@@ -1,9 +1,10 @@
-# Компоненты третьих сторон
+# Зависимости третьих сторон
 
-Исходный код и двоичные файлы ниже **не включены** в этот архив и не выполняются автоматически.
+VORQELI не является официальным продуктом Flowseal или GeoHide.
 
-- **Flowseal / zapret-discord-youtube**: https://github.com/Flowseal/zapret-discord-youtube — MIT License, авторские уведомления Flowseal и bol-van в `LICENSE.txt` репозитория. В свою очередь пакет содержит компоненты WinDivert и winws; их лицензии/уведомления должны сохраняться при дальнейшем распространении.
-- **Flowseal / tg-ws-proxy**: https://github.com/Flowseal/tg-ws-proxy — MIT License, copyright © 2026 Flowseal; полный текст в `LICENSE` репозитория.
-- **Python 3 / Tkinter**: системная среда Python, не включена в исходный архив; PyInstaller в GitHub Actions формирует отдельный exe.
+- **Flowseal / zapret-discord-youtube 1.10.3**: https://github.com/Flowseal/zapret-discord-youtube . Исходный архив не содержит бинарный движок. При первом подключении приложение скачивает официальный pinned ZIP-релиз и проверяет SHA-256. Комплект содержит лицензии Flowseal, bol-van и зависимости WinDivert.
+- **Flowseal / tg-ws-proxy v1.11.2**: https://github.com/Flowseal/tg-ws-proxy . Код не включён в исходный ZIP VORQELI, но **встраивается в собранный EXE** из коммита `307a384ab7f522e34bb1a045884d0bd90f40bee5`. Copyright © 2026 Flowseal, MIT License. Для корректной поставки нужно сохранить MIT-уведомление и уведомления о зависимостях.
+- **GeoHide DNS**: https://geohide.ru/ — отдельный провайдер. VORQELI не владеет сервисом и не распространяет его код.
+- **Pillow / pystray** — GUI assets и Windows system tray, со своими независимыми лицензиями.
 
-VORQELI Connect не является официальным продуктом Flowseal. Поддержка конкретных версий внешних компонентов не гарантирована. При распространении чужих компонентов необходимо добавлять соответствующие тексты лицензий и уведомления правообладателей.
+VORQELI Connect код лицензирован по MIT. Подробная фиксация внешних источников содержится в корневом `NOTICE.md`.

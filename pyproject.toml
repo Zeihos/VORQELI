@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vorqeli-connect"
-version = "0.11.0"
+version = "0.12.0"
 description = "Windows network connectivity control desktop app"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["Pillow>=10,<13", "pystray>=0.19,<1"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "pyinstaller>=6"]

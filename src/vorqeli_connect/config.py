@@ -3,9 +3,11 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 import json
 import os
+import threading
 
 APP_DIR = Path(os.environ.get("APPDATA", str(Path.home()))) / "VorqeliConnect"
 CONFIG_PATH = APP_DIR / "settings.json"
+_WRITE_LOCK = threading.RLock()
 
 
 @dataclass
@@ -17,7 +19,14 @@ class Settings:
     telegram_secret: str = ""
     dpi_bundle_dir: str = ""
     dpi_mode: str = "fake"
-    launch_at_startup: bool = False
+    launch_at_startup: bool = True
+    desired_enabled: bool = False
+    connect_dpi: bool = True
+    connect_telegram: bool = True
+    connect_dns: bool = True
+    window_geometry: str = "1120x720"
+    first_launch_notice: bool = True
+    telegram_link_opened: bool = False
 
 
 def load_settings(path: Path = CONFIG_PATH) -> Settings:
@@ -32,7 +41,8 @@ def load_settings(path: Path = CONFIG_PATH) -> Settings:
 
 
 def save_settings(settings: Settings, path: Path = CONFIG_PATH) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(asdict(settings), ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(path)
+    with _WRITE_LOCK:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(asdict(settings), ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp.replace(path)

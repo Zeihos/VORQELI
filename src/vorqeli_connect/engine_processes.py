@@ -33,7 +33,7 @@ class EngineProcess:
     def exit_code(self) -> int | None:
         return None if self._proc is None else self._proc.poll()
 
-    def start(self, spec: LaunchSpec, log_path: Path) -> int:
+    def start(self, spec: LaunchSpec, log_path: Path, env: dict[str, str] | None = None) -> int:
         if self.running:
             raise RuntimeError(f"{self.label} уже запущен")
         if self._log_handle:
@@ -51,7 +51,7 @@ class EngineProcess:
             process = subprocess.Popen(
                 list(spec.argv), cwd=str(spec.cwd), stdin=subprocess.DEVNULL,
                 stdout=log, stderr=subprocess.STDOUT, shell=False,
-                creationflags=flags,
+                creationflags=flags, env=env,
             )
         except Exception:
             log.close()
