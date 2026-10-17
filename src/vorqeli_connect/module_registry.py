@@ -1,4 +1,4 @@
-"""Explicit adapters for future integrations; no downloads or privilege changes."""
+"""Descriptors for experimental local integrations; no auto-downloads."""
 from dataclasses import dataclass
 from enum import Enum
 

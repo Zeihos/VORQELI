@@ -16,6 +16,8 @@ from .module_registry import MODULES
 from .integrations import inspect_file
 from .engine_adapters import build_dpi_spec, build_telegram_spec, proxy_link, port_is_free, port_is_listening
 from .engine_processes import EngineProcess
+from .preflight import check_dpi, check_telegram, checks_ok, format_checks
+from .log_tools import tail_log, redact_secrets, failure_hint
 from .profiles import load_profiles, save_profiles, validate_profile
 from .event_log import record_event, recent_events
 from tkinter import simpledialog
@@ -29,11 +31,12 @@ TEXT="#f3f0ff"; MUTED="#969bb5"; ACCENT="#a68bff"; GREEN="#75d6a8"; AMBER="#f5bf
 class ConnectApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("VORQELI Connect  ·  0.10.0")
+        self.title("VORQELI Connect  ·  0.11.0")
         self.geometry("1080x700"); self.minsize(920,620); self.configure(bg=BG)
         self.settings=load_settings(); self.module_manager=ModuleManager(); self.dpi_engine=EngineProcess("DPI"); self.tg_engine=EngineProcess("Telegram"); self.profiles=load_profiles(); self.events=queue.Queue(); self.checking=False
         self.last_results=[]; self.current_page="Обзор"
         self._shell(); self.show_page("Обзор"); self.after(100,self._poll)
+        self.after(2000, self._refresh_engine_page)
 
     def label(self,parent,text,size=11,color=TEXT,bold=False,**kw):
         return tk.Label(parent,text=text,bg=parent.cget("bg"),fg=color,
@@ -57,7 +60,7 @@ class ConnectApp(tk.Tk):
             b.pack(fill="x",padx=10,pady=2);self.nav[name]=b
         tk.Frame(self.sidebar,bg=SIDEBAR).pack(fill="both",expand=True)
         self.label(self.sidebar,"●  Локальное приложение",9,GREEN).pack(anchor="w",padx=24,pady=(0,8))
-        self.label(self.sidebar,"Версия 0.10.0  •  Preview",9,MUTED).pack(anchor="w",padx=24,pady=(0,24))
+        self.label(self.sidebar,"Версия 0.11.0  •  Preview",9,MUTED).pack(anchor="w",padx=24,pady=(0,24))
         self.main=tk.Frame(self,bg=BG,padx=32,pady=26);self.main.pack(side="left",fill="both",expand=True)
 
     def panel(self,parent,padx=22,pady=18):
@@ -143,15 +146,32 @@ class ConnectApp(tk.Tk):
         self.label(parent,status,11,GREEN if engine.running else AMBER,True).pack(anchor="w",pady=(14,0))
 
     def open_engine_log(self, filename):
+        """Open a bounded, read-only log view. Do not open raw logs by default."""
         path=APP_DIR / filename
-        if not path.is_file():
-            messagebox.showinfo("Журнал","Файл журнала ещё не создан")
-            return
-        try:
-            if os.name == "nt": os.startfile(str(path))
-            else: messagebox.showinfo("Журнал",str(path))
-        except OSError as exc:
-            messagebox.showerror("Журнал",str(exc))
+        window=tk.Toplevel(self)
+        window.title("VORQELI · Журнал · " + filename)
+        window.geometry("840x500")
+        window.configure(bg=BG)
+        top=tk.Frame(window,bg=BG,padx=18,pady=12);top.pack(fill="x")
+        self.label(top,"Последние 64 КБ · локальный журнал",13,TEXT,True).pack(side="left")
+        body=tk.Frame(window,bg=BG,padx=18,pady=5);body.pack(fill="both",expand=True)
+        scrollbar=tk.Scrollbar(body);scrollbar.pack(side="right",fill="y")
+        area=tk.Text(body,bg=PANEL,fg=TEXT,insertbackground=TEXT,
+                     relief="flat",font=("Consolas",10),wrap="word",yscrollcommand=scrollbar.set)
+        area.pack(side="left",fill="both",expand=True)
+        scrollbar.configure(command=area.yview)
+        def refresh():
+            try:
+                output=redact_secrets(tail_log(path),self.settings.telegram_secret)
+            except OSError as exc:
+                output="Не удалось прочитать журнал: "+str(exc)
+            area.configure(state="normal");area.delete("1.0",tk.END)
+            area.insert("1.0",output);area.configure(state="disabled")
+            area.see(tk.END)
+        controls=tk.Frame(window,bg=BG,padx=18,pady=12);controls.pack(fill="x")
+        self.button(controls,"Обновить",refresh,True).pack(side="left")
+        self.label(controls,"Секрет Telegram скрыт в окне просмотра; исходный лог не изменяется.",9,MUTED).pack(side="left",padx=14)
+        refresh()
 
     def dpi_page(self):
         self.heading("DPI · WinWS", "Экспериментальный прямой запуск локального движка Flowseal")
@@ -159,7 +179,9 @@ class ConnectApp(tk.Tk):
         self.label(card,"Источник: Flowseal / zapret-discord-youtube",13,TEXT,True).pack(anchor="w")
         self.label(card,"Выберите распакованный оригинальный пакет. Ничего не скачиваем автоматически.",10,MUTED).pack(anchor="w",pady=(7,12))
         self.label(card,"Папка: "+(self.settings.dpi_bundle_dir or "не выбрана"),10,MUTED).pack(anchor="w")
-        self.button(card,"Выбрать папку zapret",self.select_dpi_bundle).pack(anchor="w",pady=(10,14))
+        bar_select=tk.Frame(card,bg=PANEL);bar_select.pack(anchor="w",pady=(10,14))
+        self.button(bar_select,"Выбрать папку zapret",self.select_dpi_bundle).pack(side="left",padx=(0,8))
+        self.button(bar_select,"Проверить комплект",self.preflight_dpi).pack(side="left")
         bar=tk.Frame(card,bg=PANEL);bar.pack(anchor="w")
         self.label(bar,"TCP-стратегия:",11,TEXT).pack(side="left",padx=(0,12))
         self.dpi_mode=tk.StringVar(value=self.settings.dpi_mode if self.settings.dpi_mode in ("fake","multisplit") else "fake")
@@ -177,6 +199,40 @@ class ConnectApp(tk.Tk):
             try: self._save_engine_settings(); self.show_page("DPI")
             except OSError as exc: messagebox.showerror("Ошибка",str(exc))
 
+    def preflight_dpi(self):
+        checks=check_dpi(self.settings.dpi_bundle_dir,self.dpi_mode.get())
+        show=messagebox.showinfo if checks_ok(checks) else messagebox.showwarning
+        show("Проверка DPI",format_checks(checks)+"\n\nЭто не проверка обхода DPI в реальной сети.")
+
+    def _check_engine_start(self, engine, run_id, name, logfile, page):
+        """Detect quick startup failures without blocking the Tk event loop."""
+        if engine.run_id != run_id:
+            return  # User intentionally stopped or restarted it.
+        if engine.running:
+            return
+        try:
+            log=redact_secrets(tail_log(APP_DIR / logfile, max_bytes=8192),self.settings.telegram_secret)
+            hint=failure_hint(log,engine.exit_code)
+            record_event("engine_error",f"{name}: процесс завершился (код {engine.exit_code})")
+        except OSError as exc:
+            hint=str(exc)
+        if self.current_page==page:
+            self.show_page(page)
+        messagebox.showwarning(f"{name} · ошибка запуска",hint+"\n\nОткройте журнал для подробностей.")
+
+    def _refresh_engine_page(self):
+        try:
+            if self.current_page in ("DPI","Telegram"):
+                # Refresh only when a state actually changed; avoid losing form input.
+                states=(self.dpi_engine.running,self.tg_engine.running)
+                if getattr(self,"_last_engine_states",states)!=states:
+                    self.show_page(self.current_page)
+                self._last_engine_states=states
+            else:
+                self._last_engine_states=(self.dpi_engine.running,self.tg_engine.running)
+        finally:
+            self.after(2000,self._refresh_engine_page)
+
     def start_dpi(self):
         if os.name != "nt":
             messagebox.showerror("Только Windows","DPI-адаптер работает только в Windows")
@@ -187,6 +243,8 @@ class ConnectApp(tk.Tk):
             self.settings.dpi_mode=mode
             self._save_engine_settings()
             pid=self.dpi_engine.start(spec,APP_DIR / "dpi-engine.log")
+            self.after(1200,lambda run=self.dpi_engine.run_id:self._check_engine_start(
+                self.dpi_engine,run,"DPI","dpi-engine.log","DPI"))
             record_event("dpi_start",f"DPI запущен PID {pid}; стратегия {mode}")
             self.show_page("DPI")
         except (OSError,ValueError,RuntimeError) as exc:
@@ -206,7 +264,9 @@ class ConnectApp(tk.Tk):
         self.label(card,"Источник: Flowseal / tg-ws-proxy",13,TEXT,True).pack(anchor="w")
         self.label(card,"Выберите локальную копию исходников. Сначала установите её Python-зависимости.",10,MUTED).pack(anchor="w",pady=(7,12))
         self.label(card,"Папка: "+(self.settings.telegram_source_dir or "не выбрана"),10,MUTED).pack(anchor="w")
-        self.button(card,"Выбрать папку tg-ws-proxy",self.select_tg_bundle).pack(anchor="w",pady=(10,10))
+        tg_select=tk.Frame(card,bg=PANEL);tg_select.pack(anchor="w",pady=(10,10))
+        self.button(tg_select,"Выбрать папку tg-ws-proxy",self.select_tg_bundle).pack(side="left",padx=(0,8))
+        self.button(tg_select,"Проверить комплект",self.preflight_telegram).pack(side="left")
         self.label(card,"Python (py, python или полный путь к python.exe)",10,TEXT).pack(anchor="w")
         self.tg_python=tk.StringVar(value=self.settings.telegram_python)
         tk.Entry(card,textvariable=self.tg_python,bg=PANEL2,fg=TEXT,insertbackground=TEXT,
@@ -229,6 +289,14 @@ class ConnectApp(tk.Tk):
             self.settings.telegram_secret=secrets.token_hex(16)
         return self.settings.telegram_secret
 
+    def preflight_telegram(self):
+        python_command=self.tg_python.get().strip()
+        checks=check_telegram(self.settings.telegram_source_dir,self.settings.telegram_port,
+                              self._ensure_telegram_secret(),python_command,
+                              port_busy_ok=self.tg_engine.running)
+        show=messagebox.showinfo if checks_ok(checks) else messagebox.showwarning
+        show("Проверка Telegram",format_checks(checks)+"\n\nЭто не проверка протокола MTProto или доступа к Telegram.")
+
     def start_telegram(self):
         if os.name != "nt":
             messagebox.showerror("Только Windows","Эта сборка предназначена для Windows")
@@ -242,6 +310,8 @@ class ConnectApp(tk.Tk):
                 raise ValueError(f"Порт {self.settings.telegram_port} уже занят")
             self._save_engine_settings()
             pid=self.tg_engine.start(spec,APP_DIR / "telegram-engine.log")
+            self.after(1200,lambda run=self.tg_engine.run_id:self._check_engine_start(
+                self.tg_engine,run,"Telegram","telegram-engine.log","Telegram"))
             record_event("telegram_start",f"Telegram запущен PID {pid} на порту {self.settings.telegram_port}")
             self.show_page("Telegram")
         except (OSError,ValueError,RuntimeError) as exc:
@@ -395,7 +465,7 @@ class ConnectApp(tk.Tk):
         self.heading("О VORQELI Connect","Информация о проекте")
         card=self.panel(self.main);card.pack(fill="x")
         self.label(card,"◆  VORQELI CONNECT",20,ACCENT,True).pack(anchor="w")
-        self.label(card,"Версия 0.10.0  •  Предварительная сборка",11,MUTED).pack(anchor="w",pady=(12,18))
+        self.label(card,"Версия 0.11.0  •  Предварительная сборка",11,MUTED).pack(anchor="w",pady=(12,18))
         self.label(card,"Открытый проект сетевого менеджера для Windows.",11,TEXT).pack(anchor="w")
         self.label(card,"GitHub: github.com/Zeihos/VORQELI",10,MUTED).pack(anchor="w",pady=(10,0))
 
@@ -457,7 +527,7 @@ class ConnectApp(tk.Tk):
         path=filedialog.asksaveasfilename(title="Сохранить диагностику",defaultextension=".json",
                                            filetypes=[("JSON","*.json")])
         if not path:return
-        data={"app":"VORQELI Connect","version":"0.10.0","exported_at":datetime.now().astimezone().isoformat(),
+        data={"app":"VORQELI Connect","version":"0.11.0","exported_at":datetime.now().astimezone().isoformat(),
               "results":dict(self.last_results)}
         try:Path(path).write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding="utf-8")
         except OSError as exc:messagebox.showerror("Экспорт",str(exc))

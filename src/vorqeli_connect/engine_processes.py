@@ -11,10 +11,19 @@ class EngineProcess:
         self.label = label
         self._proc: Optional[subprocess.Popen] = None
         self._log_handle = None
+        self._run_id = 0
 
     @property
     def running(self) -> bool:
-        return self._proc is not None and self._proc.poll() is None
+        alive = self._proc is not None and self._proc.poll() is None
+        if not alive:
+            self._close_log()
+        return alive
+
+    @property
+    def run_id(self) -> int:
+        """A changing token to distinguish a launch from a subsequent manual stop."""
+        return self._run_id
 
     @property
     def pid(self) -> int | None:
@@ -31,6 +40,10 @@ class EngineProcess:
             self._log_handle.close()
             self._log_handle = None
         log_path.parent.mkdir(parents=True, exist_ok=True)
+        # Rotate older logs on the next launch (a currently running process is not rotated).
+        if log_path.is_file() and log_path.stat().st_size >= 2 * 1024 * 1024:
+            backup = log_path.with_name(log_path.name + ".old")
+            log_path.replace(backup)
         # Binary log capture: no stdout pipe to deadlock and no unbounded event-list memory.
         log = log_path.open("ab")
         flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
@@ -45,9 +58,11 @@ class EngineProcess:
             raise
         self._log_handle = log
         self._proc = process
+        self._run_id += 1
         return process.pid
 
     def stop(self, timeout: float = 5) -> bool:
+        self._run_id += 1
         if not self.running:
             self._close_log()
             return False
