@@ -6,7 +6,7 @@
   https://github.com/Flowseal/zapret-discord-youtube/releases/tag/1.10.3
   bundled archive SHA-256:
   `244314ae1c24538a0d751601da8e0c925c843371eec4456eb15f14c4fd6b7058`.
-  The upstream release includes `LICENSE.txt`, which remains next to the downloaded binaries.
+  The binary release may omit `LICENSE.txt`; VORQELI includes the exact license from the pinned tag in `assets/Flowseal-zapret-1.10.3-LICENSE.txt` and copies it beside the verified binaries.
   Underlying components may include WinDivert and other third-party licenses; refer to upstream binary bundle notices.
 
 * `Flowseal/tg-ws-proxy` — MIT licensed, pinned commit

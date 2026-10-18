@@ -97,3 +97,42 @@ def test_dev_cache_root_stays_in_user_profile(monkeypatch):
     from vorqeli_connect import assets_manager as am
     monkeypatch.setattr(am.sys,'frozen',False,raising=False)
     assert am.engine_cache_root()==am.APP_DIR/'engines'
+
+
+def test_official_zip_without_license_uses_pinned_source_license(tmp_path, monkeypatch):
+    """Regression: tagged Flowseal binaries ZIP omits upstream LICENSE.txt."""
+    from vorqeli_connect import assets_manager as a
+    import io
+    raw = io.BytesIO()
+    with zipfile.ZipFile(raw, 'w') as z:
+        z.writestr('zapret-discord-youtube-1.10.3/bin/winws.exe', b'fake-winws-test-only')
+        z.writestr('zapret-discord-youtube-1.10.3/lists/list-general.txt', b'example.org')
+    zipped = raw.getvalue()
+    class Response(io.BytesIO):
+        def __enter__(self): return self
+        def __exit__(self, *args): self.close()
+    monkeypatch.setattr(a.urllib.request, 'urlopen', lambda *args, **kw: Response(zipped))
+    expected = hashlib.sha256(zipped).hexdigest()
+    dest = a.ensure_zapret(base_dir=tmp_path/'engines', expected_sha=expected)
+    assert (dest/'LICENSE.txt').is_file()
+    assert a.sha256_file(dest/'LICENSE.txt') == a.FLOWSEAL_LICENSE_SHA256
+    assert a.engine_integrity(dest, release_sha=expected) == 'verified'
+    assert a.ensure_zapret(base_dir=tmp_path/'engines', expected_sha=expected) == dest
+
+
+def test_corrupt_pinned_license_fails_closed(tmp_path, monkeypatch):
+    from vorqeli_connect import assets_manager as a
+    import io
+    raw = io.BytesIO()
+    with zipfile.ZipFile(raw, 'w') as z:
+        z.writestr('repo/bin/winws.exe', b'fake-winws-test-only')
+        z.writestr('repo/lists/list-general.txt', b'example.org')
+    zipped = raw.getvalue()
+    class Response(io.BytesIO):
+        def __enter__(self): return self
+        def __exit__(self, *args): self.close()
+    monkeypatch.setattr(a.urllib.request, 'urlopen', lambda *args, **kw: Response(zipped))
+    monkeypatch.setattr(a, 'FLOWSEAL_LICENSE_SHA256', '0' * 64)
+    with pytest.raises(RuntimeError, match='Лицензия Flowseal'):
+        a.ensure_zapret(base_dir=tmp_path/'engines', expected_sha=hashlib.sha256(zipped).hexdigest())
+    assert not (tmp_path/'engines'/'zapret-1.10.3').exists()

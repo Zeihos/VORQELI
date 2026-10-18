@@ -20,6 +20,8 @@ ZAPRET_SHA256 = '244314ae1c24538a0d751601da8e0c925c843371eec4456eb15f14c4fd6b705
 MAX_DOWNLOAD_BYTES = 30 * 1024 * 1024
 MAX_EXTRACT_BYTES = 140 * 1024 * 1024
 ENGINE_MANIFEST = '.vorqeli-engine-manifest.json'
+FLOWSEAL_LICENSE_RESOURCE = 'Flowseal-zapret-1.10.3-LICENSE.txt'
+FLOWSEAL_LICENSE_SHA256 = 'fe3983a1e91206ad1a530bcfae01fad207020cb61882edd62c1e3cb5f8d5d430'
 # Restrict verification to executable binaries: user-provided host lists need not
 # be overwritten during validation. Manifest is generated only after ZIP SHA
 # validation, then stored in the protected installation directory.
@@ -119,9 +121,9 @@ def engine_integrity(root: Path, *, release_sha: str = ZAPRET_SHA256) -> str:
 def find_bundle(root: Path) -> Path:
     candidates = [p.parent.parent for p in root.rglob('winws.exe') if p.parent.name.lower() == 'bin']
     for path in candidates:
-        if (path / 'lists/list-general.txt').is_file() and (path / 'LICENSE.txt').is_file():
+        if (path / 'lists/list-general.txt').is_file():
             return path
-    raise ValueError('В официальном архиве не найден ожидаемый комплект winws.exe / lists / LICENSE.txt')
+    raise ValueError('В официальном архиве не найдены bin/winws.exe и lists/list-general.txt')
 
 
 def engine_cache_root() -> Path:
@@ -174,6 +176,16 @@ def ensure_zapret(*, progress=None, base_dir: Path | None = None,
         if staged.exists():
             shutil.rmtree(staged)
         shutil.copytree(found, staged)
+        # Flowseal's release ZIP may omit LICENSE.txt despite the tagged source
+        # including it. Never fabricate a license or weaken SHA validation:
+        # bundle the exact, SHA-pinned official 1.10.3 LICENSE.txt in the app.
+        license_path = staged / 'LICENSE.txt'
+        if not license_path.exists():
+            base = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[2]))
+            resource = base / 'assets' / FLOWSEAL_LICENSE_RESOURCE
+            if not resource.is_file() or sha256_file(resource) != FLOWSEAL_LICENSE_SHA256:
+                raise RuntimeError('Лицензия Flowseal отсутствует или повреждена; установка DPI отменена')
+            shutil.copyfile(resource, license_path)
         write_engine_manifest(staged, release_sha=expected_sha)
         if engine_integrity(staged, release_sha=expected_sha) != 'verified':
             raise RuntimeError('Не удалось проверить распакованный DPI-движок')
