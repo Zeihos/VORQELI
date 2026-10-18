@@ -1,0 +1,145 @@
+name: Windows build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Test and package VORQELI
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Verify checkout completeness and release versions
+        run: python scripts/check_repo_layout.py
+
+      - name: Verify source manifest (tampering / incomplete upload)
+        run: python scripts/verify_build_manifest.py
+
+      - name: Install VORQELI dependencies
+        run: python -m pip install --upgrade pip ".[dev]"
+
+      # Pinned upstream commit, not moving main/HEAD. Its MIT license is in NOTICE.
+      - name: Install Flowseal Telegram core
+        run: python -m pip install "git+https://github.com/Flowseal/tg-ws-proxy.git@307a384ab7f522e34bb1a045884d0bd90f40bee5"
+
+      - name: Run tests (including offline Smart DPI selectors)
+        run: python -m pytest -q
+
+      - name: Verify Windows DPAPI secret storage
+        run: python scripts/windows_dpapi_smoke.py
+
+      # This tests actual HKCU Run creation/deletion on a clean Windows runner.
+      # It NEVER starts DPI, configures DNS or creates an elevated scheduled task.
+      - name: Verify Windows autostart registration lifecycle
+        run: python scripts/windows_startup_smoke.py
+
+      # Uses isolated temp settings only. Validates that explicit OFF survives
+      # a stale ON file, with no DNS, proxy, driver, task or registry changes.
+      - name: Verify explicit OFF survives interrupted settings writes
+        run: python scripts/windows_off_intent_smoke.py
+
+      # Reads available PowerShell cmdlets only. Does not change DNS or network adapters.
+      - name: Check Windows DoH capability (read only)
+        run: python scripts/windows_doh_readonly_smoke.py
+
+      # Read-only smoke on real Windows PowerShell. Identity is verified
+      # without changing DNS, connecting networking modules, or touching registry.
+      - name: Verify adapter identity snapshot (read only)
+        run: python scripts/windows_adapter_identity_smoke.py
+
+      - name: Build single Windows executable
+        shell: pwsh
+        run: |
+          python -m PyInstaller `
+            --noconfirm --clean --onefile --windowed `
+            --name VORQELI-Connect `
+            --icon assets/VORQELI.ico `
+            --paths src `
+            --add-data "assets;assets" `
+            --collect-submodules proxy `
+            --collect-submodules utils `
+            --collect-data certifi `
+            --collect-submodules pystray `
+            --hidden-import pystray._win32 `
+            --hidden-import proxy.tg_ws_proxy `
+            build_entry.py
+
+      - name: Confirm built EXE version
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath "dist/VORQELI-Connect.exe" -ArgumentList "--version" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "VORQELI --version failed: $($p.ExitCode)" }
+
+      - name: Smoke-test executable startup
+        shell: pwsh
+        run: |
+          $p = Start-Process -FilePath "dist/VORQELI-Connect.exe" -ArgumentList "--self-test" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "VORQELI executable smoke test failed: $($p.ExitCode)" }
+
+      - name: Smoke-test read-only diagnostics CLI
+        shell: pwsh
+        run: |
+          $target = Join-Path $env:RUNNER_TEMP "vorqeli-doctor.json"
+          $p = Start-Process -FilePath "dist/VORQELI-Connect.exe" -ArgumentList @('--doctor', '--doctor-output', "`"$target`"") -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "VORQELI doctor failed: $($p.ExitCode)" }
+          if (-not (Test-Path $target)) { throw "Doctor report not created" }
+          $report = Get-Content $target -Raw | ConvertFrom-Json
+          if ($report.schema -ne 1) { throw "Unexpected doctor schema" }
+          if ($report.platform -ne "windows") { throw "Doctor platform detection failed" }
+          if ($report.PSObject.Properties.Name -contains 'telegram_secret') { throw "Secret exposed in doctor report" }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup -y --no-progress
+
+      - name: Package Windows installer
+        shell: pwsh
+        run: |
+          $iscc = Join-Path ${env:ProgramFiles(x86)} "Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { throw "Inno Setup compiler not found at $iscc" }
+          & $iscc "installer\VORQELI.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed" }
+
+      - name: Smoke-test Windows installation, blocked removal, upgrade and uninstall
+        shell: pwsh
+        run: ./scripts/windows_installer_smoke.ps1
+
+      - name: Generate release SHA-256 checksums
+        shell: pwsh
+        run: |
+          $items = @('dist/VORQELI-Connect.exe', 'dist/VORQELI-Connect-Setup.exe')
+          foreach ($item in $items) {
+            if (-not (Test-Path $item)) { throw "Missing release file: $item" }
+            $entry = Get-FileHash -Algorithm SHA256 -Path $item
+            "{0}  {1}" -f $entry.Hash.ToLowerInvariant(), (Split-Path $item -Leaf) |
+              Add-Content -Path dist/SHA256SUMS.txt -Encoding utf8
+          }
+          if ((Get-Content dist/SHA256SUMS.txt).Count -ne 2) { throw 'Invalid checksum file' }
+
+      - name: Upload Windows application
+        uses: actions/upload-artifact@v6
+        with:
+          name: VORQELI-Connect-v0.34.0-Windows
+          path: |
+            dist/VORQELI-Connect.exe
+            dist/VORQELI-Connect-Setup.exe
+            dist/SHA256SUMS.txt
+            LICENSE
+            NOTICE.md
+            docs/QUICK_START.md
+          if-no-files-found: error
+          retention-days: 30
