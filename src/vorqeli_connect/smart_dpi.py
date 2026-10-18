@@ -13,6 +13,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import HTTPSHandler, ProxyHandler, Request, build_opener
 
 PROFILES = ('fake', 'multisplit')
+from .flowseal_alts import ALT_PRIORITY
 # HTTPS destinations also checked in the ordinary Diagnostics page.
 TARGETS = ('https://discord.com/', 'https://www.youtube.com/')
 
@@ -76,7 +77,8 @@ def select_strategy(*, start: Callable[[str], None], stop: Callable[[], None],
                     running: Callable[[], bool],
                     cancelled: Callable[[], bool],
                     progress: Callable[[str], None] = lambda msg: None,
-                    probe: Callable[[Callable[[], bool]], tuple[bool, ...]] = probe_targets
+                    probe: Callable[[Callable[[], bool]], tuple[bool, ...]] = probe_targets,
+                    profiles: tuple[str, ...] = PROFILES
                     ) -> Selection:
     """Try FAKE then MULTISPLIT and keep the best observed strategy.
 
@@ -86,9 +88,11 @@ def select_strategy(*, start: Callable[[str], None], stop: Callable[[], None],
     anything, leave FAKE running with an explicit *unverified* warning.
     Process callbacks only manage the application's own child process.
     """
+    if not profiles or len(set(profiles)) != len(profiles):
+        raise ValueError("Некорректный список профилей")
     trials: list[Trial] = []
     active: str | None = None
-    for mode in PROFILES:
+    for mode in profiles:
         if cancelled():
             raise SelectionCancelled('Подключение отменено')
         if active is not None:

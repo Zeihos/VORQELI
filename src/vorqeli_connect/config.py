@@ -63,7 +63,7 @@ class Settings:
     telegram_secret_dpapi_blob: str = field(default='',repr=False,compare=False)
     telegram_secret_error: str = field(default='',repr=False,compare=False)
     dpi_bundle_dir: str = ""
-    dpi_mode: str = "fake"
+    dpi_mode: str = "alt_auto"
     dns_mode: str = "plain"
     launch_at_startup: bool = True
     desired_enabled: bool = False
@@ -111,7 +111,8 @@ def _validate_settings_fields(data: dict) -> dict:
             raise ValueError('Некорректный порт Telegram')
         result['telegram_port'] = port
     if 'dpi_mode' in data:
-        if data['dpi_mode'] not in ('fake', 'multisplit', 'auto'):
+        if data['dpi_mode'] not in ('fake', 'multisplit', 'auto', 'alt_auto',
+                                    *(f'alt{i}' for i in range(1,14))):
             raise ValueError('Неизвестная DPI-стратегия')
         result['dpi_mode'] = data['dpi_mode']
     if 'dns_mode' in data:

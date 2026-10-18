@@ -1,3 +1,10 @@
+## 0.35.0 — Flowseal ALT 1–13 и HOSTS
+
+- Приоритетный последовательный выбор ALT2, ALT6, ALT11… и ручное меню ALT1–ALT13.
+- Безопасный разбор параметров официальных ALT BAT без их исполнения.
+- HOSTS: 241 дополнительных доменов с явным подтверждением и удаляемым блоком.
+- Проверка целостности ALT-шаблонов, новые офлайн-тесты и улучшенные статусы.
+
 ## v0.34.0 — Network adapter identity protection (2026-10-18)
 
 - Persist stable `InterfaceGuid` in every new GeoHide IPv4 DNS backup.

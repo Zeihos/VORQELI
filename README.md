@@ -123,3 +123,7 @@ python -m pip install "git+https://github.com/Flowseal/tg-ws-proxy.git@307a384ab
 Сценарии проверки Windows: `docs/WINDOWS_STARTUP_AUDIT_V24.md`.
 
 Проверка готовности к первому публичному выпуску: [RELEASE_CANDIDATE_CHECKLIST_V29.md](docs/RELEASE_CANDIDATE_CHECKLIST_V29.md).
+
+
+### Flowseal ALT1–ALT13 и HOSTS (v0.35.0)
+Выбор профиля DPI: Настройки → АВТО ALT1–13 или ВЫБРАТЬ ALT. Дополнительные статические hosts: Настройки → HOSTS · ДОПОЛНИТЕЛЬНО. Правила hosts независимы от GeoHide DNS, вносятся только по подтверждению. Подробности — docs/FLOWSEAL_ALT_AND_HOSTS_V35.md.

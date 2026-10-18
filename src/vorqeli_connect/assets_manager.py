@@ -12,6 +12,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 from .config import APP_DIR
+from .flowseal_alts import ALT_MODES, alt_filename
 
 ZAPRET_TAG = '1.10.3'
 ZAPRET_URL = ('https://github.com/Flowseal/zapret-discord-youtube/releases/download/'
@@ -80,11 +81,30 @@ def _engine_binaries(root: Path) -> dict[str, str]:
     return result
 
 
+def _engine_profiles(root: Path) -> dict[str, str]:
+    """Pin original ALT script bytes; never execute a .bat on Windows.
+
+    The tiny synthetic ZIPs in offline tests lack scripts; a real pinned
+    release has all thirteen. A partial profile set is rejected.
+    """
+    result = {}
+    for mode in ALT_MODES:
+        path = root / alt_filename(mode)
+        if path.is_symlink():
+            raise ValueError('Ссылка вместо профиля ALT')
+        if path.is_file():
+            result[mode] = sha256_file(path)
+    if result and len(result) != len(ALT_MODES):
+        raise ValueError('Неполный комплект Flowseal ALT')
+    return result
+
+
 def write_engine_manifest(root: Path, *, release_sha: str = ZAPRET_SHA256) -> None:
     """Call only on unpacked contents of a SHA-verified official release."""
     payload = {'schema': 1, 'source': 'Flowseal/zapret-discord-youtube',
                'archive_sha256': release_sha.lower(),
-               'binaries': _engine_binaries(root)}
+               'binaries': _engine_binaries(root),
+               'profiles': _engine_profiles(root)}
     path = root / ENGINE_MANIFEST
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8')
 
@@ -113,7 +133,8 @@ def engine_integrity(root: Path, *, release_sha: str = ZAPRET_SHA256) -> str:
         present = _engine_binaries(root)
         if any(not isinstance(h, str) or len(h) != 64 for h in hashes.values()):
             return 'tampered'
-        return 'verified' if present == hashes else 'tampered'
+        return ('verified' if present == hashes and
+                data.get('profiles', {}) == _engine_profiles(root) else 'tampered')
     except (OSError, ValueError, UnicodeError, TypeError):
         return 'tampered'
 

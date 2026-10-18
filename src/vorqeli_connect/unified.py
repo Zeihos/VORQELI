@@ -17,6 +17,7 @@ from .config import APP_DIR, Settings, save_settings
 from .engine_adapters import build_dpi_spec, port_is_free, port_is_listening
 from .engine_processes import EngineProcess
 from .smart_dpi import select_strategy, SelectionCancelled
+from .flowseal_alts import ALT_PRIORITY
 from .geohide import enable_dns, restore_dns, STATE_FILE
 from .geohide_doh import enable_geo_dns, restore_geo_dns, DOH_STATE_FILE
 from .startup import configure_startup
@@ -97,7 +98,7 @@ class UnifiedController:
                         bundle = self.assets(progress=self._send)
                         if self._cancel.is_set():
                             return self._cancelled()
-                        if self.settings.dpi_mode == 'auto':
+                        if self.settings.dpi_mode in ('auto', 'alt_auto'):
                             # Sequential, bounded probes; manual OFF takes priority.
                             def launch(mode: str) -> None:
                                 spec = build_dpi_spec(bundle, mode)
@@ -106,10 +107,13 @@ class UnifiedController:
                             result = select_strategy(
                                 start=launch, stop=self.dpi.stop,
                                 running=lambda: self.dpi.running,
-                                cancelled=self._cancel.is_set, progress=self._send)
+                                cancelled=self._cancel.is_set, progress=self._send,
+                                **({"profiles": ALT_PRIORITY} if self.settings.dpi_mode == "alt_auto" else {}))
                             self.active_dpi_mode = result.active_mode
                             if result.warning:
                                 warnings.append(result.warning)
+                            elif self.settings.dpi_mode == 'alt_auto':
+                                warnings.append('HTTPS отвечает, но это ещё не доказательство обхода DPI.')
                         else:
                             self.active_dpi_mode = self.settings.dpi_mode
                             spec = build_dpi_spec(bundle, self.settings.dpi_mode)

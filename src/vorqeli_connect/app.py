@@ -29,6 +29,8 @@ from .startup import is_admin, relaunch_elevated, configure_startup
 from .unified import UnifiedController, ConnectionReport
 from .recovery import RecoveryPolicy
 from .engine_adapters import proxy_link
+from .flowseal_alts import ALT_MODES, ALT_PRIORITY
+from .hosts_overlay import (hosts_path, analyze_hosts, apply_optional_hosts, remove_optional_hosts)
 from .tray_assets import tray_icon
 from .support_report import build_report
 from .ui_copy import main_status, module_caption, connection_disclaimer
@@ -64,6 +66,14 @@ class ConnectApp(tk.Tk):
     def __init__(self, *, minimized=False):
         super().__init__()
         self.settings = load_settings()
+        # v0.34 used FAKE as default. Prefer real Flowseal ALT profiles after
+        # upgrade, while keeping explicitly chosen newer profiles untouched.
+        if self.settings.dpi_mode in ('fake', 'auto', 'multisplit'):
+            self.settings.dpi_mode = 'alt_auto'
+            try:
+                save_settings(self.settings)
+            except OSError:
+                pass
         self.title('VORQELI Connect')
         self.configure(bg=BG)
         from .window_state import safe_geometry
@@ -473,12 +483,12 @@ class ConnectApp(tk.Tk):
                            self._start_disconnect if active else self._start_connect,
                            accent=not active,width=236,height=59,size=12,
                            disabled=self._disconnecting or (busy and not active))
-        self._text(right-149,257,
-                   'Включены: '+str(sum((self.settings.connect_dpi,self.settings.connect_telegram,self.settings.connect_dns)))+'/3',
+        selected=sum((self.settings.connect_dpi,self.settings.connect_telegram,self.settings.connect_dns))
+        running=sum(getattr(report,k)=='on' for k in ('dpi','telegram','dns'))
+        self._text(right-149,257,f'Запущены: {running}/{selected}',
                    10,SECONDARY,anchor='center')
-        dpi_caption = ('Smart DPI · ' + self.controller.active_dpi_mode.upper() + ' (HTTPS-проба)'
-                       if self.settings.dpi_mode == 'auto' and self.controller.active_dpi_mode
-                       else 'Обход сетевых ограничений')
+        dpi_caption = ('Flowseal · ' + (self.controller.active_dpi_mode or self.settings.dpi_mode).upper()
+                       + (' (HTTPS-проба)' if self.settings.dpi_mode == 'alt_auto' else ' · выбран'))
         cards=[('DPI / WINWS','01','dpi',self.settings.connect_dpi,dpi_caption),
                ('TELEGRAM','02','telegram',self.settings.connect_telegram,'Локальный MTProto-прокси'),
                ('GEOHIDE DNS','03','dns',self.settings.connect_dns,'Профиль системного DNS')]
@@ -562,12 +572,16 @@ class ConnectApp(tk.Tk):
         span=right-x
         split=x+int(span*.56)
         self._text(x+30,272,'СТРАТЕГИЯ DPI',10,VIOLET,weight='bold')
-        self._text(x+30,297,'АВТО проверяет HTTPS; это не гарантия обхода.',10,SECONDARY)
-        for i,(mode,label) in enumerate((('auto','АВТО'),('fake','FAKE'),('multisplit','MULTISPLIT'))):
-            self._place_button(right-459+i*148,268,label,
-                               lambda m=mode:self._set_dpi_mode(m),
-                               accent=self.settings.dpi_mode==mode,width=136,height=44,size=10,
-                               disabled=self.running_job)
+        self._text(x+30,297,'Сначала ALT2, ALT6, ALT11… · HTTPS не гарантирует обход.',10,SECONDARY)
+        self._place_button(right-370,268,'АВТО · ALT1–13',
+                           lambda:self._set_dpi_mode('alt_auto'),
+                           accent=self.settings.dpi_mode=='alt_auto',width=173,height=44,size=9,
+                           disabled=self.running_job)
+        chosen=(self.settings.dpi_mode.upper() if self.settings.dpi_mode in ALT_MODES
+                else 'ВЫБРАТЬ ALT')
+        self._place_button(right-182,268,chosen+'  ▾',self._show_alt_picker,
+                           accent=self.settings.dpi_mode in ALT_MODES,width=170,height=44,size=10,
+                           disabled=self.running_job)
         self._text(x+28,390,'КОМПОНЕНТЫ',10,VIOLET,weight='bold')
         self._text(split,390,'ПОВЕДЕНИЕ',10,VIOLET,weight='bold')
         for j,(title,key,subtitle) in enumerate([
@@ -595,6 +609,8 @@ class ConnectApp(tk.Tk):
                            width=int(span*.39),height=43,size=9)
         self._place_button(split,575,'ОТКРЫТЬ В TELEGRAM  ↗',self._open_telegram_proxy,
                            width=int(span*.39),height=43,size=9)
+        self._place_button(split,634,'HOSTS · ДОПОЛНИТЕЛЬНО',self._show_hosts_manager,
+                           width=int(span*.39),height=38,size=9)
         # No overlapping footer: the GeoHide transport controls must remain
         # unobstructed at the supported 710px logical minimum height.
 
@@ -664,8 +680,95 @@ class ConnectApp(tk.Tk):
         except OSError as exc:
             messagebox.showerror('Технический отчёт',str(exc),parent=self)
 
+    def _show_alt_picker(self):
+        if self.running_job:
+            return
+        window=tk.Toplevel(self)
+        window.title('VORQELI · Стратегии Flowseal ALT')
+        window.configure(bg='#111629')
+        window.resizable(False,False)
+        window.transient(self)
+        title=tk.Label(window,text='Выберите профиль Flowseal',bg='#111629',fg=FG,
+                       font=('Segoe UI',14,'bold'),padx=18,pady=15)
+        title.grid(row=0,column=0,columnspan=4,sticky='w')
+        tk.Label(window,text='Смена применяется после переподключения. Рейтинг зависит от сети.',
+                 bg='#111629',fg=SECONDARY,font=('Segoe UI',10),padx=18).grid(
+                     row=1,column=0,columnspan=4,sticky='w')
+        for i,mode in enumerate(ALT_PRIORITY):
+            def choose(value=mode):
+                self._set_dpi_mode(value)
+                window.destroy()
+            color='#61519B' if self.settings.dpi_mode == mode else '#303754'
+            tk.Button(window,text=mode.upper(),command=choose,bg=color,fg=FG,
+                      activebackground='#7965B6',activeforeground=FG,
+                      font=('Segoe UI',11,'bold'),width=10,pady=10,
+                      borderwidth=0).grid(row=2+i//4,column=i%4,padx=7,pady=7)
+        tk.Label(window,text='ALT5 оставлен последним: upstream отмечает его как не рекомендуемый.',
+                 bg='#111629',fg=SECONDARY,font=('Segoe UI',9),pady=13).grid(
+                     row=6,column=0,columnspan=4)
+        window.grab_set()
+
+    def _show_hosts_manager(self):
+        """Explicit action only. Does not conflate DNS and Windows HOSTS."""
+        window=tk.Toplevel(self)
+        window.title('VORQELI · Дополнительные HOSTS-правила')
+        window.geometry('730x545')
+        window.configure(bg='#111629')
+        window.transient(self)
+        content=tk.Text(window,bg='#1B2238',fg=FG,font=('Consolas',10),
+                        wrap='word',padx=16,pady=13,relief='flat',bd=0)
+        content.pack(fill='both',expand=True,padx=15,pady=12)
+        def refresh():
+            try:
+                reference=asset('VORQELI-hosts-optional.txt').read_text(encoding='utf8')
+                state=analyze_hosts(hosts_path().read_text(encoding='utf8',errors='replace'),reference)
+                info=(f'HOSTS / ДОПОЛНИТЕЛЬНЫЕ ПРАВИЛА\n\n'
+                      f'Всего в файле: {state["count"]}\n'
+                      f'Уже совпадают: {state["existing"]}\n'
+                      f'Отсутствуют: {len(state["needed"])}\n'
+                      f'Конфликты: {len(state["conflicts"])}\n'
+                      f'VORQELI-блок: {"да" if state["managed"] else "нет"}\n\n'
+                      'Ручные записи не изменяются. Эти IP НЕ являются настройкой GeoHide DNS.\n'
+                      'Фиксированные IP могут устареть и нарушить доступ к сайтам.\n'
+                      'Используйте только если понимаете последствия.\n\n'
+                      + '\n'.join(state['needed'])[:4000])
+            except Exception as exc:
+                info='Не удалось прочитать HOSTS: '+str(exc)
+            content.configure(state='normal')
+            content.delete('1.0','end')
+            content.insert('1.0',info)
+            content.configure(state='disabled')
+        def apply():
+            if not messagebox.askyesno('HOSTS',
+                'Добавить недостающие статические IP в системный HOSTS?\n'
+                'Они могут быть устаревшими. Для записи нужны права администратора.',parent=window):
+                return
+            try:
+                text=asset('VORQELI-hosts-optional.txt').read_text(encoding='utf8')
+                result=apply_optional_hosts(hosts_path(),text)
+                messagebox.showinfo('HOSTS',f'Добавлено: {len(result["needed"])}',parent=window)
+            except (OSError,ValueError,RuntimeError) as exc:
+                messagebox.showerror('HOSTS',str(exc),parent=window)
+            refresh()
+        def remove():
+            if not messagebox.askyesno('HOSTS','Удалить только блок VORQELI из HOSTS?',parent=window):
+                return
+            try:
+                removed=remove_optional_hosts(hosts_path())
+                messagebox.showinfo('HOSTS','Блок удалён.' if removed else 'Блока VORQELI нет.',parent=window)
+            except (OSError,ValueError,RuntimeError) as exc:
+                messagebox.showerror('HOSTS',str(exc),parent=window)
+            refresh()
+        toolbar=tk.Frame(window,bg='#111629',pady=12)
+        toolbar.pack(fill='x',padx=15)
+        for title, callback in (('ОБНОВИТЬ',refresh),('ДОБАВИТЬ',apply),('УБРАТЬ БЛОК',remove)):
+            tk.Button(toolbar,text=title,command=callback,bg='#33395C',fg=FG,
+                      activebackground='#6054A0',activeforeground=FG,
+                      font=('Segoe UI',10,'bold'),bd=0,padx=18,pady=9).pack(side='left',padx=5)
+        refresh()
+
     def _set_dpi_mode(self, mode: str):
-        if self.running_job or mode not in ('fake','multisplit','auto') or self.settings.dpi_mode==mode:
+        if self.running_job or mode not in (*ALT_MODES, 'alt_auto') or self.settings.dpi_mode==mode:
             return
         previous=self.settings.dpi_mode
         self.settings.dpi_mode=mode
