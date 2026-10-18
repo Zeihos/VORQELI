@@ -4,6 +4,40 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+# Every external EXE is time-bounded. A hung GUI, UAC dialog or Inno
+# uninstaller must fail the CI job, not consume the runner for an hour.
+function Invoke-Bounded {
+    param(
+        [Parameter(Mandatory=$true)][string]$Label,
+        [Parameter(Mandatory=$true)][string]$FilePath,
+        [Parameter(Mandatory=$true)][string]$Arguments,
+        [int]$TimeoutSeconds = 90
+    )
+    Write-Host "SMOKE START: $Label (timeout ${TimeoutSeconds}s)"
+    $proc = Start-Process -FilePath $FilePath -ArgumentList $Arguments -PassThru
+    try {
+        if (-not $proc.WaitForExit([int]($TimeoutSeconds * 1000))) {
+            try {
+                # PowerShell 7 / .NET supports killing the process tree.
+                $proc.Kill($true)
+                [void]$proc.WaitForExit(5000)
+            }
+            catch {
+                Write-Warning "Could not fully terminate $Label : $_"
+            }
+            throw "SMOKE TIMEOUT: $Label exceeded ${TimeoutSeconds}s; check Inno dialogs and application child processes"
+        }
+        $proc.Refresh()
+        $exitCode = [int]$proc.ExitCode
+        Write-Host "SMOKE DONE: $Label (exit $exitCode)"
+        return [pscustomobject]@{ ExitCode = $exitCode }
+    }
+    finally {
+        $proc.Dispose()
+    }
+}
+
+
 $installer = (Resolve-Path 'dist/VORQELI-Connect-Setup.exe').Path
 $installDir = Join-Path $env:RUNNER_TEMP 'VORQELI Installer Smoke'
 $reportFile = Join-Path $env:RUNNER_TEMP 'vorqeli-installed-doctor.json'
@@ -16,8 +50,8 @@ if (Test-Path $installDir) {
 }
 
 try {
-    $args = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /DIR="' + $installDir + '"'
-    $process = Start-Process -FilePath $installer -ArgumentList $args -Wait -PassThru
+    $args = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /LOG="' + (Join-Path $env:RUNNER_TEMP 'vorqeli-smoke-setup.log') + '" /DIR="' + $installDir + '"'
+    $process = Invoke-Bounded -Label 'initial-install' -FilePath $installer -Arguments $args -TimeoutSeconds 120
     if ($process.ExitCode -ne 0) {
         throw "Installer failed with code $($process.ExitCode)"
     }
@@ -29,12 +63,12 @@ try {
             throw "Required installed resource is missing: $resource"
         }
     }
-    $process = Start-Process -FilePath $installed -ArgumentList '--self-test' -Wait -PassThru
+    $process = Invoke-Bounded -Label 'installed-self-test' -FilePath $installed -Arguments '--self-test' -TimeoutSeconds 90
     if ($process.ExitCode -ne 0) {
         throw "Installed EXE self-test failed: $($process.ExitCode)"
     }
     $args = '--doctor --doctor-output "' + $reportFile + '"'
-    $process = Start-Process -FilePath $installed -ArgumentList $args -Wait -PassThru
+    $process = Invoke-Bounded -Label 'installed-diagnostics' -FilePath $installed -Arguments $args -TimeoutSeconds 90
     if ($process.ExitCode -ne 0) {
         throw "Installed EXE doctor test failed: $($process.ExitCode)"
     }
@@ -52,13 +86,13 @@ try {
     # Cleanup must fail CLOSED, not delete startup settings / DNS while the app runs.
     $mutex = [System.Threading.Mutex]::new($false, 'Local\VORQELI-Connect-Instance')
     try {
-        $process = Start-Process -FilePath $installed -ArgumentList '--uninstall-cleanup' -Wait -PassThru
+        $process = Invoke-Bounded -Label 'blocked-cleanup-check' -FilePath $installed -Arguments '--uninstall-cleanup' -TimeoutSeconds 60
         if ($process.ExitCode -ne 8) {
             throw "Uninstall safety guard must block a live instance (got $($process.ExitCode))"
         }
         # The installer must also refuse to overwrite a still-running app.
-        $args = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /DIR="' + $installDir + '"'
-        $upgrade = Start-Process -FilePath $installer -ArgumentList $args -Wait -PassThru
+        $args = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /LOG="' + (Join-Path $env:RUNNER_TEMP 'vorqeli-smoke-setup.log') + '" /DIR="' + $installDir + '"'
+        $upgrade = Invoke-Bounded -Label 'blocked-in-place-upgrade' -FilePath $installer -Arguments $args -TimeoutSeconds 60
         if ($upgrade.ExitCode -eq 0) {
             throw 'Installer unexpectedly accepted an upgrade while the app mutex was held'
         }
@@ -68,8 +102,8 @@ try {
         # Uninstallation must also abort while the GUI mutex exists. Inno
         # Setup calls --uninstall-cleanup before deleting a single installed
         # executable; this exercises that contract with a real Inno EXE.
-        $blockedRemoval = Start-Process -FilePath $uninstall `
-            -ArgumentList '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART' -Wait -PassThru
+        $blockedRemoval = Invoke-Bounded -Label 'blocked-uninstall' -FilePath $uninstall `
+            -Arguments '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART' -TimeoutSeconds 60
         if ($blockedRemoval.ExitCode -eq 0) {
             throw 'Uninstaller ignored the active VORQELI instance mutex'
         }
@@ -82,7 +116,7 @@ try {
     }
     # The previously blocked update MUST succeed after the process exits,
     # without uninstalling the previous version or losing its settings.
-    $upgrade = Start-Process -FilePath $installer -ArgumentList $args -Wait -PassThru
+    $upgrade = Invoke-Bounded -Label 'unblocked-in-place-upgrade' -FilePath $installer -Arguments $args -TimeoutSeconds 120
     if ($upgrade.ExitCode -ne 0) {
         throw "In-place upgrade failed after releasing app mutex: $($upgrade.ExitCode)"
     }
@@ -94,7 +128,7 @@ try {
     if ($installedHash -ne $expectedHash) {
         throw 'Installed app differs from the newly built executable'
     }
-    $postUpgrade = Start-Process -FilePath $installed -ArgumentList '--self-test' -Wait -PassThru
+    $postUpgrade = Invoke-Bounded -Label 'upgraded-self-test' -FilePath $installed -Arguments '--self-test' -TimeoutSeconds 90
     if ($postUpgrade.ExitCode -ne 0) {
         throw "Upgraded EXE self-test failed: $($postUpgrade.ExitCode)"
     }
@@ -102,7 +136,7 @@ try {
 }
 finally {
     if (Test-Path $uninstall) {
-        $process = Start-Process -FilePath $uninstall -ArgumentList '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART' -Wait -PassThru
+        $process = Invoke-Bounded -Label 'final-uninstall' -FilePath $uninstall -Arguments '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART' -TimeoutSeconds 120
         $uninstallExit = $process.ExitCode
     }
 }

@@ -120,7 +120,16 @@ jobs:
 
       - name: Smoke-test Windows installation, blocked removal, upgrade and uninstall
         shell: pwsh
+        timeout-minutes: 12
         run: ./scripts/windows_installer_smoke.ps1
+
+      - name: Upload installer smoke logs if failed
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: VORQELI-installer-smoke-diagnostics
+          path: ${{ runner.temp }}/vorqeli-smoke-*.log
+          if-no-files-found: ignore
 
       - name: Generate release SHA-256 checksums
         shell: pwsh

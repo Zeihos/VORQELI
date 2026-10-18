@@ -2,8 +2,8 @@
   "file_count": 139,
   "files": {
     ".github/workflows/windows-build.yml": {
-      "bytes": 5908,
-      "sha256": "ee20edfccf7a7fdc2a6edc7daa96d536f33287784ea103c13cb565fc765f6270"
+      "bytes": 6209,
+      "sha256": "a2ca9964a0850ca3a75f02f730bf835f222ba749197d40e3982f92af83be167b"
     },
     ".gitignore": {
       "bytes": 140,
@@ -178,8 +178,8 @@
       "sha256": "0206dbdf844e1a3586ae6000c5e4c30d2731e3cc0bd27098ab9b8c7c3e4073d5"
     },
     "installer/VORQELI.iss": {
-      "bytes": 2747,
-      "sha256": "80aeab11ce403f205d70919f80b828a1729e73b42661a45a06f9168f4682164c"
+      "bytes": 2783,
+      "sha256": "f321aae705616f095cf1a710d4e3bfead7c2515edcb4c6518a0e6121fb466eda"
     },
     "pyproject.toml": {
       "bytes": 479,
@@ -218,8 +218,8 @@
       "sha256": "13e13d70175d729ba851a542d74aa6c95714c8c5bf68ca24f9f9118ba83bf98a"
     },
     "scripts/windows_installer_smoke.ps1": {
-      "bytes": 5471,
-      "sha256": "e38fcb2471b7b6a45826a00f52d34f776cc353aa417b315abacdf71dec73e7a5"
+      "bytes": 7149,
+      "sha256": "80ac543826dfa24ac09c4a06ee0a0dd053193bff6d76b0dd570ca243e210e28b"
     },
     "scripts/windows_off_intent_smoke.py": {
       "bytes": 1356,

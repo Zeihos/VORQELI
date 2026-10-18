@@ -55,16 +55,16 @@ begin
     ewWaitUntilTerminated, ExitCode);
   if not Started then
   begin
-    MsgBox('Не удалось запустить проверку перед удалением VORQELI. ' +
-      'Файлы не будут удалены.', mbError, MB_OK);
+    SuppressibleMsgBox('Не удалось запустить проверку перед удалением VORQELI. ' +
+      'Файлы не будут удалены.', mbError, MB_OK, IDOK);
     Exit;
   end;
   if ExitCode <> 0 then
   begin
-    MsgBox('Не удалось безопасно подготовить удаление VORQELI. ' +
+    SuppressibleMsgBox('Не удалось безопасно подготовить удаление VORQELI. ' +
       'Полностью закройте программу через трей и восстановите DNS. ' +
       'Если проблема осталась, запустите VORQELI от администратора ' +
-      'и повторите удаление. Код: ' + IntToStr(ExitCode), mbError, MB_OK);
+      'и повторите удаление. Код: ' + IntToStr(ExitCode), mbError, MB_OK, IDOK);
     Exit;
   end;
   Result := True;
