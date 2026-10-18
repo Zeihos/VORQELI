@@ -171,3 +171,13 @@ def test_legacy_backup_remains_readable_after_partial_restore(tmp_path,monkeypat
             geohide.restore_dns(journal)
     saved=json.loads(journal.read_text())['interfaces']
     assert 'guid' not in saved[0]
+
+
+def test_snapshot_skips_only_absent_dns_cim_objects():
+    """Hosted Windows can expose a NIC without DNSClient CIM state."""
+    script = geohide._SNAPSHOT
+    assert "Get-DnsClientServerAddress -InterfaceIndex $a.ifIndex -AddressFamily IPv4 -ErrorAction Stop" in script
+    assert "CmdletizationQuery_NotFound*" in script
+    assert "{ continue }" in script
+    assert "    throw" in script
+    assert "@($dns.ServerAddresses)" in script

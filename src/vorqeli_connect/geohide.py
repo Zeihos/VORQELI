@@ -40,7 +40,15 @@ $result = foreach ($a in $items) {
   $key='HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\' + $guid
   $manual=''
   if (Test-Path $key) { $manual=[string](Get-ItemProperty -Path $key -Name NameServer -ErrorAction SilentlyContinue).NameServer }
-  $before=@((Get-DnsClientServerAddress -InterfaceIndex $a.ifIndex -AddressFamily IPv4).ServerAddresses)
+  # Some hosted Windows NICs have no matching DNS Client CIM instance.
+  # Skip only this exact missing-object error, never mask other CIM failures.
+  try {
+    $dns = Get-DnsClientServerAddress -InterfaceIndex $a.ifIndex -AddressFamily IPv4 -ErrorAction Stop
+  } catch {
+    if ($_.FullyQualifiedErrorId -like 'CmdletizationQuery_NotFound*') { continue }
+    throw
+  }
+  $before=@($dns.ServerAddresses)
   [pscustomobject]@{ index=[int]$a.ifIndex; guid=[string]$a.InterfaceGuid; alias=[string]$a.Name; manual=[string]$manual; before=@($before) }
 }
 @($result) | ConvertTo-Json -Depth 5 -Compress

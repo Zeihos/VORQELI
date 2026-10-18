@@ -278,8 +278,8 @@
       "sha256": "f63c3aa11783a392d4c9bf222b0ed2bb5d2e72e4e6bd8bb1f939515639b633aa"
     },
     "src/vorqeli_connect/geohide.py": {
-      "bytes": 18311,
-      "sha256": "daeff90764ed696830285771b2fb5b5f56c69b6d695cf17c457d41bb5acf0cbb"
+      "bytes": 18610,
+      "sha256": "332a8e7557b790347a4f41f48aa42a85e5e60dd20a17bd1a59c14059910b1c36"
     },
     "src/vorqeli_connect/geohide_doh.py": {
       "bytes": 10129,
@@ -374,8 +374,8 @@
       "sha256": "3763f2a966cb6f440f1084ef7d04e0dcfe65a43a66c44be69a808f214b38c5f3"
     },
     "tests/test_adapter_identity_v34.py": {
-      "bytes": 7776,
-      "sha256": "42866a578d2fd192eef2b3d2202feca355ddbd91cd9eb9fd9f42db985f8ec3c9"
+      "bytes": 8218,
+      "sha256": "ddba1152bc60bd96e083f367f0464d3afc4af1c14334d06bf8d1b80fe0eb427f"
     },
     "tests/test_assets_manager.py": {
       "bytes": 4008,
