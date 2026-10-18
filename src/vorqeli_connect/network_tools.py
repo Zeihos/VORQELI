@@ -3,7 +3,7 @@ import socket
 from concurrent.futures import ThreadPoolExecutor
 
 TARGETS = {"Discord": ("discord.com", 443), "YouTube": ("www.youtube.com", 443),
-           "Telegram": ("web.telegram.org", 443), "GitHub": ("github.com", 443)}
+           "Telegram Web": ("web.telegram.org", 443), "GitHub": ("github.com", 443)}
 
 
 def check_endpoint(name: str, host: str, port: int = 443, timeout: float = 3.0) -> tuple[str, str]:

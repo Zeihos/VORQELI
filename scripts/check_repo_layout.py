@@ -34,6 +34,9 @@ REQUIRED_FILES = (
     'scripts/windows_adapter_identity_smoke.py', 'tests/test_adapter_identity_v34.py',
     'docs/GEOHIDE_ADAPTER_IDENTITY_V34.md',
     'scripts/windows_startup_smoke.py', 'tests/test_startup_registry_v25.py',
+    'src/vorqeli_connect/telegram_web_audit.py',
+    'tests/test_telegram_web_audit_v36.py',
+    'docs/TELEGRAM_WEB_DIAGNOSTICS_V36.md',
 )
 
 

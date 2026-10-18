@@ -6,7 +6,7 @@ from urllib.error import URLError, HTTPError
 SERVICES = {
     "Discord": "https://discord.com",
     "YouTube": "https://www.youtube.com",
-    "Telegram": "https://web.telegram.org",
+    "Telegram Web": "https://web.telegram.org/k/",
     "GitHub": "https://github.com",
 }
 

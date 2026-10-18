@@ -1,5 +1,5 @@
 #define MyAppName "VORQELI Connect"
-#define MyAppVersion "0.35.0"
+#define MyAppVersion "0.36.0"
 #define MyAppExeName "VORQELI-Connect.exe"
 
 [Setup]
@@ -55,16 +55,16 @@ begin
     ewWaitUntilTerminated, ExitCode);
   if not Started then
   begin
-    SuppressibleMsgBox('Не удалось запустить проверку перед удалением VORQELI. ' +
-      'Файлы не будут удалены.', mbError, MB_OK, IDOK);
+    MsgBox('Не удалось запустить проверку перед удалением VORQELI. ' +
+      'Файлы не будут удалены.', mbError, MB_OK);
     Exit;
   end;
   if ExitCode <> 0 then
   begin
-    SuppressibleMsgBox('Не удалось безопасно подготовить удаление VORQELI. ' +
+    MsgBox('Не удалось безопасно подготовить удаление VORQELI. ' +
       'Полностью закройте программу через трей и восстановите DNS. ' +
       'Если проблема осталась, запустите VORQELI от администратора ' +
-      'и повторите удаление. Код: ' + IntToStr(ExitCode), mbError, MB_OK, IDOK);
+      'и повторите удаление. Код: ' + IntToStr(ExitCode), mbError, MB_OK);
     Exit;
   end;
   Result := True;

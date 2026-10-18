@@ -6,6 +6,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from .config import Settings
 from .unified import ConnectionReport
+from .flowseal_alts import ALT_MODES
 
 _SAFE_SCAN_STATES = {'Доступен', 'Нет ответа', 'Не проверено'}
 _SAFE_MODULE_STATES = {'on', 'off', 'error'}
@@ -21,7 +22,7 @@ def build_report(settings: Settings, status: ConnectionReport,
         'captured_at': datetime.now(timezone.utc).isoformat(),
         'desired_enabled': bool(settings.desired_enabled),
         'launch_at_startup_requested': bool(settings.launch_at_startup),
-        'dpi_mode': settings.dpi_mode if settings.dpi_mode in ('fake', 'multisplit', 'auto') else 'unknown',
+        'dpi_mode': settings.dpi_mode if settings.dpi_mode in (*ALT_MODES, 'alt_auto', 'fake', 'multisplit', 'auto') else 'unknown',
         'geohide_transport': settings.dns_mode if settings.dns_mode in ('plain', 'doh') else 'unknown',
         'components': {
             'dpi': {'enabled': bool(settings.connect_dpi),
@@ -33,6 +34,6 @@ def build_report(settings: Settings, status: ConnectionReport,
         },
         'overall': status.overall if status.overall in _SAFE_OVERALL_STATES else 'unknown',
         'checks': {str(label)[:32]: result if result in _SAFE_SCAN_STATES else 'Другой результат'
-                   for label, result in results[:10] if label in ('Discord', 'YouTube', 'Telegram', 'GitHub')},
+                   for label, result in results[:10] if label in ('Discord', 'YouTube', 'Telegram', 'Telegram Web', 'GitHub')},
         'notice': 'Не является подтверждением успешного обхода DPI или DNS/Telegram-трафика.',
     }

@@ -127,3 +127,8 @@ python -m pip install "git+https://github.com/Flowseal/tg-ws-proxy.git@307a384ab
 
 ### Flowseal ALT1–ALT13 и HOSTS (v0.35.0)
 Выбор профиля DPI: Настройки → АВТО ALT1–13 или ВЫБРАТЬ ALT. Дополнительные статические hosts: Настройки → HOSTS · ДОПОЛНИТЕЛЬНО. Правила hosts независимы от GeoHide DNS, вносятся только по подтверждению. Подробности — docs/FLOWSEAL_ALT_AND_HOSTS_V35.md.
+
+
+### Telegram Web (v0.36.0)
+
+Встроенная **Диагностика → TELEGRAM WEB** проверяет веб-клиенты K/A, прямой TLS/HTTPS, системные записи HOSTS и DNS без HOSTS на Windows. Прокси MTProto Telegram Desktop не связан с доступностью веб-приложения. Проверка ничего не меняет и не гарантирует загрузку Telegram Web в браузере. Подробнее — `docs/TELEGRAM_WEB_DIAGNOSTICS_V36.md`.

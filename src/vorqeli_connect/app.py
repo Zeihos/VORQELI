@@ -20,6 +20,7 @@ from PIL import Image, ImageTk
 from .config import APP_DIR, load_settings, save_settings
 from .diagnostics import check_all
 from .network_audit import run_dns_audit, format_dns_audit
+from .telegram_web_audit import audit_telegram_web, format_telegram_web_audit
 from .event_log import record_event, recent_events
 from .geohide import INFO_PAGE, STATE_FILE
 from .geohide_doh import DOH_STATE_FILE, restore_geo_dns
@@ -48,18 +49,9 @@ from . import __version__ as VERSION
 
 
 def asset(name: str) -> Path:
-    """Resolve bundled images or source-tree assets after pip installation."""
-    frozen_root = getattr(sys, '_MEIPASS', None)
-    if frozen_root is not None:
-        return Path(frozen_root) / 'assets' / name
-    source_root = Path(__file__).resolve().parents[2]
-    # CI and developer installs import from site-packages while the current
-    # directory remains the VORQELI checkout. A PyInstaller build uses MEIPASS.
-    for root in (source_root, Path.cwd()):
-        candidate = root / 'assets' / name
-        if candidate.is_file():
-            return candidate
-    return source_root / 'assets' / name
+    """Works for source checkout and PyInstaller --onefile."""
+    base = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[2]))
+    return base / 'assets' / name
 
 
 class ConnectApp(tk.Tk):
@@ -108,6 +100,9 @@ class ConnectApp(tk.Tk):
         self._dns_audit_window = None
         self._dns_audit_text = None
         self._dns_audit_busy = False
+        self._telegram_web_window = None
+        self._telegram_web_text = None
+        self._telegram_web_busy = False
         previous = load_history()
         self.last_results = list(previous[-1]['results'].items()) if previous else []
         # A compact/150%-scaled display exposes scrollbars rather than
@@ -532,11 +527,15 @@ class ConnectApp(tk.Tk):
                            width=98,height=51,size=9)
         self._place_button(x+592,268,'DNS / HOSTS',self._show_dns_audit,
                            width=133,height=51,size=10)
-        self._text(x+29,385,'ПОСЛЕДНИЕ ПРОВЕРКИ',11,VIOLET,weight='bold')
+        self._place_button(x+30,386,'TELEGRAM WEB',self._show_telegram_web_audit,
+                           width=181,height=41,size=10)
+        self._text(x+225,400,'Отдельно от MTProto · DNS / TLS / HTTPS',9,SECONDARY,
+                   width=max(270,right-x-250))
+        self._text(x+29,453,'ПОСЛЕДНИЕ ПРОВЕРКИ',11,VIOLET,weight='bold')
         results=self.last_results or [('Discord','Не проверено'),('YouTube','Не проверено'),
-                                      ('Telegram','Не проверено'),('GitHub','Не проверено')]
+                                      ('Telegram Web','Не проверено'),('GitHub','Не проверено')]
         for j,(name,status) in enumerate(results[:5]):
-            y=427+j*49
+            y=494+j*49
             self._text(x+36,y,str(name),12,FG,weight='bold')
             c=AQUA if status=='Доступен' else ROSE if status=='Нет ответа' else SECONDARY
             self._text(right-49,y,fit_line(status,count=44),11,c,anchor='ne')
@@ -884,6 +883,72 @@ class ConnectApp(tk.Tk):
             self.events.put(('dns_audit', result))
         threading.Thread(target=worker, daemon=True, name='GeoHideAudit').start()
 
+    def _show_telegram_web_audit(self):
+        """Open direct Telegram Web diagnostics; never modify hosts or DNS."""
+        if self._telegram_web_window is not None:
+            try:
+                if self._telegram_web_window.winfo_exists():
+                    self._telegram_web_window.lift()
+                    return
+            except tk.TclError:
+                pass
+        dlg = tk.Toplevel(self)
+        dlg.title('VORQELI · Telegram Web')
+        dlg.configure(bg='#111629')
+        dlg.geometry('850x610')
+        dlg.minsize(620,420)
+        dlg.transient(self)
+        self._telegram_web_window = dlg
+        header = tk.Frame(dlg,bg='#111629',padx=18,pady=15)
+        header.pack(fill='x')
+        tk.Label(header,text='TELEGRAM WEB  /  ПРОВЕРКА',bg='#111629',fg=VIOLET,
+                 font=('Segoe UI',12,'bold')).pack(side='left')
+        tk.Button(header,text='ПОВТОРИТЬ',command=self._start_telegram_web_audit,
+                  bg='#33395C',fg=FG,activebackground='#7965B6',
+                  activeforeground=FG,bd=0,padx=16,pady=9,
+                  font=('Segoe UI',10,'bold')).pack(side='right')
+        body = tk.Frame(dlg,bg='#111629',padx=18,pady=10)
+        body.pack(fill='both',expand=True)
+        widget = tk.Text(body,bg='#1B2238',fg=FG,insertbackground=FG,
+                         selectbackground='#65569A',font=('Consolas',10),wrap='word',
+                         bd=0,padx=18,pady=16,state='disabled')
+        widget.pack(side='left',fill='both',expand=True)
+        bar = tk.Scrollbar(body,command=widget.yview)
+        bar.pack(side='right',fill='y')
+        widget.configure(yscrollcommand=bar.set)
+        self._telegram_web_text=widget
+        self._set_telegram_web_audit_text('Проверяем Telegram Web, HTTPS и HOSTS…')
+        self._start_telegram_web_audit()
+
+    def _set_telegram_web_audit_text(self, value: str) -> None:
+        widget=self._telegram_web_text
+        if widget is None:
+            return
+        try:
+            if not widget.winfo_exists():
+                return
+            widget.configure(state='normal')
+            widget.delete('1.0','end')
+            widget.insert('1.0',value)
+            widget.configure(state='disabled')
+        except tk.TclError:
+            pass
+
+    def _start_telegram_web_audit(self) -> None:
+        if self._telegram_web_busy:
+            return
+        self._telegram_web_busy=True
+        self._set_telegram_web_audit_text(
+            'Проверяем Telegram Web K/A и веб-шлюзы через прямое HTTPS…\n'
+            'HOSTS, GeoHide, DPI и MTProto не изменяются.')
+        def worker():
+            try:
+                text=format_telegram_web_audit(audit_telegram_web())
+            except Exception as exc:
+                text='Проверка завершилась ошибкой: '+type(exc).__name__
+            self.events.put(('telegram_web_audit',text))
+        threading.Thread(target=worker,daemon=True,name='TelegramWebAudit').start()
+
     def _show_engine_logs(self):
         """Read a bounded, redacted log; never copy Telegram secrets into the window."""
         dlg=tk.Toplevel(self)
@@ -1174,6 +1239,9 @@ class ConnectApp(tk.Tk):
                 elif typ=='dns_audit':
                     self._dns_audit_busy = False
                     self._set_dns_audit_text(str(value))
+                elif typ=='telegram_web_audit':
+                    self._telegram_web_busy = False
+                    self._set_telegram_web_audit_text(str(value))
                 elif typ=='diagnostics':
                     self.last_results=value
                     try:record_scan(value)

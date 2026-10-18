@@ -10,10 +10,6 @@ on:
 permissions:
   contents: read
 
-env:
-  PYTHONIOENCODING: utf-8
-  PYTHONUTF8: '1'
-
 jobs:
   build:
     name: Test and package VORQELI
@@ -121,16 +117,7 @@ jobs:
 
       - name: Smoke-test Windows installation, blocked removal, upgrade and uninstall
         shell: pwsh
-        timeout-minutes: 12
         run: ./scripts/windows_installer_smoke.ps1
-
-      - name: Upload installer smoke logs if failed
-        if: failure()
-        uses: actions/upload-artifact@v6
-        with:
-          name: VORQELI-installer-smoke-diagnostics
-          path: ${{ runner.temp }}/vorqeli-smoke-*.log
-          if-no-files-found: ignore
 
       - name: Generate release SHA-256 checksums
         shell: pwsh
@@ -147,7 +134,7 @@ jobs:
       - name: Upload Windows application
         uses: actions/upload-artifact@v6
         with:
-          name: VORQELI-Connect-v0.35.0-Windows
+          name: VORQELI-Connect-v0.36.0-Windows
           path: |
             dist/VORQELI-Connect.exe
             dist/VORQELI-Connect-Setup.exe

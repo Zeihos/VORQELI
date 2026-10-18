@@ -1,3 +1,12 @@
+## 0.36.0 — Telegram Web diagnostics and accurate reporting
+
+- New read-only Telegram Web K/A diagnostic window: fixed HTTPS endpoints, TLS errors, HOSTS mappings and Windows DNS without HOSTS.
+- Direct TLS probes do not use environment proxies, have short timeouts and never modify DNS or system HOSTS.
+- Explicit distinction between browser Telegram Web and working MTProto proxy.
+- Support JSON accurately reports ALT1–ALT13 and ALT AUTO rather than unknown DPI mode.
+- Working Flowseal ALT presets, GeoHide DNS and Telegram MTProto remain unchanged.
+- Windows CI tests must confirm this version before an EXE can be considered ready.
+
 ## 0.35.0 — Flowseal ALT 1–13 и HOSTS
 
 - Приоритетный последовательный выбор ALT2, ALT6, ALT11… и ручное меню ALT1–ALT13.
