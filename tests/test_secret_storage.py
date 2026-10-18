@@ -4,7 +4,7 @@ from vorqeli_connect.config import Settings
 
 
 def test_source_roundtrip_is_explicitly_portable(monkeypatch, tmp_path):
-    monkeypatch.setattr(secret_storage.os, 'name', 'posix', raising=False)
+    monkeypatch.setattr(config, 'serialize_secret', lambda value: {'telegram_secret': value})
     path=tmp_path/'settings.json'
     secret='ab'*16
     settings=Settings(telegram_secret=secret)

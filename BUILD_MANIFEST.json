@@ -1,562 +1,562 @@
 {
-    "file_count":  139,
-    "files":  {
-                  ".github/workflows/windows-build.yml":  {
-                                                              "bytes":  5908,
-                                                              "sha256":  "ee20edfccf7a7fdc2a6edc7daa96d536f33287784ea103c13cb565fc765f6270"
-                                                          },
-                  ".gitignore":  {
-                                     "bytes":  140,
-                                     "sha256":  "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
-                                 },
-                  "CHANGELOG.md":  {
-                                       "bytes":  20199,
-                                       "sha256":  "12d0d68c644c7822caec1b933f7c4bd81f7565811980bb5d198d3c4a6afb6bd0"
-                                   },
-                  "Compact-preview.png":  {
-                                              "bytes":  74045,
-                                              "sha256":  "41ddf4fd81330616e25f995e5c4b2d2d594b6b29e46458962b9974b100e7efac"
-                                          },
-                  "Diagnostics-preview.png":  {
-                                                  "bytes":  91806,
-                                                  "sha256":  "4ef1758f859976214005a36079d03f72e683f42e08589c34b7abb698e81a9c06"
-                                              },
-                  "Keyboard-preview.png":  {
-                                               "bytes":  103834,
-                                               "sha256":  "dd073579edf3fffb2ccaaab6f7123d020a80a467cb557cc5ce2b4346b5e9bc73"
-                                           },
-                  "LICENSE":  {
-                                  "bytes":  1077,
-                                  "sha256":  "d1266ba7e98f1956717feebf5bdb0cdf4af6257f824cfada393e094e5e73e3a3"
-                              },
-                  "NOTICE.md":  {
-                                    "bytes":  1576,
-                                    "sha256":  "7a8234d2dfffac88632ec9fbfed13b27c0ffab07ea2a209293a4273bf7bd6128"
-                                },
-                  "README.md":  {
-                                    "bytes":  17774,
-                                    "sha256":  "8b1d7a387756c33e04528fcd8916778b3efdb1ea49cea7bfaff90957edad05c9"
-                                },
-                  "Settings-preview.png":  {
-                                               "bytes":  116184,
-                                               "sha256":  "e668f5f1665f1454a9cf5d752fb6b84cf2ce41c3854844c70715183aa06a6de0"
-                                           },
-                  "UI-preview.png":  {
-                                         "bytes":  108123,
-                                         "sha256":  "0df2b9540b3a70aeb4f52bf793d5a5b1cf4a017c055993b6516500dfdcc434c6"
-                                     },
-                  "Update-preview.png":  {
-                                             "bytes":  97197,
-                                             "sha256":  "471756b36cbfe188345fff6027928b3f27f844bda17de0cc89e0cf2c436c9808"
-                                         },
-                  "assets/VORQELI-logo.png":  {
-                                                  "bytes":  1024911,
-                                                  "sha256":  "111a42152ad3ccd6f537343924562fe15cdca7b2654c5e57d5631310ceff5f98"
-                                              },
-                  "assets/VORQELI.ico":  {
-                                             "bytes":  78604,
-                                             "sha256":  "3224ffdcea1f6477cef1538715321861610adfb2532f96a1783079249906fb9f"
-                                         },
-                  "assets/brand-banner.jpg":  {
-                                                  "bytes":  61605,
-                                                  "sha256":  "f8e8c446ae193f290a09039c9231039643d590e46a48c55295f68ab1c406e49e"
-                                              },
-                  "build_entry.py":  {
-                                         "bytes":  150,
-                                         "sha256":  "4a782a7340b08822a1770a3206bb10f2fc2d05debe6bb530289630b4ae69fdde"
-                                     },
-                  "docs/DESIGN_SYSTEM.md":  {
-                                                "bytes":  4791,
-                                                "sha256":  "0e373687ace4c67c65043baa53d322b3d85dbd156367ce709fb83ce48d5eb646"
-                                            },
-                  "docs/GEOHIDE_ADAPTER_IDENTITY_V34.md":  {
-                                                               "bytes":  2335,
-                                                               "sha256":  "a1d61d66855cc60639675c242a2c49d5eb9d19b0aaeed763f0e9c8371d23b7ec"
-                                                           },
-                  "docs/GEOHIDE_DOH_V27.md":  {
-                                                  "bytes":  8552,
-                                                  "sha256":  "c0c12f69b5ce4ca23bdc06d91b525c5a905919302c22a6c21c1c94afda5fb3ff"
-                                              },
-                  "docs/GITHUB_RECOVERY.md":  {
-                                                  "bytes":  3102,
-                                                  "sha256":  "dbc79aa87e14868579080c811c7562036b852a3216473ce1eb69c3052bd2253a"
-                                              },
-                  "docs/INTEGRATIONS.md":  {
-                                               "bytes":  6938,
-                                               "sha256":  "816de2afa44d46426b0795fdb8c5656b986a46f728bcbfdc24114c28f19fe78c"
-                                           },
-                  "docs/OFF_INTENT_RECOVERY_V33.md":  {
-                                                          "bytes":  3854,
-                                                          "sha256":  "f12fc2bab82ba2b29d3d2b49a6a04ad6ea9779f7dcef0418a31121b27b850aea"
-                                                      },
-                  "docs/QUICK_START.md":  {
-                                              "bytes":  3663,
-                                              "sha256":  "d3f9cfe482bc327448d2ccfc04b3ad413abf39316f418c686200cc97de741363"
-                                          },
-                  "docs/RELEASE_CANDIDATE_CHECKLIST_V29.md":  {
-                                                                  "bytes":  3525,
-                                                                  "sha256":  "ef30b2f2baa3bac4835f86cc591895091da124e79f421d37a0b0f57c9f94f16b"
-                                                              },
-                  "docs/RELEASE_CANDIDATE_GATE_V30.md":  {
-                                                             "bytes":  3436,
-                                                             "sha256":  "1c5cb7de532b99e448eb95ffba47f8d72bdfd95692e71176a733bb78b8d5ce57"
-                                                         },
-                  "docs/RELEASE_CANDIDATE_GATE_V31.md":  {
-                                                             "bytes":  1239,
-                                                             "sha256":  "7ebfcf11c9a9daab5efc67ceee41c02aa1012eb639d3d523d9ccd17479e2adde"
-                                                         },
-                  "docs/RELEASE_CANDIDATE_GATE_V32.md":  {
-                                                             "bytes":  3367,
-                                                             "sha256":  "5bd6ad28d3865becab2468742526fcddf3e762ea263ec5226e80c8c8fd075445"
-                                                         },
-                  "docs/RELEASE_CHECKLIST.md":  {
-                                                    "bytes":  1636,
-                                                    "sha256":  "74043c595b40d69692bff6491b124d210d95e1bcdb2e90ae0e6f42f35d92d745"
-                                                },
-                  "docs/RELEASE_VALIDATION.md":  {
-                                                     "bytes":  3457,
-                                                     "sha256":  "e81c07730b1bb60d90382c333bdb0b9561b68938f1a196155a3b02a54f1ae682"
-                                                 },
-                  "docs/ROADMAP.md":  {
-                                          "bytes":  6136,
-                                          "sha256":  "1ea209aa232e927686e8608a4d927748165c174450e8e649f5eb01faeef5d6fb"
-                                      },
-                  "docs/SMART_DPI_V26.md":  {
-                                                "bytes":  5454,
-                                                "sha256":  "f296f0c9646310779375dcee3e61a139996eae998a79b2886b67fb84830602cf"
-                                            },
-                  "docs/THIRD_PARTY.md":  {
-                                              "bytes":  1552,
-                                              "sha256":  "362d57eecf195ca5b99fd02f638f82479dded65c874100f59419364d47821644"
-                                          },
-                  "docs/UI_ACCESSIBILITY_V28.md":  {
-                                                       "bytes":  4506,
-                                                       "sha256":  "3456ee37dee64726004d61974f1e584cd8318b63fcb4432f4eea8af59c3e9cb8"
-                                                   },
-                  "docs/UPDATES_V29.md":  {
-                                              "bytes":  6361,
-                                              "sha256":  "d139c3de425690a21615f785adfcf73870dbe797b5dcadf5bd9f078d6d40ae06"
-                                          },
-                  "docs/WINDOWS_ACCEPTANCE_V18.md":  {
-                                                         "bytes":  5949,
-                                                         "sha256":  "f316154fe5afdbe9d559e1f213fa8cce19ca35b5cf4dca028dd1bbd05e2b2021"
-                                                     },
-                  "docs/WINDOWS_ACCEPTANCE_V19.md":  {
-                                                         "bytes":  2783,
-                                                         "sha256":  "dcde7b3d5d81b5d09e19e6aa79ec3170e701f98f76d4388fc7faf3d04321abdf"
-                                                     },
-                  "docs/WINDOWS_ACCEPTANCE_V20.md":  {
-                                                         "bytes":  2455,
-                                                         "sha256":  "4524c787991d6429d58c2e1a2c4cab7ab41db9545647703090183f0605c0d0a9"
-                                                     },
-                  "docs/WINDOWS_ACCEPTANCE_V21.md":  {
-                                                         "bytes":  2990,
-                                                         "sha256":  "8925bd9a401c7b7fcb578f63b68fc550187b90969f0e0160646c4dfbbf96a281"
-                                                     },
-                  "docs/WINDOWS_ACCEPTANCE_V22.md":  {
-                                                         "bytes":  4154,
-                                                         "sha256":  "50af877479ad1c67bffd0d8e2a23b9fc3473ede2cf63a1e163ee22dbb3968f64"
-                                                     },
-                  "docs/WINDOWS_ACCEPTANCE_V23.md":  {
-                                                         "bytes":  5040,
-                                                         "sha256":  "f1d08f260d6eeefefe926fda094e26dbfe5c71c119ea131520aeb3709782dab7"
-                                                     },
-                  "docs/WINDOWS_STARTUP_AUDIT_V24.md":  {
-                                                            "bytes":  2794,
-                                                            "sha256":  "641be24e3d3900108678d93c6ea130e4554bb31daf1d0b782e09df1e0cebbfb5"
-                                                        },
-                  "docs/WINDOWS_STARTUP_AUDIT_V25.md":  {
-                                                            "bytes":  4501,
-                                                            "sha256":  "b710a5aec5066a61fc32f32540a6df3905f81dab908e016c1ffc91b4196a7432"
-                                                        },
-                  "docs/WINDOWS_TEST_PLAN.md":  {
-                                                    "bytes":  8531,
-                                                    "sha256":  "feaf6583e1e164851f16804e43d4df3c4b6a80dad3a97f6386b1e965165c1cfc"
-                                                },
-                  "docs/screenshots/overview.png":  {
-                                                        "bytes":  100321,
-                                                        "sha256":  "0206dbdf844e1a3586ae6000c5e4c30d2731e3cc0bd27098ab9b8c7c3e4073d5"
-                                                    },
-                  "installer/VORQELI.iss":  {
-                                                "bytes":  2747,
-                                                "sha256":  "80aeab11ce403f205d70919f80b828a1729e73b42661a45a06f9168f4682164c"
-                                            },
-                  "pyproject.toml":  {
-                                         "bytes":  479,
-                                         "sha256":  "836f191f2b3b4efc36c82279e7391ad8d1e249a4c7d0c9ae3fe34b12400efc3c"
-                                     },
-                  "scripts/__init__.py":  {
-                                              "bytes":  0,
-                                              "sha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-                                          },
-                  "scripts/check_repo_layout.py":  {
-                                                       "bytes":  5374,
-                                                       "sha256":  "e6c22c5a5a7b1314a4a5dd0bb141de2c53c7d3f620d274f2178cd9ec64085b1d"
-                                                   },
-                  "scripts/gui_keyboard_smoke.py":  {
-                                                        "bytes":  2081,
-                                                        "sha256":  "2d94f0221b9c9c3dd38ff4024963ac12b0a7d835e2cd70d7d3ee55cc7ce0fdad"
-                                                    },
-                  "scripts/gui_smoke.py":  {
-                                               "bytes":  718,
-                                               "sha256":  "29a3cefccef1dab861470db4c58453ee4ffe14914064dc2c71c32d0f4b95e1f4"
-                                           },
-                  "scripts/verify_build_manifest.py":  {
-                                                           "bytes":  5268,
-                                                           "sha256":  "5bc9cecd45d0284d80ecc35bda2c72121732d3e51ff8c4aa3c15fb911ab5e7b5"
-                                                       },
-                  "scripts/windows_adapter_identity_smoke.py":  {
-                                                                    "bytes":  816,
-                                                                    "sha256":  "94be4eb43ba78ecddd9e59ce3ba0a791c0432d6e47707e2ea09d4f37a00bc2bd"
-                                                                },
-                  "scripts/windows_doh_readonly_smoke.py":  {
-                                                                "bytes":  1456,
-                                                                "sha256":  "a81ad2d365c027093140347324680bad3a1f4c2f292d9056cbc4a26c0ae79f31"
-                                                            },
-                  "scripts/windows_dpapi_smoke.py":  {
-                                                         "bytes":  1044,
-                                                         "sha256":  "13e13d70175d729ba851a542d74aa6c95714c8c5bf68ca24f9f9118ba83bf98a"
-                                                     },
-                  "scripts/windows_installer_smoke.ps1":  {
-                                                              "bytes":  5471,
-                                                              "sha256":  "e38fcb2471b7b6a45826a00f52d34f776cc353aa417b315abacdf71dec73e7a5"
-                                                          },
-                  "scripts/windows_off_intent_smoke.py":  {
-                                                              "bytes":  1356,
-                                                              "sha256":  "9f68786f7fec2d65336b6371a6c5ff7db3fc619d2cad84f816d39f8ce88709c7"
-                                                          },
-                  "scripts/windows_release_gate.ps1":  {
-                                                           "bytes":  2567,
-                                                           "sha256":  "2705e74e648fa4a2e46aa827d39419adcaea37f4ec7c35e67ac907b478fe89ea"
-                                                       },
-                  "scripts/windows_startup_smoke.py":  {
-                                                           "bytes":  1376,
-                                                           "sha256":  "b20ca1f7d0390bac598f2a49bd8a9b599b38c07a49c7837b12265934f8b9e152"
-                                                       },
-                  "src/vorqeli_connect/__init__.py":  {
-                                                          "bytes":  23,
-                                                          "sha256":  "ef08236713f1b293fcec223898390542e95d90a8043573b915a3e24bc11733cf"
-                                                      },
-                  "src/vorqeli_connect/__main__.py":  {
-                                                          "bytes":  29,
-                                                          "sha256":  "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
-                                                      },
-                  "src/vorqeli_connect/app.py":  {
-                                                     "bytes":  63251,
-                                                     "sha256":  "47626d1bffd1e4139b41116ed6e52b26553e3c2a0eed41bf1b21cc5b46902832"
-                                                 },
-                  "src/vorqeli_connect/assets_manager.py":  {
-                                                                "bytes":  9264,
-                                                                "sha256":  "b62ca10935f86b71af805ddec686e065550fa06b75278b35357ed7f91c5e7215"
-                                                            },
-                  "src/vorqeli_connect/bundled_telegram.py":  {
-                                                                  "bytes":  1565,
-                                                                  "sha256":  "9c5e89747f003cad0b5b6478f7cc0033806f0457a6b006c4e8e11d50a80aa209"
-                                                              },
-                  "src/vorqeli_connect/config.py":  {
-                                                        "bytes":  9940,
-                                                        "sha256":  "0a5394043d20d11892695e7cf9aa734f93ddbcb06887d832db4740d34da0a90c"
-                                                    },
-                  "src/vorqeli_connect/diagnostics.py":  {
-                                                             "bytes":  1150,
-                                                             "sha256":  "808dcbc6bc55c36f60c7631de0cfcaf1d012d1387b4541dbbbb28a7000d0579c"
-                                                         },
-                  "src/vorqeli_connect/doctor.py":  {
-                                                        "bytes":  4585,
-                                                        "sha256":  "785bd1df7211834f9a3a50467b047052a6c3fdd95c165d1d8ce61d858cf68c27"
-                                                    },
-                  "src/vorqeli_connect/engine_adapters.py":  {
-                                                                 "bytes":  5270,
-                                                                 "sha256":  "1f120106ceb0368c973937d81a73892e67e4bf69a1a7a5f400e57d2c1d0678e6"
-                                                             },
-                  "src/vorqeli_connect/engine_processes.py":  {
-                                                                  "bytes":  3097,
-                                                                  "sha256":  "e1176ecec8e6aab51afe41d5c615bc865ead6531bf7fb0a12843c0430a2d9b09"
-                                                              },
-                  "src/vorqeli_connect/event_log.py":  {
-                                                           "bytes":  1059,
-                                                           "sha256":  "f63c3aa11783a392d4c9bf222b0ed2bb5d2e72e4e6bd8bb1f939515639b633aa"
-                                                       },
-                  "src/vorqeli_connect/geohide.py":  {
-                                                         "bytes":  18311,
-                                                         "sha256":  "daeff90764ed696830285771b2fb5b5f56c69b6d695cf17c457d41bb5acf0cbb"
-                                                     },
-                  "src/vorqeli_connect/geohide_doh.py":  {
-                                                             "bytes":  10129,
-                                                             "sha256":  "37c74694b147e63127c93efd346dc718f0a236fb72276fa222f7af9d1ea9c488"
-                                                         },
-                  "src/vorqeli_connect/history.py":  {
-                                                         "bytes":  1075,
-                                                         "sha256":  "0dbb64be441cfdc43fc69b73e4a63f08cc157a7c8f8b40917f75e2a0a1c0f601"
-                                                     },
-                  "src/vorqeli_connect/integrations.py":  {
-                                                              "bytes":  1285,
-                                                              "sha256":  "b19db88423d343bfb949a1ffcf68282a94e7d379c165e24b1f72209d5f3d157c"
-                                                          },
-                  "src/vorqeli_connect/log_tools.py":  {
-                                                           "bytes":  2656,
-                                                           "sha256":  "1097826acb9cdfca2ad81fd6258496e8529f8f15dc8380e2635334d2dcdd3ba4"
-                                                       },
-                  "src/vorqeli_connect/module_registry.py":  {
-                                                                 "bytes":  848,
-                                                                 "sha256":  "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
-                                                             },
-                  "src/vorqeli_connect/network_tools.py":  {
-                                                               "bytes":  1358,
-                                                               "sha256":  "b010c95ba269f303e99c364cf2158aea7640918ad646b54ac4167db0d3a9d032"
-                                                           },
-                  "src/vorqeli_connect/preflight.py":  {
-                                                           "bytes":  2737,
-                                                           "sha256":  "8be68d455c2249065a49adb00d044aed0b01c50457c411447165e62902f47502"
-                                                       },
-                  "src/vorqeli_connect/process_manager.py":  {
-                                                                 "bytes":  1607,
-                                                                 "sha256":  "b03d84ad21e93e7aaed489683b6591d50cae6242bb8185bcd44260522b7f2c1d"
-                                                             },
-                  "src/vorqeli_connect/profiles.py":  {
-                                                          "bytes":  1816,
-                                                          "sha256":  "aecd7308a8d08c210912378a7870f1a104b7d8b2f9d0c9e5447e41713612efb6"
-                                                      },
-                  "src/vorqeli_connect/recovery.py":  {
-                                                          "bytes":  2036,
-                                                          "sha256":  "79949613e351e81b7d013d9c37f5bf8aa26714dd9ce343c5bb137f39fdc870ef"
-                                                      },
-                  "src/vorqeli_connect/secret_storage.py":  {
-                                                                "bytes":  3025,
-                                                                "sha256":  "375ea94a612638e5ce8e840127d9429b59fa57a4e6e81745734c1ff4e0be78fa"
-                                                            },
-                  "src/vorqeli_connect/smart_dpi.py":  {
-                                                           "bytes":  6045,
-                                                           "sha256":  "a3d59fc12f73e4c6a81539f4b00fdf8b9000f93aab5a2002ade72962891fc708"
-                                                       },
-                  "src/vorqeli_connect/startup.py":  {
-                                                         "bytes":  12752,
-                                                         "sha256":  "fcd5ad3be02fdbd26d2bcbd628f33c2e89c975a7d7ea298115d98f932b137395"
-                                                     },
-                  "src/vorqeli_connect/support_report.py":  {
-                                                                "bytes":  2201,
-                                                                "sha256":  "1d19dc4c7eca29ab9e3875c28d106049a912f123998a95d8fc082841114499bc"
-                                                            },
-                  "src/vorqeli_connect/tray_assets.py":  {
-                                                             "bytes":  870,
-                                                             "sha256":  "b7dd023b8921c7864df9d4df47440b74e8704e16bf1de73f0d22e48e4343c029"
-                                                         },
-                  "src/vorqeli_connect/ui_copy.py":  {
-                                                         "bytes":  1566,
-                                                         "sha256":  "35f1c65b53e7dd7813d2fb54c710d7f0fb526d29b73eabe1d216305e61aed984"
-                                                     },
-                  "src/vorqeli_connect/ui_navigation.py":  {
-                                                               "bytes":  1210,
-                                                               "sha256":  "6969bec8598d2b6b72323e27b6de6c3765b88662102d04658eb1f6a6d2e82f20"
-                                                           },
-                  "src/vorqeli_connect/unified.py":  {
-                                                         "bytes":  14105,
-                                                         "sha256":  "83016dbf5cd8653a931e2dfce5097d0bd03f3459723f53dbb2b80dc6b1eae5a7"
-                                                     },
-                  "src/vorqeli_connect/uninstall_safety.py":  {
-                                                                  "bytes":  4478,
-                                                                  "sha256":  "2c8c9ae36305e609ce5626da1d25d9750daf76780e709d325862f05ed311f5ce"
-                                                              },
-                  "src/vorqeli_connect/update_checker.py":  {
-                                                                "bytes":  14633,
-                                                                "sha256":  "016660f9860dd8a552ffacee2858a40edc00f7ba757ad450b32b67d16dcbac8f"
-                                                            },
-                  "src/vorqeli_connect/visual_design.py":  {
-                                                               "bytes":  5980,
-                                                               "sha256":  "94f40129012d120045b3e04f833cb173dc9b8bf5daf0d46c265f9cbf1148762d"
-                                                           },
-                  "src/vorqeli_connect/window_state.py":  {
-                                                              "bytes":  1505,
-                                                              "sha256":  "761f08c5fd15e5deaf3d19412dff702a8d09d6312c2990fe5a13c9a917688a03"
-                                                          },
-                  "src/vorqeli_connect/windows_chrome.py":  {
-                                                                "bytes":  1971,
-                                                                "sha256":  "3763f2a966cb6f440f1084ef7d04e0dcfe65a43a66c44be69a808f214b38c5f3"
-                                                            },
-                  "tests/test_adapter_identity_v34.py":  {
-                                                             "bytes":  7776,
-                                                             "sha256":  "42866a578d2fd192eef2b3d2202feca355ddbd91cd9eb9fd9f42db985f8ec3c9"
-                                                         },
-                  "tests/test_assets_manager.py":  {
-                                                       "bytes":  4008,
-                                                       "sha256":  "06158d47abca27e51b7edf4b8f81da0c1793962a33a60f9ff84e8818c1cd122d"
-                                                   },
-                  "tests/test_build_manifest_v31.py":  {
-                                                           "bytes":  1272,
-                                                           "sha256":  "b63746e1c125f448aa293aa4ea15afdce6ef939642e49f903eb46a8fe277fc99"
-                                                       },
-                  "tests/test_config.py":  {
-                                               "bytes":  381,
-                                               "sha256":  "c3a5e60bbe196f530c24f5e815fc0bc6afaeaa991d356aa4c14cba43dc78d8a3"
-                                           },
-                  "tests/test_diagnostics.py":  {
-                                                    "bytes":  451,
-                                                    "sha256":  "9cb99bec1d65757684516e1b0a8c89fd7a92dc91eadebedadf3e9bbff13d99f9"
-                                                },
-                  "tests/test_engine_adapters.py":  {
-                                                        "bytes":  3873,
-                                                        "sha256":  "962a66284a947db2d7b29e09c7a1aac3c3064a419c29669d30917f46ec40ccd4"
-                                                    },
-                  "tests/test_engine_processes.py":  {
-                                                         "bytes":  2147,
-                                                         "sha256":  "e15003175bbbc4baebbaa8661d925e0d7e615d438c829042e5d4e24cc01a37e6"
-                                                     },
-                  "tests/test_geohide.py":  {
-                                                "bytes":  2038,
-                                                "sha256":  "1a0edb6cd30e9a8be6b3eee846d22ded969e001333df782a68607499ec0d72d9"
-                                            },
-                  "tests/test_geohide_doh_v27.py":  {
-                                                        "bytes":  13598,
-                                                        "sha256":  "fee47faffe58c6169f47e46d49bde215dab562a370a2e361c31aa53017b07917"
-                                                    },
-                  "tests/test_geohide_safety.py":  {
-                                                       "bytes":  870,
-                                                       "sha256":  "b11e670c2c7f0af52d4132d16e980e0d41472e8c2699fea1a7ced8244dca4437"
-                                                   },
-                  "tests/test_gui_assets.py":  {
-                                                   "bytes":  340,
-                                                   "sha256":  "5b1fa75fd12ba26d1a99269b948f234f3442c56df17bbab6b7fced44594d3915"
-                                               },
-                  "tests/test_history.py":  {
-                                                "bytes":  728,
-                                                "sha256":  "b4372a2ad3621fe4aee645e7f4aca954b68457728df3b8404ee7e3ebbefe55cc"
-                                            },
-                  "tests/test_integrations.py":  {
-                                                     "bytes":  896,
-                                                     "sha256":  "0b920eb406e6c882ab9ef5213b781aa6210dc0718a038bfb9e7c95bec29f51a8"
-                                                 },
-                  "tests/test_integrity_v20.py":  {
-                                                      "bytes":  3687,
-                                                      "sha256":  "a01bccb8f8b6f936bd6ca820c2ca507feed3e14a635d06654cc3ca868b10c8a2"
-                                                  },
-                  "tests/test_log_tools.py":  {
-                                                  "bytes":  1400,
-                                                  "sha256":  "09d0c92346a7925f0ec1112b51e83de8bf52898f1263c99b23c6bfe42850f020"
-                                              },
-                  "tests/test_module_registry.py":  {
-                                                        "bytes":  480,
-                                                        "sha256":  "8bc9fab370306100c5b309b6024c8b8cd03a4480c3a191039eff27054378fb4d"
-                                                    },
-                  "tests/test_network_tools.py":  {
-                                                      "bytes":  1240,
-                                                      "sha256":  "82c32a2ebc40785f358c9b2a13aaecfc921267273557b31124fc9ad6a62b3a23"
-                                                  },
-                  "tests/test_off_intent_v33.py":  {
-                                                       "bytes":  5100,
-                                                       "sha256":  "6fec8c4cee986baf97e2ef9f54643830195e1e445505e55baaf605c5e6d752fd"
-                                                   },
-                  "tests/test_preflight.py":  {
-                                                  "bytes":  2115,
-                                                  "sha256":  "2a785c29480be5c6a4994e666a77a6fad8580b3d1ef43eb7ae3958c6c8b1a7fe"
-                                              },
-                  "tests/test_process_lifecycle.py":  {
-                                                          "bytes":  1237,
-                                                          "sha256":  "c9e65c61bf380ca861176d186df3d2a6e48bb0855309335159518bead9882aa9"
-                                                      },
-                  "tests/test_process_manager.py":  {
-                                                        "bytes":  967,
-                                                        "sha256":  "5590228dbee4067691ff0fe0a2ce4cf205d23d30da4e7f3d70e92f51f577c85e"
-                                                    },
-                  "tests/test_profiles_events.py":  {
-                                                        "bytes":  1017,
-                                                        "sha256":  "9f01753f0826ba0b8a9d3ed307356e880d27e6bc45900fdef449c0c47365c937"
-                                                    },
-                  "tests/test_recovery.py":  {
-                                                 "bytes":  1731,
-                                                 "sha256":  "d6d8afe81715893617b273d32b7d81b6416eed3790ec3222cfeea15e3b413c45"
-                                             },
-                  "tests/test_release_safety_v32.py":  {
-                                                           "bytes":  4502,
-                                                           "sha256":  "b48e556948a19b0b5a2e24cfa5cac95170c676ce02c34a885eff17d4d6a4c14f"
-                                                       },
-                  "tests/test_reliability_v18.py":  {
-                                                        "bytes":  4540,
-                                                        "sha256":  "028cc58ce0dd5523aeda1398b433461598baa3bee0b671d2ae26f77c56150764"
-                                                    },
-                  "tests/test_reliability_v19.py":  {
-                                                        "bytes":  8613,
-                                                        "sha256":  "7571a9552c028e64a63f26190b15b13833bd973ef56796409af7e343dfe3b5f6"
-                                                    },
-                  "tests/test_repo_layout_v22.py":  {
-                                                        "bytes":  1404,
-                                                        "sha256":  "fc639c918bf4a97ca929ecf1985ce4b4eaf3a8e9bde67feffa551c26f7965e07"
-                                                    },
-                  "tests/test_safety_v17.py":  {
-                                                   "bytes":  3853,
-                                                   "sha256":  "4865c5950f9c96720814371e4a3ddbc32f0ba2446bcd7c91b0d706c531ed75ec"
-                                               },
-                  "tests/test_secret_storage.py":  {
-                                                       "bytes":  2125,
-                                                       "sha256":  "30b6b66cab8be17e4b5574c27b2ce4256cd5d7034e325c9938e491bb2abe8e2c"
-                                                   },
-                  "tests/test_settings_recovery.py":  {
-                                                          "bytes":  2018,
-                                                          "sha256":  "1a745b4c0e9d4074c50f804c0d184486a4ebc06197520545ca0909b223b5b7ab"
-                                                      },
-                  "tests/test_smart_dpi_v26.py":  {
-                                                      "bytes":  8576,
-                                                      "sha256":  "14afee018f5d0f133c57f2cbfbadab48a24814de9da2b44128b262dbb970c5ac"
-                                                  },
-                  "tests/test_startup.py":  {
-                                                "bytes":  666,
-                                                "sha256":  "e0275602fecdcb6174f29b60fd016a176eeb225b586cf4f725a11700ca969436"
-                                            },
-                  "tests/test_startup_audit_v24.py":  {
-                                                          "bytes":  4375,
-                                                          "sha256":  "a9050f1266ee41118ab0dd22805b4b8a60fdfe60b18ae03d672be3baa0192682"
-                                                      },
-                  "tests/test_startup_registry_v25.py":  {
-                                                             "bytes":  8630,
-                                                             "sha256":  "63e2717c2ca33b0d88bfd998a4d6ebb65a6ba67e8a0562a064d87573aad2bd9a"
-                                                         },
-                  "tests/test_startup_v23.py":  {
-                                                    "bytes":  8216,
-                                                    "sha256":  "ad87cfb784e57bf4daa4c17efebfe82d8d948450bbf91dad69f27f3ef005b81f"
-                                                },
-                  "tests/test_support_report.py":  {
-                                                       "bytes":  1121,
-                                                       "sha256":  "6e5e3bd8eae3412ad6d86d8342edfa896f8e35480d48cb0a4430847dd59fcd46"
-                                                   },
-                  "tests/test_tray_assets.py":  {
-                                                    "bytes":  504,
-                                                    "sha256":  "667078c845cb3974ee0ce75ecaa77b93a2a23d29f10e69802d7ea01a63170300"
-                                                },
-                  "tests/test_ui_copy_v15.py":  {
-                                                    "bytes":  972,
-                                                    "sha256":  "def61baa397e77511504a9d51b8ac62e91ca86582ae926d5ebcadd7be6f02848"
-                                                },
-                  "tests/test_ui_navigation_v28.py":  {
-                                                          "bytes":  3010,
-                                                          "sha256":  "eb71412a687742d2aa07f0b3b0a8123d863908c24b0982c463919d1815368cdd"
-                                                      },
-                  "tests/test_unified.py":  {
-                                                "bytes":  3299,
-                                                "sha256":  "ae8af725410dfbc7d2dacdd8cea17aaccc069476e5c4a807d156b061f287bcb9"
-                                            },
-                  "tests/test_uninstall_safety_v22.py":  {
-                                                             "bytes":  3773,
-                                                             "sha256":  "c7fb0d3b864ece9aaec490b9bd6b5b006622272c9993aa6fe3e2795bedf4f75f"
-                                                         },
-                  "tests/test_update_checker_v29.py":  {
-                                                           "bytes":  7813,
-                                                           "sha256":  "04d867cfde033a2474b766ffc2b0a88e2116d8c1add6f5084cb231ecf4cea564"
-                                                       },
-                  "tests/test_update_security_v30.py":  {
-                                                            "bytes":  5916,
-                                                            "sha256":  "b23ffa6f34322e7e2cdba7f9964971081a46ea52c51668762cee815c657e9953"
-                                                        },
-                  "tests/test_update_security_v31.py":  {
-                                                            "bytes":  1958,
-                                                            "sha256":  "5004631e185bb8c7e8cd118f83fdce1384008e5a50bb080fa5dcbf170ccb221d"
-                                                        },
-                  "tests/test_verified_dns_v21.py":  {
-                                                         "bytes":  7633,
-                                                         "sha256":  "1463af05ec229aae811d4bda025b01bc02a1abb60e4871e6b7d38bcc0998646a"
-                                                     },
-                  "tests/test_visual_design.py":  {
-                                                      "bytes":  1115,
-                                                      "sha256":  "9ae6ab8289fd1249f3ca8611c428d6c0e44dff3e446be5c38cd15cfd990be68d"
-                                                  }
-              },
-    "version":  "0.34.0"
+  "file_count": 139,
+  "files": {
+    ".github/workflows/windows-build.yml": {
+      "bytes": 5908,
+      "sha256": "ee20edfccf7a7fdc2a6edc7daa96d536f33287784ea103c13cb565fc765f6270"
+    },
+    ".gitignore": {
+      "bytes": 140,
+      "sha256": "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
+    },
+    "CHANGELOG.md": {
+      "bytes": 20199,
+      "sha256": "12d0d68c644c7822caec1b933f7c4bd81f7565811980bb5d198d3c4a6afb6bd0"
+    },
+    "Compact-preview.png": {
+      "bytes": 74045,
+      "sha256": "41ddf4fd81330616e25f995e5c4b2d2d594b6b29e46458962b9974b100e7efac"
+    },
+    "Diagnostics-preview.png": {
+      "bytes": 91806,
+      "sha256": "4ef1758f859976214005a36079d03f72e683f42e08589c34b7abb698e81a9c06"
+    },
+    "Keyboard-preview.png": {
+      "bytes": 103834,
+      "sha256": "dd073579edf3fffb2ccaaab6f7123d020a80a467cb557cc5ce2b4346b5e9bc73"
+    },
+    "LICENSE": {
+      "bytes": 1077,
+      "sha256": "d1266ba7e98f1956717feebf5bdb0cdf4af6257f824cfada393e094e5e73e3a3"
+    },
+    "NOTICE.md": {
+      "bytes": 1576,
+      "sha256": "7a8234d2dfffac88632ec9fbfed13b27c0ffab07ea2a209293a4273bf7bd6128"
+    },
+    "README.md": {
+      "bytes": 17774,
+      "sha256": "8b1d7a387756c33e04528fcd8916778b3efdb1ea49cea7bfaff90957edad05c9"
+    },
+    "Settings-preview.png": {
+      "bytes": 116184,
+      "sha256": "e668f5f1665f1454a9cf5d752fb6b84cf2ce41c3854844c70715183aa06a6de0"
+    },
+    "UI-preview.png": {
+      "bytes": 108123,
+      "sha256": "0df2b9540b3a70aeb4f52bf793d5a5b1cf4a017c055993b6516500dfdcc434c6"
+    },
+    "Update-preview.png": {
+      "bytes": 97197,
+      "sha256": "471756b36cbfe188345fff6027928b3f27f844bda17de0cc89e0cf2c436c9808"
+    },
+    "assets/VORQELI-logo.png": {
+      "bytes": 1024911,
+      "sha256": "111a42152ad3ccd6f537343924562fe15cdca7b2654c5e57d5631310ceff5f98"
+    },
+    "assets/VORQELI.ico": {
+      "bytes": 78604,
+      "sha256": "3224ffdcea1f6477cef1538715321861610adfb2532f96a1783079249906fb9f"
+    },
+    "assets/brand-banner.jpg": {
+      "bytes": 61605,
+      "sha256": "f8e8c446ae193f290a09039c9231039643d590e46a48c55295f68ab1c406e49e"
+    },
+    "build_entry.py": {
+      "bytes": 150,
+      "sha256": "4a782a7340b08822a1770a3206bb10f2fc2d05debe6bb530289630b4ae69fdde"
+    },
+    "docs/DESIGN_SYSTEM.md": {
+      "bytes": 4791,
+      "sha256": "0e373687ace4c67c65043baa53d322b3d85dbd156367ce709fb83ce48d5eb646"
+    },
+    "docs/GEOHIDE_ADAPTER_IDENTITY_V34.md": {
+      "bytes": 2335,
+      "sha256": "a1d61d66855cc60639675c242a2c49d5eb9d19b0aaeed763f0e9c8371d23b7ec"
+    },
+    "docs/GEOHIDE_DOH_V27.md": {
+      "bytes": 8552,
+      "sha256": "c0c12f69b5ce4ca23bdc06d91b525c5a905919302c22a6c21c1c94afda5fb3ff"
+    },
+    "docs/GITHUB_RECOVERY.md": {
+      "bytes": 3102,
+      "sha256": "dbc79aa87e14868579080c811c7562036b852a3216473ce1eb69c3052bd2253a"
+    },
+    "docs/INTEGRATIONS.md": {
+      "bytes": 6938,
+      "sha256": "816de2afa44d46426b0795fdb8c5656b986a46f728bcbfdc24114c28f19fe78c"
+    },
+    "docs/OFF_INTENT_RECOVERY_V33.md": {
+      "bytes": 3854,
+      "sha256": "f12fc2bab82ba2b29d3d2b49a6a04ad6ea9779f7dcef0418a31121b27b850aea"
+    },
+    "docs/QUICK_START.md": {
+      "bytes": 3663,
+      "sha256": "d3f9cfe482bc327448d2ccfc04b3ad413abf39316f418c686200cc97de741363"
+    },
+    "docs/RELEASE_CANDIDATE_CHECKLIST_V29.md": {
+      "bytes": 3525,
+      "sha256": "ef30b2f2baa3bac4835f86cc591895091da124e79f421d37a0b0f57c9f94f16b"
+    },
+    "docs/RELEASE_CANDIDATE_GATE_V30.md": {
+      "bytes": 3436,
+      "sha256": "1c5cb7de532b99e448eb95ffba47f8d72bdfd95692e71176a733bb78b8d5ce57"
+    },
+    "docs/RELEASE_CANDIDATE_GATE_V31.md": {
+      "bytes": 1239,
+      "sha256": "7ebfcf11c9a9daab5efc67ceee41c02aa1012eb639d3d523d9ccd17479e2adde"
+    },
+    "docs/RELEASE_CANDIDATE_GATE_V32.md": {
+      "bytes": 3367,
+      "sha256": "5bd6ad28d3865becab2468742526fcddf3e762ea263ec5226e80c8c8fd075445"
+    },
+    "docs/RELEASE_CHECKLIST.md": {
+      "bytes": 1636,
+      "sha256": "74043c595b40d69692bff6491b124d210d95e1bcdb2e90ae0e6f42f35d92d745"
+    },
+    "docs/RELEASE_VALIDATION.md": {
+      "bytes": 3457,
+      "sha256": "e81c07730b1bb60d90382c333bdb0b9561b68938f1a196155a3b02a54f1ae682"
+    },
+    "docs/ROADMAP.md": {
+      "bytes": 6136,
+      "sha256": "1ea209aa232e927686e8608a4d927748165c174450e8e649f5eb01faeef5d6fb"
+    },
+    "docs/SMART_DPI_V26.md": {
+      "bytes": 5454,
+      "sha256": "f296f0c9646310779375dcee3e61a139996eae998a79b2886b67fb84830602cf"
+    },
+    "docs/THIRD_PARTY.md": {
+      "bytes": 1552,
+      "sha256": "362d57eecf195ca5b99fd02f638f82479dded65c874100f59419364d47821644"
+    },
+    "docs/UI_ACCESSIBILITY_V28.md": {
+      "bytes": 4506,
+      "sha256": "3456ee37dee64726004d61974f1e584cd8318b63fcb4432f4eea8af59c3e9cb8"
+    },
+    "docs/UPDATES_V29.md": {
+      "bytes": 6361,
+      "sha256": "d139c3de425690a21615f785adfcf73870dbe797b5dcadf5bd9f078d6d40ae06"
+    },
+    "docs/WINDOWS_ACCEPTANCE_V18.md": {
+      "bytes": 5949,
+      "sha256": "f316154fe5afdbe9d559e1f213fa8cce19ca35b5cf4dca028dd1bbd05e2b2021"
+    },
+    "docs/WINDOWS_ACCEPTANCE_V19.md": {
+      "bytes": 2783,
+      "sha256": "dcde7b3d5d81b5d09e19e6aa79ec3170e701f98f76d4388fc7faf3d04321abdf"
+    },
+    "docs/WINDOWS_ACCEPTANCE_V20.md": {
+      "bytes": 2455,
+      "sha256": "4524c787991d6429d58c2e1a2c4cab7ab41db9545647703090183f0605c0d0a9"
+    },
+    "docs/WINDOWS_ACCEPTANCE_V21.md": {
+      "bytes": 2990,
+      "sha256": "8925bd9a401c7b7fcb578f63b68fc550187b90969f0e0160646c4dfbbf96a281"
+    },
+    "docs/WINDOWS_ACCEPTANCE_V22.md": {
+      "bytes": 4154,
+      "sha256": "50af877479ad1c67bffd0d8e2a23b9fc3473ede2cf63a1e163ee22dbb3968f64"
+    },
+    "docs/WINDOWS_ACCEPTANCE_V23.md": {
+      "bytes": 5040,
+      "sha256": "f1d08f260d6eeefefe926fda094e26dbfe5c71c119ea131520aeb3709782dab7"
+    },
+    "docs/WINDOWS_STARTUP_AUDIT_V24.md": {
+      "bytes": 2794,
+      "sha256": "641be24e3d3900108678d93c6ea130e4554bb31daf1d0b782e09df1e0cebbfb5"
+    },
+    "docs/WINDOWS_STARTUP_AUDIT_V25.md": {
+      "bytes": 4501,
+      "sha256": "b710a5aec5066a61fc32f32540a6df3905f81dab908e016c1ffc91b4196a7432"
+    },
+    "docs/WINDOWS_TEST_PLAN.md": {
+      "bytes": 8531,
+      "sha256": "feaf6583e1e164851f16804e43d4df3c4b6a80dad3a97f6386b1e965165c1cfc"
+    },
+    "docs/screenshots/overview.png": {
+      "bytes": 100321,
+      "sha256": "0206dbdf844e1a3586ae6000c5e4c30d2731e3cc0bd27098ab9b8c7c3e4073d5"
+    },
+    "installer/VORQELI.iss": {
+      "bytes": 2747,
+      "sha256": "80aeab11ce403f205d70919f80b828a1729e73b42661a45a06f9168f4682164c"
+    },
+    "pyproject.toml": {
+      "bytes": 479,
+      "sha256": "836f191f2b3b4efc36c82279e7391ad8d1e249a4c7d0c9ae3fe34b12400efc3c"
+    },
+    "scripts/__init__.py": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scripts/check_repo_layout.py": {
+      "bytes": 5374,
+      "sha256": "e6c22c5a5a7b1314a4a5dd0bb141de2c53c7d3f620d274f2178cd9ec64085b1d"
+    },
+    "scripts/gui_keyboard_smoke.py": {
+      "bytes": 2081,
+      "sha256": "2d94f0221b9c9c3dd38ff4024963ac12b0a7d835e2cd70d7d3ee55cc7ce0fdad"
+    },
+    "scripts/gui_smoke.py": {
+      "bytes": 718,
+      "sha256": "29a3cefccef1dab861470db4c58453ee4ffe14914064dc2c71c32d0f4b95e1f4"
+    },
+    "scripts/verify_build_manifest.py": {
+      "bytes": 5268,
+      "sha256": "5bc9cecd45d0284d80ecc35bda2c72121732d3e51ff8c4aa3c15fb911ab5e7b5"
+    },
+    "scripts/windows_adapter_identity_smoke.py": {
+      "bytes": 816,
+      "sha256": "94be4eb43ba78ecddd9e59ce3ba0a791c0432d6e47707e2ea09d4f37a00bc2bd"
+    },
+    "scripts/windows_doh_readonly_smoke.py": {
+      "bytes": 1456,
+      "sha256": "a81ad2d365c027093140347324680bad3a1f4c2f292d9056cbc4a26c0ae79f31"
+    },
+    "scripts/windows_dpapi_smoke.py": {
+      "bytes": 1044,
+      "sha256": "13e13d70175d729ba851a542d74aa6c95714c8c5bf68ca24f9f9118ba83bf98a"
+    },
+    "scripts/windows_installer_smoke.ps1": {
+      "bytes": 5471,
+      "sha256": "e38fcb2471b7b6a45826a00f52d34f776cc353aa417b315abacdf71dec73e7a5"
+    },
+    "scripts/windows_off_intent_smoke.py": {
+      "bytes": 1356,
+      "sha256": "9f68786f7fec2d65336b6371a6c5ff7db3fc619d2cad84f816d39f8ce88709c7"
+    },
+    "scripts/windows_release_gate.ps1": {
+      "bytes": 2567,
+      "sha256": "2705e74e648fa4a2e46aa827d39419adcaea37f4ec7c35e67ac907b478fe89ea"
+    },
+    "scripts/windows_startup_smoke.py": {
+      "bytes": 1376,
+      "sha256": "b20ca1f7d0390bac598f2a49bd8a9b599b38c07a49c7837b12265934f8b9e152"
+    },
+    "src/vorqeli_connect/__init__.py": {
+      "bytes": 23,
+      "sha256": "ef08236713f1b293fcec223898390542e95d90a8043573b915a3e24bc11733cf"
+    },
+    "src/vorqeli_connect/__main__.py": {
+      "bytes": 29,
+      "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
+    },
+    "src/vorqeli_connect/app.py": {
+      "bytes": 63684,
+      "sha256": "c493e6c27e48c72fe87b0e57ec25c75b08d136cacb2d0523bddf24cff7c2b985"
+    },
+    "src/vorqeli_connect/assets_manager.py": {
+      "bytes": 9264,
+      "sha256": "b62ca10935f86b71af805ddec686e065550fa06b75278b35357ed7f91c5e7215"
+    },
+    "src/vorqeli_connect/bundled_telegram.py": {
+      "bytes": 1565,
+      "sha256": "9c5e89747f003cad0b5b6478f7cc0033806f0457a6b006c4e8e11d50a80aa209"
+    },
+    "src/vorqeli_connect/config.py": {
+      "bytes": 9940,
+      "sha256": "0a5394043d20d11892695e7cf9aa734f93ddbcb06887d832db4740d34da0a90c"
+    },
+    "src/vorqeli_connect/diagnostics.py": {
+      "bytes": 1150,
+      "sha256": "808dcbc6bc55c36f60c7631de0cfcaf1d012d1387b4541dbbbb28a7000d0579c"
+    },
+    "src/vorqeli_connect/doctor.py": {
+      "bytes": 4585,
+      "sha256": "785bd1df7211834f9a3a50467b047052a6c3fdd95c165d1d8ce61d858cf68c27"
+    },
+    "src/vorqeli_connect/engine_adapters.py": {
+      "bytes": 5270,
+      "sha256": "1f120106ceb0368c973937d81a73892e67e4bf69a1a7a5f400e57d2c1d0678e6"
+    },
+    "src/vorqeli_connect/engine_processes.py": {
+      "bytes": 3097,
+      "sha256": "e1176ecec8e6aab51afe41d5c615bc865ead6531bf7fb0a12843c0430a2d9b09"
+    },
+    "src/vorqeli_connect/event_log.py": {
+      "bytes": 1059,
+      "sha256": "f63c3aa11783a392d4c9bf222b0ed2bb5d2e72e4e6bd8bb1f939515639b633aa"
+    },
+    "src/vorqeli_connect/geohide.py": {
+      "bytes": 18311,
+      "sha256": "daeff90764ed696830285771b2fb5b5f56c69b6d695cf17c457d41bb5acf0cbb"
+    },
+    "src/vorqeli_connect/geohide_doh.py": {
+      "bytes": 10129,
+      "sha256": "37c74694b147e63127c93efd346dc718f0a236fb72276fa222f7af9d1ea9c488"
+    },
+    "src/vorqeli_connect/history.py": {
+      "bytes": 1075,
+      "sha256": "0dbb64be441cfdc43fc69b73e4a63f08cc157a7c8f8b40917f75e2a0a1c0f601"
+    },
+    "src/vorqeli_connect/integrations.py": {
+      "bytes": 1285,
+      "sha256": "b19db88423d343bfb949a1ffcf68282a94e7d379c165e24b1f72209d5f3d157c"
+    },
+    "src/vorqeli_connect/log_tools.py": {
+      "bytes": 2656,
+      "sha256": "1097826acb9cdfca2ad81fd6258496e8529f8f15dc8380e2635334d2dcdd3ba4"
+    },
+    "src/vorqeli_connect/module_registry.py": {
+      "bytes": 848,
+      "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
+    },
+    "src/vorqeli_connect/network_tools.py": {
+      "bytes": 1358,
+      "sha256": "b010c95ba269f303e99c364cf2158aea7640918ad646b54ac4167db0d3a9d032"
+    },
+    "src/vorqeli_connect/preflight.py": {
+      "bytes": 2737,
+      "sha256": "8be68d455c2249065a49adb00d044aed0b01c50457c411447165e62902f47502"
+    },
+    "src/vorqeli_connect/process_manager.py": {
+      "bytes": 1607,
+      "sha256": "b03d84ad21e93e7aaed489683b6591d50cae6242bb8185bcd44260522b7f2c1d"
+    },
+    "src/vorqeli_connect/profiles.py": {
+      "bytes": 1816,
+      "sha256": "aecd7308a8d08c210912378a7870f1a104b7d8b2f9d0c9e5447e41713612efb6"
+    },
+    "src/vorqeli_connect/recovery.py": {
+      "bytes": 2036,
+      "sha256": "79949613e351e81b7d013d9c37f5bf8aa26714dd9ce343c5bb137f39fdc870ef"
+    },
+    "src/vorqeli_connect/secret_storage.py": {
+      "bytes": 3025,
+      "sha256": "375ea94a612638e5ce8e840127d9429b59fa57a4e6e81745734c1ff4e0be78fa"
+    },
+    "src/vorqeli_connect/smart_dpi.py": {
+      "bytes": 6045,
+      "sha256": "a3d59fc12f73e4c6a81539f4b00fdf8b9000f93aab5a2002ade72962891fc708"
+    },
+    "src/vorqeli_connect/startup.py": {
+      "bytes": 12752,
+      "sha256": "fcd5ad3be02fdbd26d2bcbd628f33c2e89c975a7d7ea298115d98f932b137395"
+    },
+    "src/vorqeli_connect/support_report.py": {
+      "bytes": 2201,
+      "sha256": "1d19dc4c7eca29ab9e3875c28d106049a912f123998a95d8fc082841114499bc"
+    },
+    "src/vorqeli_connect/tray_assets.py": {
+      "bytes": 870,
+      "sha256": "b7dd023b8921c7864df9d4df47440b74e8704e16bf1de73f0d22e48e4343c029"
+    },
+    "src/vorqeli_connect/ui_copy.py": {
+      "bytes": 1566,
+      "sha256": "35f1c65b53e7dd7813d2fb54c710d7f0fb526d29b73eabe1d216305e61aed984"
+    },
+    "src/vorqeli_connect/ui_navigation.py": {
+      "bytes": 1210,
+      "sha256": "6969bec8598d2b6b72323e27b6de6c3765b88662102d04658eb1f6a6d2e82f20"
+    },
+    "src/vorqeli_connect/unified.py": {
+      "bytes": 14105,
+      "sha256": "83016dbf5cd8653a931e2dfce5097d0bd03f3459723f53dbb2b80dc6b1eae5a7"
+    },
+    "src/vorqeli_connect/uninstall_safety.py": {
+      "bytes": 4478,
+      "sha256": "2c8c9ae36305e609ce5626da1d25d9750daf76780e709d325862f05ed311f5ce"
+    },
+    "src/vorqeli_connect/update_checker.py": {
+      "bytes": 14633,
+      "sha256": "016660f9860dd8a552ffacee2858a40edc00f7ba757ad450b32b67d16dcbac8f"
+    },
+    "src/vorqeli_connect/visual_design.py": {
+      "bytes": 5980,
+      "sha256": "94f40129012d120045b3e04f833cb173dc9b8bf5daf0d46c265f9cbf1148762d"
+    },
+    "src/vorqeli_connect/window_state.py": {
+      "bytes": 1505,
+      "sha256": "761f08c5fd15e5deaf3d19412dff702a8d09d6312c2990fe5a13c9a917688a03"
+    },
+    "src/vorqeli_connect/windows_chrome.py": {
+      "bytes": 1971,
+      "sha256": "3763f2a966cb6f440f1084ef7d04e0dcfe65a43a66c44be69a808f214b38c5f3"
+    },
+    "tests/test_adapter_identity_v34.py": {
+      "bytes": 7776,
+      "sha256": "42866a578d2fd192eef2b3d2202feca355ddbd91cd9eb9fd9f42db985f8ec3c9"
+    },
+    "tests/test_assets_manager.py": {
+      "bytes": 4008,
+      "sha256": "06158d47abca27e51b7edf4b8f81da0c1793962a33a60f9ff84e8818c1cd122d"
+    },
+    "tests/test_build_manifest_v31.py": {
+      "bytes": 1272,
+      "sha256": "b63746e1c125f448aa293aa4ea15afdce6ef939642e49f903eb46a8fe277fc99"
+    },
+    "tests/test_config.py": {
+      "bytes": 381,
+      "sha256": "c3a5e60bbe196f530c24f5e815fc0bc6afaeaa991d356aa4c14cba43dc78d8a3"
+    },
+    "tests/test_diagnostics.py": {
+      "bytes": 451,
+      "sha256": "9cb99bec1d65757684516e1b0a8c89fd7a92dc91eadebedadf3e9bbff13d99f9"
+    },
+    "tests/test_engine_adapters.py": {
+      "bytes": 3873,
+      "sha256": "962a66284a947db2d7b29e09c7a1aac3c3064a419c29669d30917f46ec40ccd4"
+    },
+    "tests/test_engine_processes.py": {
+      "bytes": 2147,
+      "sha256": "e15003175bbbc4baebbaa8661d925e0d7e615d438c829042e5d4e24cc01a37e6"
+    },
+    "tests/test_geohide.py": {
+      "bytes": 2038,
+      "sha256": "1a0edb6cd30e9a8be6b3eee846d22ded969e001333df782a68607499ec0d72d9"
+    },
+    "tests/test_geohide_doh_v27.py": {
+      "bytes": 13598,
+      "sha256": "fee47faffe58c6169f47e46d49bde215dab562a370a2e361c31aa53017b07917"
+    },
+    "tests/test_geohide_safety.py": {
+      "bytes": 870,
+      "sha256": "b11e670c2c7f0af52d4132d16e980e0d41472e8c2699fea1a7ced8244dca4437"
+    },
+    "tests/test_gui_assets.py": {
+      "bytes": 865,
+      "sha256": "529757f119dd40cb57a4d6d3311ce6651d766d6a55bd96c93f704b19a3c4c075"
+    },
+    "tests/test_history.py": {
+      "bytes": 728,
+      "sha256": "b4372a2ad3621fe4aee645e7f4aca954b68457728df3b8404ee7e3ebbefe55cc"
+    },
+    "tests/test_integrations.py": {
+      "bytes": 896,
+      "sha256": "0b920eb406e6c882ab9ef5213b781aa6210dc0718a038bfb9e7c95bec29f51a8"
+    },
+    "tests/test_integrity_v20.py": {
+      "bytes": 3687,
+      "sha256": "a01bccb8f8b6f936bd6ca820c2ca507feed3e14a635d06654cc3ca868b10c8a2"
+    },
+    "tests/test_log_tools.py": {
+      "bytes": 1400,
+      "sha256": "09d0c92346a7925f0ec1112b51e83de8bf52898f1263c99b23c6bfe42850f020"
+    },
+    "tests/test_module_registry.py": {
+      "bytes": 480,
+      "sha256": "8bc9fab370306100c5b309b6024c8b8cd03a4480c3a191039eff27054378fb4d"
+    },
+    "tests/test_network_tools.py": {
+      "bytes": 1240,
+      "sha256": "82c32a2ebc40785f358c9b2a13aaecfc921267273557b31124fc9ad6a62b3a23"
+    },
+    "tests/test_off_intent_v33.py": {
+      "bytes": 5100,
+      "sha256": "6fec8c4cee986baf97e2ef9f54643830195e1e445505e55baaf605c5e6d752fd"
+    },
+    "tests/test_preflight.py": {
+      "bytes": 2115,
+      "sha256": "2a785c29480be5c6a4994e666a77a6fad8580b3d1ef43eb7ae3958c6c8b1a7fe"
+    },
+    "tests/test_process_lifecycle.py": {
+      "bytes": 1237,
+      "sha256": "c9e65c61bf380ca861176d186df3d2a6e48bb0855309335159518bead9882aa9"
+    },
+    "tests/test_process_manager.py": {
+      "bytes": 967,
+      "sha256": "5590228dbee4067691ff0fe0a2ce4cf205d23d30da4e7f3d70e92f51f577c85e"
+    },
+    "tests/test_profiles_events.py": {
+      "bytes": 1017,
+      "sha256": "9f01753f0826ba0b8a9d3ed307356e880d27e6bc45900fdef449c0c47365c937"
+    },
+    "tests/test_recovery.py": {
+      "bytes": 1731,
+      "sha256": "d6d8afe81715893617b273d32b7d81b6416eed3790ec3222cfeea15e3b413c45"
+    },
+    "tests/test_release_safety_v32.py": {
+      "bytes": 4502,
+      "sha256": "b48e556948a19b0b5a2e24cfa5cac95170c676ce02c34a885eff17d4d6a4c14f"
+    },
+    "tests/test_reliability_v18.py": {
+      "bytes": 4540,
+      "sha256": "028cc58ce0dd5523aeda1398b433461598baa3bee0b671d2ae26f77c56150764"
+    },
+    "tests/test_reliability_v19.py": {
+      "bytes": 8613,
+      "sha256": "7571a9552c028e64a63f26190b15b13833bd973ef56796409af7e343dfe3b5f6"
+    },
+    "tests/test_repo_layout_v22.py": {
+      "bytes": 1404,
+      "sha256": "fc639c918bf4a97ca929ecf1985ce4b4eaf3a8e9bde67feffa551c26f7965e07"
+    },
+    "tests/test_safety_v17.py": {
+      "bytes": 3853,
+      "sha256": "4865c5950f9c96720814371e4a3ddbc32f0ba2446bcd7c91b0d706c531ed75ec"
+    },
+    "tests/test_secret_storage.py": {
+      "bytes": 2144,
+      "sha256": "d1bbd2f407faaa17017244cce690c5b684863cc37cb23875869e95627d71aba5"
+    },
+    "tests/test_settings_recovery.py": {
+      "bytes": 2018,
+      "sha256": "1a745b4c0e9d4074c50f804c0d184486a4ebc06197520545ca0909b223b5b7ab"
+    },
+    "tests/test_smart_dpi_v26.py": {
+      "bytes": 8576,
+      "sha256": "14afee018f5d0f133c57f2cbfbadab48a24814de9da2b44128b262dbb970c5ac"
+    },
+    "tests/test_startup.py": {
+      "bytes": 666,
+      "sha256": "e0275602fecdcb6174f29b60fd016a176eeb225b586cf4f725a11700ca969436"
+    },
+    "tests/test_startup_audit_v24.py": {
+      "bytes": 4375,
+      "sha256": "a9050f1266ee41118ab0dd22805b4b8a60fdfe60b18ae03d672be3baa0192682"
+    },
+    "tests/test_startup_registry_v25.py": {
+      "bytes": 8630,
+      "sha256": "63e2717c2ca33b0d88bfd998a4d6ebb65a6ba67e8a0562a064d87573aad2bd9a"
+    },
+    "tests/test_startup_v23.py": {
+      "bytes": 8216,
+      "sha256": "ad87cfb784e57bf4daa4c17efebfe82d8d948450bbf91dad69f27f3ef005b81f"
+    },
+    "tests/test_support_report.py": {
+      "bytes": 1121,
+      "sha256": "6e5e3bd8eae3412ad6d86d8342edfa896f8e35480d48cb0a4430847dd59fcd46"
+    },
+    "tests/test_tray_assets.py": {
+      "bytes": 504,
+      "sha256": "667078c845cb3974ee0ce75ecaa77b93a2a23d29f10e69802d7ea01a63170300"
+    },
+    "tests/test_ui_copy_v15.py": {
+      "bytes": 972,
+      "sha256": "def61baa397e77511504a9d51b8ac62e91ca86582ae926d5ebcadd7be6f02848"
+    },
+    "tests/test_ui_navigation_v28.py": {
+      "bytes": 3010,
+      "sha256": "eb71412a687742d2aa07f0b3b0a8123d863908c24b0982c463919d1815368cdd"
+    },
+    "tests/test_unified.py": {
+      "bytes": 3299,
+      "sha256": "ae8af725410dfbc7d2dacdd8cea17aaccc069476e5c4a807d156b061f287bcb9"
+    },
+    "tests/test_uninstall_safety_v22.py": {
+      "bytes": 3773,
+      "sha256": "c7fb0d3b864ece9aaec490b9bd6b5b006622272c9993aa6fe3e2795bedf4f75f"
+    },
+    "tests/test_update_checker_v29.py": {
+      "bytes": 7813,
+      "sha256": "04d867cfde033a2474b766ffc2b0a88e2116d8c1add6f5084cb231ecf4cea564"
+    },
+    "tests/test_update_security_v30.py": {
+      "bytes": 5916,
+      "sha256": "b23ffa6f34322e7e2cdba7f9964971081a46ea52c51668762cee815c657e9953"
+    },
+    "tests/test_update_security_v31.py": {
+      "bytes": 1958,
+      "sha256": "5004631e185bb8c7e8cd118f83fdce1384008e5a50bb080fa5dcbf170ccb221d"
+    },
+    "tests/test_verified_dns_v21.py": {
+      "bytes": 7633,
+      "sha256": "1463af05ec229aae811d4bda025b01bc02a1abb60e4871e6b7d38bcc0998646a"
+    },
+    "tests/test_visual_design.py": {
+      "bytes": 1115,
+      "sha256": "9ae6ab8289fd1249f3ca8611c428d6c0e44dff3e446be5c38cd15cfd990be68d"
+    }
+  },
+  "version": "0.34.0"
 }

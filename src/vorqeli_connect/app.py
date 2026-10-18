@@ -45,9 +45,18 @@ from . import __version__ as VERSION
 
 
 def asset(name: str) -> Path:
-    """Works for source checkout and PyInstaller --onefile."""
-    base = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[2]))
-    return base / 'assets' / name
+    """Resolve bundled images or source-tree assets after pip installation."""
+    frozen_root = getattr(sys, '_MEIPASS', None)
+    if frozen_root is not None:
+        return Path(frozen_root) / 'assets' / name
+    source_root = Path(__file__).resolve().parents[2]
+    # CI and developer installs import from site-packages while the current
+    # directory remains the VORQELI checkout. A PyInstaller build uses MEIPASS.
+    for root in (source_root, Path.cwd()):
+        candidate = root / 'assets' / name
+        if candidate.is_file():
+            return candidate
+    return source_root / 'assets' / name
 
 
 class ConnectApp(tk.Tk):
