@@ -17,3 +17,6 @@ vorqeli-connect = "vorqeli_connect.app:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+vorqeli_connect = ["Flowseal-zapret-1.10.3-LICENSE.txt"]

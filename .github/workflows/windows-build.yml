@@ -78,6 +78,7 @@ jobs:
             --collect-submodules utils `
             --collect-data certifi `
             --collect-submodules pystray `
+            --collect-data vorqeli_connect `
             --hidden-import pystray._win32 `
             --hidden-import proxy.tg_ws_proxy `
             build_entry.py

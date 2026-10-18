@@ -1,9 +1,9 @@
 {
-  "file_count": 140,
+  "file_count": 141,
   "files": {
     ".github/workflows/windows-build.yml": {
-      "bytes": 6209,
-      "sha256": "a2ca9964a0850ca3a75f02f730bf835f222ba749197d40e3982f92af83be167b"
+      "bytes": 6254,
+      "sha256": "66850830d97f85534db9c0e88850cec87eacf0fb66d6316cd38eaa8bcf8874f2"
     },
     ".gitignore": {
       "bytes": 140,
@@ -186,8 +186,8 @@
       "sha256": "f321aae705616f095cf1a710d4e3bfead7c2515edcb4c6518a0e6121fb466eda"
     },
     "pyproject.toml": {
-      "bytes": 479,
-      "sha256": "836f191f2b3b4efc36c82279e7391ad8d1e249a4c7d0c9ae3fe34b12400efc3c"
+      "bytes": 568,
+      "sha256": "63739513e8254740c107e7060d22bb46ccc9d2c0400d05e5d8ca7a834d926e36"
     },
     "scripts/__init__.py": {
       "bytes": 0,
@@ -237,6 +237,10 @@
       "bytes": 1376,
       "sha256": "b20ca1f7d0390bac598f2a49bd8a9b599b38c07a49c7837b12265934f8b9e152"
     },
+    "src/vorqeli_connect/Flowseal-zapret-1.10.3-LICENSE.txt": {
+      "bytes": 2105,
+      "sha256": "fe3983a1e91206ad1a530bcfae01fad207020cb61882edd62c1e3cb5f8d5d430"
+    },
     "src/vorqeli_connect/__init__.py": {
       "bytes": 23,
       "sha256": "ef08236713f1b293fcec223898390542e95d90a8043573b915a3e24bc11733cf"
@@ -250,8 +254,8 @@
       "sha256": "c493e6c27e48c72fe87b0e57ec25c75b08d136cacb2d0523bddf24cff7c2b985"
     },
     "src/vorqeli_connect/assets_manager.py": {
-      "bytes": 10131,
-      "sha256": "f1947197ea8a6058373bfb5b2529caec2ea4cef282f8b8bf06b386de1c7073c2"
+      "bytes": 10211,
+      "sha256": "bdef456ccb1b3aa7ea8d03ee1fbf196deb3b8492b397f3c09e8842a60b1b1814"
     },
     "src/vorqeli_connect/bundled_telegram.py": {
       "bytes": 1565,

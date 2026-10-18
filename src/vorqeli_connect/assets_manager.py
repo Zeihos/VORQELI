@@ -181,8 +181,9 @@ def ensure_zapret(*, progress=None, base_dir: Path | None = None,
         # bundle the exact, SHA-pinned official 1.10.3 LICENSE.txt in the app.
         license_path = staged / 'LICENSE.txt'
         if not license_path.exists():
-            base = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[2]))
-            resource = base / 'assets' / FLOWSEAL_LICENSE_RESOURCE
+            # Package resources are installed with pip and collected into the
+            # frozen app. Do not derive paths from site-packages/../../.
+            resource = Path(__file__).resolve().parent / FLOWSEAL_LICENSE_RESOURCE
             if not resource.is_file() or sha256_file(resource) != FLOWSEAL_LICENSE_SHA256:
                 raise RuntimeError('Лицензия Flowseal отсутствует или повреждена; установка DPI отменена')
             shutil.copyfile(resource, license_path)
