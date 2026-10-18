@@ -49,9 +49,31 @@ from . import __version__ as VERSION
 
 
 def asset(name: str) -> Path:
-    """Works for source checkout and PyInstaller --onefile."""
-    base = Path(getattr(sys, '_MEIPASS', Path(__file__).resolve().parents[2]))
-    return base / 'assets' / name
+    """Locate trusted UI assets in source, installed wheel, or PyInstaller EXE.
+
+    The wheel embeds its UI resources; when tests run against a site-packages
+    install from the checkout, a checkout-relative fallback is also supported.
+    Frozen applications only use PyInstaller's data directory, never CWD.
+    """
+    if (not isinstance(name, str) or not name or name in ('.', '..') or
+            Path(name).name != name or '/' in name or "\\" in name):
+        raise ValueError('Недопустимое имя ресурса интерфейса')
+    frozen_root = getattr(sys, '_MEIPASS', None)
+    if frozen_root is not None:
+        return Path(frozen_root) / 'assets' / name
+    package = Path(__file__).resolve().parent
+    checkout = package.parent.parent
+    if (checkout / 'pyproject.toml').is_file():
+        source = checkout / 'assets' / name
+        if source.is_file():
+            return source
+    bundled = package / 'ui_assets' / name
+    if bundled.is_file():
+        return bundled
+    working = Path.cwd() / 'assets' / name
+    if working.is_file():
+        return working
+    return bundled
 
 
 class ConnectApp(tk.Tk):

@@ -1,5 +1,5 @@
 {
-  "file_count": 155,
+  "file_count": 160,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -96,6 +96,10 @@
     "docs/GITHUB_RECOVERY.md": {
       "bytes": 3102,
       "sha256": "dbc79aa87e14868579080c811c7562036b852a3216473ce1eb69c3052bd2253a"
+    },
+    "docs/GUI_ASSETS_WINDOWS_V361.md": {
+      "bytes": 1176,
+      "sha256": "bf2d2b7332741fa7cbfab22a98d48569b8a6ae58e09835de15b54cfc1b2c7756"
     },
     "docs/INTEGRATIONS.md": {
       "bytes": 6938,
@@ -206,8 +210,8 @@
       "sha256": "9a8dad853fb6e8dfef31b90da0d0440954c0dfed10bdfd263378af8dce73e948"
     },
     "pyproject.toml": {
-      "bytes": 568,
-      "sha256": "2ec13c5115b3221104c7913e967208dd80b8f8b95331d23ed0594f0564fb9600"
+      "bytes": 583,
+      "sha256": "8e281c8b884f3ab198a974c911ee68c1c7119116c4b776c3fc8e940bbfd79400"
     },
     "scripts/__init__.py": {
       "bytes": 0,
@@ -270,8 +274,8 @@
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 76944,
-      "sha256": "cb9a68dcde04e17a7ed2648d2cc8574819ac292e60c66a2b3f389a2b7c209f59"
+      "bytes": 77890,
+      "sha256": "1081d69e01234870c5f87f3d6ecffe432f920806604ff31621d0378debf262b8"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11063,
@@ -385,6 +389,18 @@
       "bytes": 870,
       "sha256": "b7dd023b8921c7864df9d4df47440b74e8704e16bf1de73f0d22e48e4343c029"
     },
+    "src/vorqeli_connect/ui_assets/VORQELI-hosts-optional.txt": {
+      "bytes": 9873,
+      "sha256": "017f9af6b2d32a188b07217edd234fcb2745663992de2ce8bb7a54e896e64f6e"
+    },
+    "src/vorqeli_connect/ui_assets/VORQELI-logo.png": {
+      "bytes": 1024911,
+      "sha256": "111a42152ad3ccd6f537343924562fe15cdca7b2654c5e57d5631310ceff5f98"
+    },
+    "src/vorqeli_connect/ui_assets/VORQELI.ico": {
+      "bytes": 78604,
+      "sha256": "3224ffdcea1f6477cef1538715321861610adfb2532f96a1783079249906fb9f"
+    },
     "src/vorqeli_connect/ui_copy.py": {
       "bytes": 1566,
       "sha256": "35f1c65b53e7dd7813d2fb54c710d7f0fb526d29b73eabe1d216305e61aed984"
@@ -460,6 +476,10 @@
     "tests/test_geohide_safety.py": {
       "bytes": 870,
       "sha256": "b11e670c2c7f0af52d4132d16e980e0d41472e8c2699fea1a7ced8244dca4437"
+    },
+    "tests/test_gui_asset_resolution_v361.py": {
+      "bytes": 2573,
+      "sha256": "9101beb12736fd510a1f19053b6a45b6358ac0679095be098b018d8ad7e827f6"
     },
     "tests/test_gui_assets.py": {
       "bytes": 865,
