@@ -1,5 +1,5 @@
 {
-  "file_count": 141,
+  "file_count": 143,
   "files": {
     ".github/workflows/windows-build.yml": {
       "bytes": 6254,
@@ -250,8 +250,8 @@
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 63684,
-      "sha256": "c493e6c27e48c72fe87b0e57ec25c75b08d136cacb2d0523bddf24cff7c2b985"
+      "bytes": 67297,
+      "sha256": "5c124f3a5b661a4794f20ed230ab049812fe474b5bb65f63d80059f46706d1e2"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 10211,
@@ -308,6 +308,10 @@
     "src/vorqeli_connect/module_registry.py": {
       "bytes": 848,
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
+    },
+    "src/vorqeli_connect/network_audit.py": {
+      "bytes": 7934,
+      "sha256": "95adf668de17f6b1055bc36eccf14545d10ecaa23cfd84dfca2e608f08c9ecbd"
     },
     "src/vorqeli_connect/network_tools.py": {
       "bytes": 1358,
@@ -444,6 +448,10 @@
     "tests/test_module_registry.py": {
       "bytes": 480,
       "sha256": "8bc9fab370306100c5b309b6024c8b8cd03a4480c3a191039eff27054378fb4d"
+    },
+    "tests/test_network_audit_v35.py": {
+      "bytes": 2331,
+      "sha256": "a5038a0ce205809e2f48def10a41ca1c9c84d3c7b2a666152aee923035aee75f"
     },
     "tests/test_network_tools.py": {
       "bytes": 1240,

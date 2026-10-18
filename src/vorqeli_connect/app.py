@@ -19,6 +19,7 @@ from PIL import Image, ImageTk
 
 from .config import APP_DIR, load_settings, save_settings
 from .diagnostics import check_all
+from .network_audit import run_dns_audit, format_dns_audit
 from .event_log import record_event, recent_events
 from .geohide import INFO_PAGE, STATE_FILE
 from .geohide_doh import DOH_STATE_FILE, restore_geo_dns
@@ -94,6 +95,9 @@ class ConnectApp(tk.Tk):
         self._focused_control_index = None
         self._last_health = None
         self._update_busy = False
+        self._dns_audit_window = None
+        self._dns_audit_text = None
+        self._dns_audit_busy = False
         previous = load_history()
         self.last_results = list(previous[-1]['results'].items()) if previous else []
         # A compact/150%-scaled display exposes scrollbars rather than
@@ -507,14 +511,17 @@ class ConnectApp(tk.Tk):
         self._draw_header(x,right,'Диагностика сети',
                           'Проверка доступности сервисов по HTTPS. Не подтверждает работу обхода.',
                           eyebrow='ИНСТРУМЕНТЫ  /  ДИАГНОСТИКА')
+        # Five controls fit even at the minimum logical width (1060 px).
         self._place_button(x+30,268,'ПРОВЕРИТЬ  →',self._diagnose,
-                           accent=True,width=209,height=51,size=11,disabled=self.running_job)
-        self._place_button(x+255,268,'ЖУРНАЛЫ',self._show_engine_logs,
-                           width=144,height=51,size=10)
-        self._place_button(x+415,268,'ЭКСПОРТ JSON',self._export_diagnostics,
-                           width=177,height=51,size=10,disabled=not bool(self.last_results))
-        self._place_button(x+607,268,'ОТЧЁТ',self._export_support,
-                           width=125,height=51,size=10)
+                           accent=True,width=165,height=51,size=10,disabled=self.running_job)
+        self._place_button(x+204,268,'ЖУРНАЛЫ',self._show_engine_logs,
+                           width=118,height=51,size=10)
+        self._place_button(x+331,268,'ЭКСПОРТ JSON',self._export_diagnostics,
+                           width=145,height=51,size=10,disabled=not bool(self.last_results))
+        self._place_button(x+485,268,'ОТЧЁТ',self._export_support,
+                           width=98,height=51,size=9)
+        self._place_button(x+592,268,'DNS / HOSTS',self._show_dns_audit,
+                           width=133,height=51,size=10)
         self._text(x+29,385,'ПОСЛЕДНИЕ ПРОВЕРКИ',11,VIOLET,weight='bold')
         results=self.last_results or [('Discord','Не проверено'),('YouTube','Не проверено'),
                                       ('Telegram','Не проверено'),('GitHub','Не проверено')]
@@ -708,6 +715,71 @@ class ConnectApp(tk.Tk):
             self._draw()
         except OSError as exc:
             messagebox.showerror('Экспорт диагностики',str(exc),parent=self)
+
+    def _show_dns_audit(self):
+        """Display DNS + hosts status within the application, never alter OS DNS."""
+        if self._dns_audit_window is not None:
+            try:
+                if self._dns_audit_window.winfo_exists():
+                    self._dns_audit_window.lift()
+                    return
+            except tk.TclError:
+                pass
+        dlg = tk.Toplevel(self)
+        dlg.title('VORQELI · Проверка GeoHide и hosts')
+        dlg.configure(bg='#111629')
+        dlg.geometry('860x610')
+        dlg.minsize(640, 430)
+        dlg.transient(self)
+        self._dns_audit_window = dlg
+        header = tk.Frame(dlg, bg='#111629', padx=18, pady=15)
+        header.pack(fill='x')
+        tk.Label(header, text='GEOHIDE  /  DNS И HOSTS', bg='#111629', fg=VIOLET,
+                 font=('Segoe UI', 12, 'bold')).pack(side='left')
+        tk.Button(header, text='ПОВТОРИТЬ', command=self._start_dns_audit,
+                  bg='#33395C', fg=FG, activebackground='#7965B6',
+                  activeforeground=FG, bd=0, padx=16, pady=9,
+                  font=('Segoe UI', 10, 'bold')).pack(side='right')
+        body = tk.Frame(dlg, bg='#111629', padx=18, pady=10)
+        body.pack(fill='both', expand=True)
+        text = tk.Text(body, bg='#1B2238', fg=FG, insertbackground=FG,
+                       selectbackground='#65569A', font=('Consolas', 11), wrap='word',
+                       bd=0, padx=18, pady=16, state='disabled')
+        text.pack(side='left', fill='both', expand=True)
+        scrollbar = tk.Scrollbar(body, command=text.yview)
+        scrollbar.pack(side='right', fill='y')
+        text.configure(yscrollcommand=scrollbar.set)
+        self._dns_audit_text = text
+        self._set_dns_audit_text('Готовим проверку DNS и hosts…\nЭто не меняет настройки сети.')
+        self._start_dns_audit()
+
+    def _set_dns_audit_text(self, value: str) -> None:
+        widget = self._dns_audit_text
+        if widget is None:
+            return
+        try:
+            if not widget.winfo_exists():
+                return
+            widget.configure(state='normal')
+            widget.delete('1.0', 'end')
+            widget.insert('1.0', value)
+            widget.configure(state='disabled')
+        except tk.TclError:
+            pass
+
+    def _start_dns_audit(self) -> None:
+        if self._dns_audit_busy:
+            return
+        self._dns_audit_busy = True
+        self._set_dns_audit_text('Проверяем системный DNS, hosts и ответы серверов GeoHide…\n'
+                                 'Проверка может занять до 30 секунд.')
+        def worker():
+            try:
+                result = format_dns_audit(run_dns_audit())
+            except Exception as exc:
+                result = 'Проверка прервана: ' + str(exc)
+            self.events.put(('dns_audit', result))
+        threading.Thread(target=worker, daemon=True, name='GeoHideAudit').start()
 
     def _show_engine_logs(self):
         """Read a bounded, redacted log; never copy Telegram secrets into the window."""
@@ -918,7 +990,7 @@ class ConnectApp(tk.Tk):
                 typ,value=self.events.get_nowait()
                 if typ=='progress':self.detail=str(value);redraw=True
                 elif typ=='state':
-                    self.detail= value.detail or ('Подключение активно' if value.overall=='connected' else 'Отключено')
+                    self.detail= value.detail or ('Модули запущены; доступность сайтов не подтверждена' if value.overall=='connected' else 'Отключено')
                     if self.settings.desired_enabled and value.telegram == 'on' and not self.settings.telegram_link_opened and os.name == 'nt':
                         try:
                             webbrowser.open(proxy_link(self.settings.telegram_port,self.settings.telegram_secret))
@@ -996,6 +1068,9 @@ class ConnectApp(tk.Tk):
                 elif typ=='connect':self._start_connect()
                 elif typ=='disconnect':self._start_disconnect()
                 elif typ=='quit':self.quit_app()
+                elif typ=='dns_audit':
+                    self._dns_audit_busy = False
+                    self._set_dns_audit_text(str(value))
                 elif typ=='diagnostics':
                     self.last_results=value
                     try:record_scan(value)
