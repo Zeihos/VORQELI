@@ -37,6 +37,7 @@ REQUIRED_FILES = (
     'src/vorqeli_connect/telegram_web_audit.py',
     'tests/test_telegram_web_audit_v36.py',
     'docs/TELEGRAM_WEB_DIAGNOSTICS_V36.md',
+    'tests/test_windows_ci_encoding_v361.py',
 )
 
 
@@ -87,6 +88,11 @@ def check_layout(root: Path) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Even if invoked outside GitHub Actions on cp1252/legacy terminals, never
+    # let an informational Russian message hide the actual preflight result.
+    for channel in (sys.stdout, sys.stderr):
+        if hasattr(channel, 'reconfigure'):
+            channel.reconfigure(errors='backslashreplace')
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[1])
     args = parser.parse_args(argv)

@@ -16,7 +16,7 @@ import sys
 TRACKED_DIRS = ('src', 'scripts', 'tests', 'installer', 'assets', 'docs', '.github')
 TRACKED_ROOT_FILES = frozenset({
     'pyproject.toml', 'build_entry.py', 'README.md', 'LICENSE',
-    'NOTICE.md', '.gitignore', 'CHANGELOG.md',
+    'NOTICE.md', '.gitignore', '.gitattributes', 'CHANGELOG.md',
 })
 EXCLUDED_PARTS = frozenset({
     '__pycache__', '.pytest_cache', '.git', '.venv', 'venv',

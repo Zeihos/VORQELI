@@ -7,6 +7,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Windows runners may default to cp1252 and reject Russian CLI messages.
+# Export UTF-8 before the very first Python preflight, not only after pip.
+env:
+  PYTHONUTF8: '1'
+  PYTHONIOENCODING: 'utf-8'
+
 permissions:
   contents: read
 
@@ -134,7 +140,7 @@ jobs:
       - name: Upload Windows application
         uses: actions/upload-artifact@v6
         with:
-          name: VORQELI-Connect-v0.36.0-Windows
+          name: VORQELI-Connect-v0.36.1-Windows
           path: |
             dist/VORQELI-Connect.exe
             dist/VORQELI-Connect-Setup.exe

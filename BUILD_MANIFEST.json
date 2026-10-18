@@ -1,17 +1,21 @@
 {
-  "file_count": 152,
+  "file_count": 155,
   "files": {
+    ".gitattributes": {
+      "bytes": 99,
+      "sha256": "5caab612d19030c1253ea6417303b7d09e62c825024057359befe8cd3ca27796"
+    },
     ".github/workflows/windows-build.yml": {
-      "bytes": 5903,
-      "sha256": "efa1527770f6d5ff2d99083506fb1751023d434e9cb4239ebc5867413e0c525b"
+      "bytes": 6103,
+      "sha256": "d0919375d37ca7d60197aafc45125a45419439aaba5a2cddbdce630c9da96df3"
     },
     ".gitignore": {
       "bytes": 140,
       "sha256": "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
     },
     "CHANGELOG.md": {
-      "bytes": 21415,
-      "sha256": "d128cb08ff646cd7a3136f580dcd3ba59ecc7d0820673a45899501baae4fbd33"
+      "bytes": 22057,
+      "sha256": "5fb2d482ccebec4e81a3d0773b4b6bff9955a350de33ce5a348d65544c8d8723"
     },
     "Compact-preview.png": {
       "bytes": 74045,
@@ -34,8 +38,8 @@
       "sha256": "f93ea6f00a0bfb5deb9ada33d7efbe5c683fa585dcbbcf4bc5d8e92e3a2f7a77"
     },
     "README.md": {
-      "bytes": 18769,
-      "sha256": "696f5e5af95f83986cff91c36c430fbfb4f8d17f0886c6f9d152be9396cf3841"
+      "bytes": 19030,
+      "sha256": "f45e03a4c3ee7ebb4600a560bc57ba8614d23db58c7d0564483e4a33041e015f"
     },
     "Settings-preview.png": {
       "bytes": 116184,
@@ -177,6 +181,10 @@
       "bytes": 5040,
       "sha256": "f1d08f260d6eeefefe926fda094e26dbfe5c71c119ea131520aeb3709782dab7"
     },
+    "docs/WINDOWS_CI_UTF8_V361.md": {
+      "bytes": 1220,
+      "sha256": "d22d8e9fd7554ab4ab46457e1ce34a9ebcc3a825d2a2c164ff67fe49a9db3700"
+    },
     "docs/WINDOWS_STARTUP_AUDIT_V24.md": {
       "bytes": 2794,
       "sha256": "641be24e3d3900108678d93c6ea130e4554bb31daf1d0b782e09df1e0cebbfb5"
@@ -195,19 +203,19 @@
     },
     "installer/VORQELI.iss": {
       "bytes": 2747,
-      "sha256": "f3823482f8f55ce3653f533e3b33a6a5b157e3613c6bc74b35042bde36a8f749"
+      "sha256": "9a8dad853fb6e8dfef31b90da0d0440954c0dfed10bdfd263378af8dce73e948"
     },
     "pyproject.toml": {
       "bytes": 568,
-      "sha256": "ea2d918b103cb25930ec08076225c1ddc667efb6ca8245ae71f1dda266093b46"
+      "sha256": "2ec13c5115b3221104c7913e967208dd80b8f8b95331d23ed0594f0564fb9600"
     },
     "scripts/__init__.py": {
       "bytes": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "scripts/check_repo_layout.py": {
-      "bytes": 5511,
-      "sha256": "7182d30ad76e85c8ebe4351973ee6a0fe97295505f20ebacf38b327261006655"
+      "bytes": 5861,
+      "sha256": "6677b0a1b691e54ccf32f138ad8238215a7adfadab4f6291a0e3150c6fec835a"
     },
     "scripts/gui_keyboard_smoke.py": {
       "bytes": 2081,
@@ -218,8 +226,8 @@
       "sha256": "29a3cefccef1dab861470db4c58453ee4ffe14914064dc2c71c32d0f4b95e1f4"
     },
     "scripts/verify_build_manifest.py": {
-      "bytes": 5268,
-      "sha256": "5bc9cecd45d0284d80ecc35bda2c72121732d3e51ff8c4aa3c15fb911ab5e7b5"
+      "bytes": 5286,
+      "sha256": "261ec26507cea70ecba6d31cad699debaacdebec7376a2b811467a7ce940e5fd"
     },
     "scripts/windows_adapter_identity_smoke.py": {
       "bytes": 816,
@@ -255,7 +263,7 @@
     },
     "src/vorqeli_connect/__init__.py": {
       "bytes": 23,
-      "sha256": "2131fc21508440e7a445a8d9a4fa3ab0a365301343450467ce2a4837476a5e87"
+      "sha256": "76d15d2f9f28f3fc173b7c7bd1df23b48b7858766cd3702e9b31de5bf69136b2"
     },
     "src/vorqeli_connect/__main__.py": {
       "bytes": 29,
@@ -608,6 +616,10 @@
     "tests/test_visual_design.py": {
       "bytes": 1115,
       "sha256": "9ae6ab8289fd1249f3ca8611c428d6c0e44dff3e446be5c38cd15cfd990be68d"
+    },
+    "tests/test_windows_ci_encoding_v361.py": {
+      "bytes": 1728,
+      "sha256": "0f4712049d3a70c2d1faad93274a79529f8b2af55ea2715e2a1c1a2d183d0df9"
     }
   },
   "version": "0.34.0"

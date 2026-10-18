@@ -1,3 +1,12 @@
+## v0.36.1 — Windows CI UTF-8 hardening
+
+- Export `PYTHONUTF8=1` and `PYTHONIOENCODING=utf-8` at workflow level **before** Python source checks.
+- Make the repository preflight tolerant of cp1252 consoles without hiding errors.
+- Add automated regression tests for workflow encoding, successful and failing preflight under cp1252.
+- Track `.gitattributes` under SHA-256 source integrity checks so LF normalization cannot silently regress.
+- Preserve v0.36.0 Telegram Web diagnostics and v0.35.0 ALT/MTProto/GeoHide/hosts behavior unchanged.
+- Still requires a successful real Windows GitHub Actions run to claim Windows release readiness.
+
 ## 0.36.0 — Telegram Web diagnostics and accurate reporting
 
 - New read-only Telegram Web K/A diagnostic window: fixed HTTPS endpoints, TLS errors, HOSTS mappings and Windows DNS without HOSTS.

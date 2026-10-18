@@ -132,3 +132,6 @@ python -m pip install "git+https://github.com/Flowseal/tg-ws-proxy.git@307a384ab
 ### Telegram Web (v0.36.0)
 
 Встроенная **Диагностика → TELEGRAM WEB** проверяет веб-клиенты K/A, прямой TLS/HTTPS, системные записи HOSTS и DNS без HOSTS на Windows. Прокси MTProto Telegram Desktop не связан с доступностью веб-приложения. Проверка ничего не меняет и не гарантирует загрузку Telegram Web в браузере. Подробнее — `docs/TELEGRAM_WEB_DIAGNOSTICS_V36.md`.
+
+### CI encoding hotfix (v0.36.1)
+Windows build now initializes UTF-8 before the first Python preflight. A regression test checks the workflow and Windows legacy-codepage handling. Live DPI/GeoHide/Telegram Web verification remains separate from build success.
