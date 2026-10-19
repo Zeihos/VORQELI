@@ -1,5 +1,5 @@
 {
-  "file_count": 166,
+  "file_count": 169,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -7,15 +7,15 @@
     },
     ".github/workflows/windows-build.yml": {
       "bytes": 6103,
-      "sha256": "d0919375d37ca7d60197aafc45125a45419439aaba5a2cddbdce630c9da96df3"
+      "sha256": "2bd8251a03b4193e1ad4bf93b19a1f5053364d61140540d1777b50739837cb28"
     },
     ".gitignore": {
       "bytes": 140,
       "sha256": "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
     },
     "CHANGELOG.md": {
-      "bytes": 22057,
-      "sha256": "5fb2d482ccebec4e81a3d0773b4b6bff9955a350de33ce5a348d65544c8d8723"
+      "bytes": 22917,
+      "sha256": "4ffbb3d7a7a04830d325d44e68b51817012fa847787b4e6feb79a6b8c2b34357"
     },
     "Compact-preview.png": {
       "bytes": 74045,
@@ -219,11 +219,11 @@
     },
     "installer/VORQELI.iss": {
       "bytes": 2988,
-      "sha256": "70247ce7df914d8babc828583865a675860287289e3e8ba91561ea9f232f89c8"
+      "sha256": "9eae059a74a93cae4ac44c5626c2c548243e8af60f234f938ded6a07f15fca8e"
     },
     "pyproject.toml": {
       "bytes": 583,
-      "sha256": "8e281c8b884f3ab198a974c911ee68c1c7119116c4b776c3fc8e940bbfd79400"
+      "sha256": "680dbebbd8e9b8f2050a8e7eb6beb522b5f0ca381270c9c1632af4b655622845"
     },
     "scripts/__init__.py": {
       "bytes": 0,
@@ -279,15 +279,15 @@
     },
     "src/vorqeli_connect/__init__.py": {
       "bytes": 23,
-      "sha256": "76d15d2f9f28f3fc173b7c7bd1df23b48b7858766cd3702e9b31de5bf69136b2"
+      "sha256": "5c15ceed224b372b217ade23afdfb7c64e48186e448e92004b468d078fd2b939"
     },
     "src/vorqeli_connect/__main__.py": {
       "bytes": 29,
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 77936,
-      "sha256": "f9fbbcd4520b2eb978864dcc275c6f2c2e82ce07595a481209b95e57d4fb5261"
+      "bytes": 82402,
+      "sha256": "8cfc4e0909c347422ae6118fb852bf2419a02de43551ec361e013cd553e451b3"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11063,
@@ -298,8 +298,8 @@
       "sha256": "9c5e89747f003cad0b5b6478f7cc0033806f0457a6b006c4e8e11d50a80aa209"
     },
     "src/vorqeli_connect/config.py": {
-      "bytes": 10027,
-      "sha256": "5e97bf18bf380c80703a848c87eae8d32c1750ef2983dcfba72858efd65c01cd"
+      "bytes": 10193,
+      "sha256": "a785b023f9ee79c2f44a9037b2979a4817abd0aaf41bb546e6328daf2bf3d8f0"
     },
     "src/vorqeli_connect/diagnostics.py": {
       "bytes": 2315,
@@ -386,8 +386,8 @@
       "sha256": "46fe70ed7088c6de71ee9bc6cbec633f78d9ac6bcf7d55aabdb331193014f80f"
     },
     "src/vorqeli_connect/startup.py": {
-      "bytes": 12752,
-      "sha256": "fcd5ad3be02fdbd26d2bcbd628f33c2e89c975a7d7ea298115d98f932b137395"
+      "bytes": 13014,
+      "sha256": "51e4925a6c1bca88064e7d9976467926acd273892401d29c6d2c0d33d3e21574"
     },
     "src/vorqeli_connect/support_report.py": {
       "bytes": 2278,
@@ -399,7 +399,7 @@
     },
     "src/vorqeli_connect/tray_assets.py": {
       "bytes": 870,
-      "sha256": "b7dd023b8921c7864df9d4df47440b74e8704e16bf1de73f0d22e48e4343c029"
+      "sha256": "6594329b2cf0c124422bb9495813656a7ee95105ae5dd8ee3ba6f15c26601eb2"
     },
     "src/vorqeli_connect/ui_assets/VORQELI-hosts-optional.txt": {
       "bytes": 43971,
@@ -664,6 +664,18 @@
     "tests/test_windows_ci_encoding_v361.py": {
       "bytes": 1728,
       "sha256": "0f4712049d3a70c2d1faad93274a79529f8b2af55ea2715e2a1c1a2d183d0df9"
+    },
+    "src/vorqeli_connect/redesign_ui.py": {
+      "bytes": 21210,
+      "sha256": "ccc484e616f3584778a488e10272dc3930b5320d0a40d88bbcf8a6eb155495eb"
+    },
+    "tests/test_redesign_ui_v37.py": {
+      "bytes": 4081,
+      "sha256": "12573d8d61746d26fba203e4085e67edec15d989bf1167b6337b16c5b0a5e5bf"
+    },
+    "docs/REDESIGN_WINDOWS_V37.md": {
+      "bytes": 4692,
+      "sha256": "75f30b4cc1b4922a434005d879d51b66c992cb94a5f471294e0c70cae3fd8d10"
     }
   },
   "version": "0.34.0"

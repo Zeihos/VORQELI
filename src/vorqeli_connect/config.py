@@ -66,6 +66,9 @@ class Settings:
     dpi_mode: str = "alt_auto"
     dns_mode: str = "plain"
     launch_at_startup: bool = True
+    minimize_to_tray: bool = True
+    admin_on_launch: bool = True
+    restore_last_mode: bool = True
     desired_enabled: bool = False
     connect_dpi: bool = True
     connect_telegram: bool = True
@@ -78,6 +81,7 @@ class Settings:
 _FLAGS = frozenset({
     'launch_at_startup', 'desired_enabled', 'connect_dpi', 'connect_telegram',
     'connect_dns', 'first_launch_notice', 'telegram_link_opened',
+    'minimize_to_tray', 'admin_on_launch', 'restore_last_mode',
 })
 _STRINGS = frozenset({
     'dpi_profile', 'telegram_source_dir', 'telegram_python', 'dpi_bundle_dir',

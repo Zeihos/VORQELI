@@ -23,6 +23,11 @@ def is_admin() -> bool:
         return False
 
 
+def initial_uac_required(*, windows: bool, admin: bool, enabled: bool, retry: bool) -> bool:
+    """Never request UAC for non-GUI worker commands or after one attempt."""
+    return windows and not admin and enabled and not retry
+
+
 def launch_args(*, minimized: bool = True) -> list[str]:
     if getattr(sys, 'frozen', False):
         result = [sys.executable]
@@ -277,11 +282,11 @@ def _configure_startup_impl(enabled: bool, *, elevated: bool = True) -> str:
             winreg.SetValueEx(key, RUN_VALUE, 0, winreg.REG_SZ, launch_command())
     return 'registry'
 
-def relaunch_elevated() -> bool:
+def relaunch_elevated(*, minimized: bool = False) -> bool:
     """Request standard UAC prompt. Caller exits only after ShellExecute succeeds."""
     if os.name != 'nt':
         return False
-    args = launch_args(minimized=False)
+    args = launch_args(minimized=minimized)
     args.append('--elevation-retry')
     result = ctypes.windll.shell32.ShellExecuteW(
         None, 'runas', args[0], subprocess.list2cmdline(args[1:]), None, 1)

@@ -14,7 +14,7 @@ def tray_icon(logo: Image.Image, state: str = 'off') -> Image.Image:
     """Overlay a badge without mutating the original logo."""
     icon = Image.new('RGBA',(64,64),(0,0,0,0))
     inner = logo.convert('RGBA').copy()
-    inner.thumbnail((55,55),Image.Resampling.LANCZOS)
+    inner.thumbnail((58,58),Image.Resampling.LANCZOS)
     icon.alpha_composite(inner, ((64-inner.width)//2,(64-inner.height)//2))
     draw=ImageDraw.Draw(icon)
     # A dark outline makes the status visible in both light and dark Windows themes.

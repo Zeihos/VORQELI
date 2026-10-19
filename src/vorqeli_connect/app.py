@@ -18,7 +18,7 @@ from tkinter import messagebox, filedialog
 from PIL import Image, ImageTk
 
 from .config import APP_DIR, load_settings, save_settings
-from .diagnostics import check_all
+from .diagnostics import check_all, check_service, check_group, SERVICES
 from .network_audit import run_dns_audit, format_dns_audit
 from .telegram_web_audit import audit_telegram_web, format_telegram_web_audit
 from .event_log import record_event, recent_events
@@ -26,7 +26,7 @@ from .geohide import INFO_PAGE, STATE_FILE
 from .geohide_doh import DOH_STATE_FILE, restore_geo_dns
 from .history import record_scan, load_history
 from .log_tools import tail_log, redact_secrets
-from .startup import is_admin, relaunch_elevated, configure_startup
+from .startup import is_admin, relaunch_elevated, configure_startup, initial_uac_required
 from .unified import UnifiedController, ConnectionReport
 from .recovery import RecoveryPolicy
 from .engine_adapters import proxy_link
@@ -80,6 +80,13 @@ class ConnectApp(tk.Tk):
     def __init__(self, *, minimized=False):
         super().__init__()
         self.settings = load_settings()
+        if self.settings.desired_enabled and not self.settings.restore_last_mode:
+            # No automatic reconnect if the user opted out.
+            self.settings.desired_enabled = False
+            try:
+                save_settings(self.settings)
+            except OSError:
+                pass
         # v0.34 used FAKE as default. Prefer real Flowseal ALT profiles after
         # upgrade, while keeping explicitly chosen newer profiles untouched.
         if self.settings.dpi_mode in ('fake', 'auto', 'multisplit'):
@@ -89,7 +96,16 @@ class ConnectApp(tk.Tk):
             except OSError:
                 pass
         self.title('VORQELI Connect')
-        self.configure(bg=BG)
+        self.configure(bg='#0A1223')
+        # Set the actual taskbar/window icon, not merely an image in the UI.
+        self._window_icon = None
+        try:
+            icon_image = Image.open(asset('VORQELI-logo.png')).convert('RGBA')
+            icon_image.thumbnail((96, 96), Image.Resampling.LANCZOS)
+            self._window_icon = ImageTk.PhotoImage(icon_image)
+            self.iconphoto(True, self._window_icon)
+        except (OSError, tk.TclError, ValueError):
+            pass
         from .window_state import safe_geometry
         self.geometry(safe_geometry(self.settings.window_geometry,
                                     self.winfo_screenwidth(),self.winfo_screenheight()))
@@ -109,6 +125,8 @@ class ConnectApp(tk.Tk):
         self._quitting = False
         self._tray = None
         self._tray_ready = False
+        self._tray_retries = 0
+        self._tray_retry_at = 0.0
         self._start_minimized = bool(minimized)
         self._resize_job = None
         self._canvas_bg = None
@@ -156,14 +174,14 @@ class ConnectApp(tk.Tk):
         self.bind('<space>', self._keyboard_activate)
         self.bind('<Right>', self._keyboard_right)
         self.bind('<Left>', self._keyboard_left)
-        self.bind('<Escape>', lambda e:self.hide_to_tray())
+        self.bind('<Escape>', lambda e:self._window_close())
         self.bind('<Control-comma>',lambda e:self._page('Настройки'))
         self.bind('<Control-d>',lambda e:self._page('Диагностика'))
         for ix, page in enumerate(('Главная','Диагностика','История','Настройки','О проекте'),start=1):
             self.bind(f'<Alt-Key-{ix}>',lambda e,p=page:self._page(p))
         self.bind('<F5>',lambda e:self._diagnose())
         self.bind('<Control-Return>',lambda e:self._start_disconnect() if self.settings.desired_enabled else self._start_connect())
-        self.protocol('WM_DELETE_WINDOW', self.hide_to_tray)
+        self.protocol('WM_DELETE_WINDOW', self._window_close)
         self._launch_tray()
         self.after(220, self._poll)
         self.after(800, self._health_check)
@@ -216,13 +234,20 @@ class ConnectApp(tk.Tk):
             self._tray = pystray.Icon('VORQELI-Connect',image,'VORQELI Connect',
                 menu=pystray.Menu(
                     pystray.MenuItem('Открыть VORQELI', lambda *x: self.events.put(('show',None)), default=True),
-                    pystray.MenuItem('Подключиться',lambda *x:self.events.put(('connect',None))),
-                    pystray.MenuItem('Отключиться',lambda *x:self.events.put(('disconnect',None))),
+                    pystray.MenuItem('Подключиться',lambda *x:self.events.put(('connect',None)),
+                                     enabled=lambda _: not self.settings.desired_enabled),
+                    pystray.MenuItem('Отключиться',lambda *x:self.events.put(('disconnect',None)),
+                                     enabled=lambda _: self.settings.desired_enabled),
                     pystray.Menu.SEPARATOR,
-                    pystray.MenuItem('Выход из приложения',lambda *x:self.events.put(('quit',None))),
+                    pystray.MenuItem('Диагностика',lambda *x:self.events.put(('navigate','Диагностика'))),
+                    pystray.MenuItem('Настройки',lambda *x:self.events.put(('navigate','Настройки'))),
+                    pystray.Menu.SEPARATOR,
+                    pystray.MenuItem('Полностью выйти',lambda *x:self.events.put(('quit',None))),
                 ))
             threading.Thread(target=self._run_tray,daemon=True,name='VorqeliTray').start()
         except Exception as exc:
+            self._tray = None
+            self._tray_retry_at = time.monotonic() + 15
             if os.name == 'nt':
                 self.detail=f'Трей недоступен: {exc}'
 
@@ -230,7 +255,11 @@ class ConnectApp(tk.Tk):
         try:
             # pystray's setup callback runs only after the icon is registered.
             # Never claim the tray exists before the platform backend is ready.
-            self._tray.run(setup=lambda icon: self.events.put(('tray_ready', None)))
+            def setup(icon):
+                # Without visible=True, custom pystray setup leaves the icon hidden.
+                icon.visible = True
+                self.events.put(('tray_ready', None))
+            self._tray.run(setup=setup)
         except Exception as exc:
             self.events.put(('progress',f'Не удалось создать трей: {exc}'))
         finally:
@@ -247,7 +276,7 @@ class ConnectApp(tk.Tk):
             self.iconify()
 
     def _resize(self, event):
-        if event.widget is not self: return
+        if event.widget is not self and event.widget is not self.canvas: return
         if self._resize_job: self.after_cancel(self._resize_job)
         self._resize_job=self.after(170,self._draw)
 
@@ -418,7 +447,7 @@ class ConnectApp(tk.Tk):
         self.canvas.tag_bind(tag,'<Button-1>',lambda e,n=index:self._mouse_activate(n))
 
     def _page(self,name):
-        if name not in ('Главная','Диагностика','История','Настройки','О проекте'):
+        if name not in ('Главная','Диагностика','История','Настройки','О проекте','Сеть и стратегии'):
             return
         if name != self.selected_page:
             self._focused_control_index = None
@@ -426,6 +455,11 @@ class ConnectApp(tk.Tk):
         self._draw()
 
     def _draw(self):
+        """Use the shipping dark-blue UI; retain legacy rendering for fallback."""
+        from .redesign_ui import draw
+        return draw(self)
+
+    def _draw_legacy(self):
         if self._quitting or not self.winfo_exists():return
         from .visual_design import scene,layout
         w=max(1060,self.canvas.winfo_width());h=max(710,self.canvas.winfo_height())
@@ -1169,6 +1203,25 @@ class ConnectApp(tk.Tk):
         self._draw()
         threading.Thread(target=self._scan_worker,daemon=True).start()
 
+    def _diagnose_service(self, name: str):
+        """Check one of the five services asynchronously."""
+        if self.running_job or name not in SERVICES:
+            return
+        self._begin_job()
+        self.detail = 'Проверяем сервис: ' + name
+        self._draw()
+        def worker():
+            try:
+                urls = SERVICES[name]
+                result = (check_group(name, urls) if isinstance(urls, tuple)
+                          else check_service(name, urls))
+                self.events.put(('diagnostics_one', result))
+            except Exception as exc:
+                self.events.put(('error', str(exc)))
+            finally:
+                self.events.put(('idle', 'diagnostics'))
+        threading.Thread(target=worker, daemon=True, name='ServiceDiagnostics').start()
+
     def _scan_worker(self):
         try:self.events.put(('diagnostics',check_all()))
         except Exception as exc:self.events.put(('error',str(exc)))
@@ -1247,15 +1300,23 @@ class ConnectApp(tk.Tk):
                 elif typ=='show':self.deiconify();self.lift();self.focus_force();redraw=True
                 elif typ=='tray_ready':
                     self._tray_ready=True
+                    self._tray_retries=0
                     if self._start_minimized and self.state() == 'iconic':
                         self.withdraw()
                         self._start_minimized=False
                     redraw=True
                 elif typ=='tray_stopped':
                     self._tray_ready=False
+                    self._tray=None
+                    self._tray_retry_at=time.monotonic()+15
                     if self.state() == 'withdrawn' and not self._quitting:
                         # Recovery from a tray backend crash: never strand the GUI.
                         self.deiconify()
+                    redraw=True
+                elif typ=='navigate':
+                    self.deiconify()
+                    self.lift()
+                    self._page(value)
                     redraw=True
                 elif typ=='connect':self._start_connect()
                 elif typ=='disconnect':self._start_disconnect()
@@ -1266,6 +1327,15 @@ class ConnectApp(tk.Tk):
                 elif typ=='telegram_web_audit':
                     self._telegram_web_busy = False
                     self._set_telegram_web_audit_text(str(value))
+                elif typ=='diagnostics_one':
+                    name, status = value
+                    merged = dict(self.last_results)
+                    merged[name] = status
+                    self.last_results = [(key, merged[key]) for key in SERVICES if key in merged]
+                    try:record_scan(self.last_results)
+                    except OSError:pass
+                    self.detail = 'Проверен сервис: ' + name
+                    redraw = True
                 elif typ=='diagnostics':
                     self.last_results=value
                     try:record_scan(value)
@@ -1291,6 +1361,12 @@ class ConnectApp(tk.Tk):
     def _health_check(self):
         if self._quitting:
             return
+        # Recreate a tray icon if Explorer/backend exited; never hide until ready.
+        if (os.name == 'nt' and self._tray is None and not self._tray_ready
+                and self._tray_retries < 3 and time.monotonic() >= self._tray_retry_at):
+            self._tray_retries += 1
+            self._tray_retry_at = time.monotonic() + 15
+            self._launch_tray()
         state = self.controller.runtime_health()
         if state != self._last_health:
             self._last_health = state
@@ -1310,6 +1386,12 @@ class ConnectApp(tk.Tk):
             self.detail = f'Автовосстановление, попытка {state_info.attempts}/{state_info.max_attempts}…'
             self._start_connect(automatic=True)
         self.after(3500,self._health_check)
+
+    def _window_close(self):
+        if self.settings.minimize_to_tray:
+            self.hide_to_tray()
+        else:
+            self.quit_app()
 
     def hide_to_tray(self):
         if self.state() == 'normal':
@@ -1431,6 +1513,15 @@ def main():
                     ctypes.windll.user32.SetForegroundWindow(hwnd)
                 kernel.CloseHandle(mutex)
                 return
+    if initial_uac_required(windows=os.name == 'nt',
+                            admin=is_admin() if os.name == 'nt' else False,
+                            enabled=load_settings().admin_on_launch,
+                            retry=args.elevation_retry):
+        if relaunch_elevated(minimized=args.minimized):
+            # Release the old instance before the elevated process waits on it.
+            kernel.ReleaseMutex(mutex)
+            kernel.CloseHandle(mutex)
+            return
     app=ConnectApp(minimized=args.minimized)
     app.mainloop()
     if os.name=='nt':
