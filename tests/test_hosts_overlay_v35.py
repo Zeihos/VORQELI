@@ -9,7 +9,7 @@ REFERENCE='149.154.167.220 telegram.org\n104.25.158.178 example.discord.media\n'
 def test_reference_is_valid():
     root=Path(__file__).resolve().parents[1]
     from_file=(root/'assets/VORQELI-hosts-optional.txt').read_text(encoding='utf8')
-    assert len(parse_mappings(from_file)) == 241
+    assert len(parse_mappings(from_file)) >= 1000
     assert 'web.telegram.org' in parse_mappings(from_file)
 
 

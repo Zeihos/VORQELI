@@ -554,14 +554,16 @@ class ConnectApp(tk.Tk):
         self._text(x+225,400,'Отдельно от MTProto · DNS / TLS / HTTPS',9,SECONDARY,
                    width=max(270,right-x-250))
         self._text(x+29,453,'ПОСЛЕДНИЕ ПРОВЕРКИ',11,VIOLET,weight='bold')
-        results=self.last_results or [('Discord','Не проверено'),('YouTube','Не проверено'),
-                                      ('Telegram Web','Не проверено'),('GitHub','Не проверено')]
+        results=dict(self.last_results) if self.last_results else {}
+        results=[(name,results.get(name,'Не проверено')) for name in
+                 ('Discord','YouTube','Telegram Web','ChatGPT',
+                  'Microsoft (Copilot, Designer, Xbox)')]
         for j,(name,status) in enumerate(results[:5]):
-            y=494+j*49
+            y=485+j*35
             self._text(x+36,y,str(name),12,FG,weight='bold')
             c=AQUA if status=='Доступен' else ROSE if status=='Нет ответа' else SECONDARY
             self._text(right-49,y,fit_line(status,count=44),11,c,anchor='ne')
-            if j<len(results)-1:self.canvas.create_line(x+30,y+35,right-30,y+35,fill='#343B56')
+            if j<len(results)-1:self.canvas.create_line(x+30,y+26,right-30,y+26,fill='#343B56')
         self._text(x+33,h-61,'Подробности проверок сохраняются локально в истории.',10,SECONDARY)
 
     def _draw_history(self,x,right,h):
@@ -899,7 +901,7 @@ class ConnectApp(tk.Tk):
                                  'Проверка может занять до 30 секунд.')
         def worker():
             try:
-                result = format_dns_audit(run_dns_audit())
+                result = format_dns_audit(run_dns_audit(deep=True))
             except Exception as exc:
                 result = 'Проверка прервана: ' + str(exc)
             self.events.put(('dns_audit', result))

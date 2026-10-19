@@ -29,6 +29,6 @@ def test_detect_version_mismatch(tmp_path):
     source = SCRIPT.parent.parent
     shutil.copytree(source, tmp_path / 'repo', ignore=shutil.ignore_patterns('.pytest_cache','__pycache__'))
     p = tmp_path / 'repo/installer/VORQELI.iss'
-    p.write_text(re.sub(r'MyAppVersion "[0-9]+\.[0-9]+\.[0-9]+"', 'MyAppVersion "0.99.0"', p.read_text(encoding='utf-8')))
+    p.write_text(re.sub(r'MyAppVersion "[0-9]+\.[0-9]+\.[0-9]+"', 'MyAppVersion "0.99.0"', p.read_text(encoding='utf-8')), encoding='utf-8')
     issues = module.check_layout(tmp_path / 'repo')
     assert any('установщика' in problem for problem in issues)

@@ -42,7 +42,7 @@ def parse_mappings(source: str) -> dict[str, str]:
         if hostname in records and records[hostname] != ip:
             raise ValueError('В списке HOSTS противоречивые записи: ' + hostname)
         records[hostname] = ip
-        if len(records) > 400:
+        if len(records) > 2000:
             raise ValueError('Слишком много HOSTS-записей')
     if not records:
         raise ValueError('Список HOSTS пуст')

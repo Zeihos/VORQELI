@@ -68,6 +68,6 @@ def test_chrome_noop_outside_windows():
 
 def test_settings_minimum_dns_controls_no_footer_overlap():
     from pathlib import Path
-    code=(Path(__file__).resolve().parents[1] / 'src/vorqeli_connect/app.py').read_text()
+    code=(Path(__file__).resolve().parents[1] / 'src/vorqeli_connect/app.py').read_text(encoding='utf-8')
     assert "self._place_button(x+31+j*151,640,label," in code
     assert "self._text(x+31,h-60,'Изменение модулей" not in code

@@ -2,7 +2,9 @@ from unittest.mock import patch
 from vorqeli_connect.diagnostics import check_service, SERVICES
 
 def test_known_services():
-    assert {"Discord", "YouTube", "Telegram Web", "GitHub"} <= set(SERVICES)
+    expected = {"Discord", "YouTube", "Telegram Web", "ChatGPT",
+                "Microsoft (Copilot, Designer, Xbox)"}
+    assert set(SERVICES) == expected
 
 def test_unreachable_service():
     from urllib.error import URLError

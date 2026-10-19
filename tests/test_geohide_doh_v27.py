@@ -277,7 +277,7 @@ def test_uninstall_detects_orphan_doh_journal(tmp_path):
         journal.unlink()
         return True
     result=cleanup_for_uninstall(check_running=lambda:False,disable_startup=lambda _: 'off',
-                                 restore=cleanup,backup=path)
+                                 restore=cleanup,backup=path, audit_startup=_audit_absent)
     assert result.success and called==['recover']
 
 
@@ -287,7 +287,7 @@ def test_uninstall_blocks_on_leftover_doh_journal(tmp_path):
     journal=tmp_path/'dns-restore-doh.json'
     journal.write_text('leftover')
     result=cleanup_for_uninstall(check_running=lambda:False,disable_startup=lambda _: 'off',
-                                 restore=lambda:True,backup=path)
+                                 restore=lambda:True,backup=path, audit_startup=_audit_absent)
     assert not result.success and journal.exists()
 
 
@@ -316,3 +316,9 @@ def test_restore_doh_checks_adapter_restore_return_value(env,monkeypatch):
 def test_doh_mapping_parser_handles_null_json(monkeypatch):
     monkeypatch.setattr(geohide,'_ps',lambda script:'null')
     assert doh._read_mappings()=={}
+
+
+def _audit_absent():
+    """Mock Windows registration state, never read the actual host."""
+    import os
+    return 'missing' if os.name == 'nt' else 'unsupported'
