@@ -55,16 +55,21 @@ begin
     ewWaitUntilTerminated, ExitCode);
   if not Started then
   begin
-    MsgBox('Не удалось запустить проверку перед удалением VORQELI. ' +
-      'Файлы не будут удалены.', mbError, MB_OK);
+    Log('VORQELI: cleanup helper could not start; uninstall denied.');
+    if not UninstallSilent() then
+      MsgBox('Не удалось запустить проверку перед удалением VORQELI. ' +
+        'Файлы не будут удалены.', mbError, MB_OK);
     Exit;
   end;
   if ExitCode <> 0 then
   begin
-    MsgBox('Не удалось безопасно подготовить удаление VORQELI. ' +
-      'Полностью закройте программу через трей и восстановите DNS. ' +
-      'Если проблема осталась, запустите VORQELI от администратора ' +
-      'и повторите удаление. Код: ' + IntToStr(ExitCode), mbError, MB_OK);
+    Log('VORQELI: cleanup returned ' + IntToStr(ExitCode) +
+      '; uninstall denied.');
+    if not UninstallSilent() then
+      MsgBox('Не удалось безопасно подготовить удаление VORQELI. ' +
+        'Полностью закройте программу через трей и восстановите DNS. ' +
+        'Если проблема осталась, запустите VORQELI от администратора ' +
+        'и повторите удаление. Код: ' + IntToStr(ExitCode), mbError, MB_OK);
     Exit;
   end;
   Result := True;

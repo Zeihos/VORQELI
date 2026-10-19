@@ -102,8 +102,10 @@ try {
         # Uninstallation must also abort while the GUI mutex exists. Inno
         # Setup calls --uninstall-cleanup before deleting a single installed
         # executable; this exercises that contract with a real Inno EXE.
+        $blockedLog = Join-Path $env:RUNNER_TEMP 'vorqeli-smoke-blocked-uninstall.log'
+        $blockedArgs = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /LOG="' + $blockedLog + '"'
         $blockedRemoval = Invoke-Bounded -Label 'blocked-uninstall' -FilePath $uninstall `
-            -Arguments '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART' -TimeoutSeconds 60
+            -Arguments $blockedArgs -TimeoutSeconds 60
         if ($blockedRemoval.ExitCode -eq 0) {
             throw 'Uninstaller ignored the active VORQELI instance mutex'
         }

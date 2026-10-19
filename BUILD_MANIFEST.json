@@ -1,5 +1,5 @@
 {
-  "file_count": 160,
+  "file_count": 162,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -189,6 +189,10 @@
       "bytes": 1220,
       "sha256": "d22d8e9fd7554ab4ab46457e1ce34a9ebcc3a825d2a2c164ff67fe49a9db3700"
     },
+    "docs/WINDOWS_SILENT_UNINSTALL.md": {
+      "bytes": 1401,
+      "sha256": "71d50b4a61807dab2acc16cf6d29c65c4b17154c0c104cba91d8928859ddc932"
+    },
     "docs/WINDOWS_STARTUP_AUDIT_V24.md": {
       "bytes": 2794,
       "sha256": "641be24e3d3900108678d93c6ea130e4554bb31daf1d0b782e09df1e0cebbfb5"
@@ -206,8 +210,8 @@
       "sha256": "0206dbdf844e1a3586ae6000c5e4c30d2731e3cc0bd27098ab9b8c7c3e4073d5"
     },
     "installer/VORQELI.iss": {
-      "bytes": 2747,
-      "sha256": "9a8dad853fb6e8dfef31b90da0d0440954c0dfed10bdfd263378af8dce73e948"
+      "bytes": 2988,
+      "sha256": "70247ce7df914d8babc828583865a675860287289e3e8ba91561ea9f232f89c8"
     },
     "pyproject.toml": {
       "bytes": 583,
@@ -246,8 +250,8 @@
       "sha256": "13e13d70175d729ba851a542d74aa6c95714c8c5bf68ca24f9f9118ba83bf98a"
     },
     "scripts/windows_installer_smoke.ps1": {
-      "bytes": 7149,
-      "sha256": "80ac543826dfa24ac09c4a06ee0a0dd053193bff6d76b0dd570ca243e210e28b"
+      "bytes": 7299,
+      "sha256": "ae021230169c4666afa2859f68f1f553d396c0d90ee3b39262e476bf83db71cd"
     },
     "scripts/windows_off_intent_smoke.py": {
       "bytes": 1356,
@@ -492,6 +496,10 @@
     "tests/test_hosts_overlay_v35.py": {
       "bytes": 2467,
       "sha256": "910e43e7c47bac891d8998f23407585352c26cd4d88808b6e15d846df6b5acb1"
+    },
+    "tests/test_installer_silent_uninstall.py": {
+      "bytes": 1847,
+      "sha256": "014b088197db8ece61092340785d59dd921e2cbe328ae31b3d9821270e4b1a26"
     },
     "tests/test_integrations.py": {
       "bytes": 896,
