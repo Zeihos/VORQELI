@@ -1,5 +1,5 @@
 {
-  "file_count": 169,
+  "file_count": 171,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -7,15 +7,15 @@
     },
     ".github/workflows/windows-build.yml": {
       "bytes": 6103,
-      "sha256": "2bd8251a03b4193e1ad4bf93b19a1f5053364d61140540d1777b50739837cb28"
+      "sha256": "5356abd2f1dd714fa69e15a5b058def2deb05dc181b34f9a7bef8aa2829cda15"
     },
     ".gitignore": {
       "bytes": 140,
       "sha256": "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
     },
     "CHANGELOG.md": {
-      "bytes": 22917,
-      "sha256": "4ffbb3d7a7a04830d325d44e68b51817012fa847787b4e6feb79a6b8c2b34357"
+      "bytes": 23677,
+      "sha256": "a2cd4bfbbb2eefe63dc63dabb926e8a0f154699c4251ad7f0bd9c8d87bf75a46"
     },
     "Compact-preview.png": {
       "bytes": 74045,
@@ -219,11 +219,11 @@
     },
     "installer/VORQELI.iss": {
       "bytes": 2988,
-      "sha256": "9eae059a74a93cae4ac44c5626c2c548243e8af60f234f938ded6a07f15fca8e"
+      "sha256": "f5b094ff1f1276b57afacf5c220ed5cc3f3bc9d4ca822c9f595cdd43a6e55746"
     },
     "pyproject.toml": {
       "bytes": 583,
-      "sha256": "680dbebbd8e9b8f2050a8e7eb6beb522b5f0ca381270c9c1632af4b655622845"
+      "sha256": "7670e1e3fd3a49c9fc3673598bb46f7338e4238d828caa04bd17940b41286577"
     },
     "scripts/__init__.py": {
       "bytes": 0,
@@ -279,7 +279,7 @@
     },
     "src/vorqeli_connect/__init__.py": {
       "bytes": 23,
-      "sha256": "5c15ceed224b372b217ade23afdfb7c64e48186e448e92004b468d078fd2b939"
+      "sha256": "189c32adc1f5789397fe9ffd1fe2d220c3b6003c6dc65edeb2d06e43b3e0cc23"
     },
     "src/vorqeli_connect/__main__.py": {
       "bytes": 29,
@@ -666,8 +666,8 @@
       "sha256": "0f4712049d3a70c2d1faad93274a79529f8b2af55ea2715e2a1c1a2d183d0df9"
     },
     "src/vorqeli_connect/redesign_ui.py": {
-      "bytes": 21210,
-      "sha256": "ccc484e616f3584778a488e10272dc3930b5320d0a40d88bbcf8a6eb155495eb"
+      "bytes": 36826,
+      "sha256": "c3106e90a69308882951103a8c4f3c58c28727cd245da0219b6e90e2e9675aeb"
     },
     "tests/test_redesign_ui_v37.py": {
       "bytes": 4081,
@@ -676,6 +676,14 @@
     "docs/REDESIGN_WINDOWS_V37.md": {
       "bytes": 4692,
       "sha256": "75f30b4cc1b4922a434005d879d51b66c992cb94a5f471294e0c70cae3fd8d10"
+    },
+    "tests/test_ui_production_v38.py": {
+      "bytes": 5847,
+      "sha256": "4bedfbfa7fd30c188cfcfad3772bd25e349b0573628010ea9b8295e7bd3e1092"
+    },
+    "docs/UI_PRODUCTION_V38.md": {
+      "bytes": 2635,
+      "sha256": "de5100087a05e49fd95c394bb171f566c22e83003ba50ce3ccc32262bd1600bf"
     }
   },
   "version": "0.34.0"

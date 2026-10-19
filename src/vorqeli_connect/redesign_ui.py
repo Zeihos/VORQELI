@@ -1,31 +1,47 @@
-"""VORQELI Windows dashboard redesign, Canvas-only and network-side-effect free.
+"""VORQELI Connect — polished Windows Canvas visual system.
 
-The renderer operates through the existing ConnectApp controller and Tk canvas.
-No DNS/HOSTS/process mutation happens here; controls delegate to app methods.
+Visual-only module: invokes existing ConnectApp actions and reads their state.
+Never mutates network, DNS, HOSTS, startup, privileges, or Windows registry.
+Image resources stay in memory and all hit targets enter the existing
+keyboard/accessibility registry. No fake settings or fabricated health checks.
 """
 from __future__ import annotations
 
-from functools import lru_cache
+import math
 import webbrowser
+from functools import lru_cache
+
 from PIL import Image, ImageDraw, ImageFilter, ImageTk
 
 from . import __version__ as VERSION
 from .event_log import recent_events
-from .history import load_history
 from .flowseal_alts import ALT_MODES
+from .history import load_history
 
-BG = '#0A1223'
-TEXT = '#E9F1FF'
-MUTED = '#91A5C3'
-DIM = '#69809F'
-ACCENT = '#7394FF'
-GREEN = '#42D9AD'
-AMBER = '#F8BD78'
-RED = '#FF8296'
-CARD = '#12213A'
-STROKE = '#294263'
 PAGES = ('Главная', 'Диагностика', 'История', 'О проекте', 'Настройки', 'Сеть и стратегии')
 SERVICE_NAMES = ('Discord', 'YouTube', 'Telegram Web', 'ChatGPT', 'Microsoft (Copilot, Designer, Xbox)')
+
+# Palette deliberately desaturated away from the previous flat violet theme.
+BG = '#070E1C'
+RAIL = '#0B1830'
+CARD = '#101F38'
+CARD_HOVER = '#1A3155'
+STROKE = '#2B4264'
+TEXT = '#F3F7FF'
+MUTED = '#9BAECC'
+DIM = '#6D83A6'
+BLUE = '#7093FF'
+BLUE_BRIGHT = '#9CB5FF'
+GREEN = '#43E4B4'
+AMBER = '#F9C377'
+RED = '#FF8C9D'
+CYAN = '#59C7EF'
+
+# Renderer stays useful on old 1060x710 minimum windows. On smaller physical
+# screens app._sync_scrollbars provides safe, explicit scrolling.
+MIN_WIDTH, MIN_HEIGHT = 1060, 710
+LEFT, HEADER = 236, 79
+PAD = 30
 
 
 def status_tone(state: str) -> str:
@@ -34,330 +50,594 @@ def status_tone(state: str) -> str:
 
 
 def service_summary(value: str) -> tuple[str, str]:
-    """A DNS success or 403 never pretends full functionality of a service."""
+    """2xx/3xx probe success is HTTPS only, not usable account access."""
     if value == 'Доступен':
         return ('HTTPS OK', GREEN)
     if value == 'Не проверено':
         return ('Не проверено', DIM)
     if 'Copilot:' in value:
         parts = [p.strip() for p in value.split('|')]
-        if len(parts) == 3 and all(p.endswith(': OK') for p in parts):
+        oks = sum(p.endswith(': OK') for p in parts)
+        if len(parts) == 3 and oks == 3:
             return ('3/3 HTTPS OK', GREEN)
-        return ('Частичный ответ' if any(': OK' in p for p in parts) else 'Нет полного ответа', AMBER)
+        if oks:
+            return ('Частичный ответ', AMBER)
+        return ('Нет полного ответа', RED)
     if value.startswith('HTTP '):
         return (value + ' · ограничение', AMBER)
     if value == 'Нет ответа':
         return ('Нет ответа', RED)
-    return (str(value)[:42], AMBER)
+    return (str(value)[:32], AMBER)
 
 
-def _rounded(draw: ImageDraw.ImageDraw, coords: tuple[int,int,int,int], *,
-             fill: str = CARD, border: str = STROKE, radius: int = 17) -> None:
-    draw.rounded_rectangle(coords, radius=radius, fill=fill, outline=border, width=1)
+def _rgb(color: str) -> tuple[int, int, int]:
+    return tuple(int(color[k:k+2], 16) for k in (1,3,5))
 
 
-@lru_cache(maxsize=20)
-def background(width: int, height: int, page: str) -> Image.Image:
-    """Baked opaque background, avoiding Tk transparency limitations."""
-    w, h = max(1060, width), max(710, height)
-    image = Image.new('RGB', (w, h), BG)
-    pix = ImageDraw.Draw(image)
+def _blend(c1: str, c2: str, t: float) -> tuple[int, int, int]:
+    a, b = _rgb(c1), _rgb(c2)
+    return tuple(round(x*(1-t)+y*t) for x,y in zip(a,b))
+
+
+def _gradient(canvas: Image.Image, rectangle: tuple[int,int,int,int],
+              top: str, bottom: str, radius: int = 18, outline: str | None = STROKE):
+    """Antialiased rounded gradient, not flat Tk rectangle approximations."""
+    x1,y1,x2,y2 = map(int, rectangle)
+    if x2 <= x1 or y2 <= y1:
+        return
+    ww, hh = x2-x1, y2-y1
+    field = Image.new('RGBA',(ww,hh))
+    ink = ImageDraw.Draw(field)
+    for y in range(hh):
+        t = y/max(1,hh-1)
+        ink.line((0,y,ww,y),fill=(*_blend(top,bottom,t),255))
+    mask = Image.new('L',(ww,hh),0)
+    ImageDraw.Draw(mask).rounded_rectangle((0,0,ww-1,hh-1),radius=max(0,min(radius,ww//2,hh//2)),fill=255)
+    canvas.paste(field,(x1,y1),mask)
+    if outline:
+        ImageDraw.Draw(canvas).rounded_rectangle((x1,y1,x2-1,y2-1),radius=radius,
+                outline=outline,width=1)
+
+
+def _glows(canvas: Image.Image, circles: tuple[tuple[float,float,float,str,int],...], blur=55):
+    # Quarter-sized blur: fast even on 4K logical scaling. Composite once.
+    w,h = canvas.size
+    scale=4
+    glow=Image.new('RGBA',(w//scale+2,h//scale+2),(0,0,0,0))
+    draw=ImageDraw.Draw(glow,'RGBA')
+    for cx,cy,r,color,alpha in circles:
+        c=_rgb(color)
+        x,y,s=cx/scale,cy/scale,r/scale
+        draw.ellipse((x-s,y-s,x+s,y+s),fill=(*c,alpha))
+    glow=glow.filter(ImageFilter.GaussianBlur(max(1,blur/scale))).resize((w,h),Image.Resampling.BILINEAR)
+    canvas.alpha_composite(glow)
+
+
+def _hero_decoration(canvas: Image.Image, x1: int,y1:int,x2:int,y2:int):
+    """Subtle cropped accent waves (never bleed outside cards or over labels)."""
+    w=x2-x1
+    layer=Image.new('RGBA',(w,y2-y1),(0,0,0,0))
+    d=ImageDraw.Draw(layer,'RGBA')
+    for i in range(5):
+        coords=[]
+        for step in range(64):
+            t=step/63
+            px=round(w*t)
+            py=layer.height-18-i*7-round(math.sin(t*math.pi*2.1+i*.23)*3)
+            coords.append((px,py))
+        d.line(coords,fill=(105,158,255,15+i*8),width=2)
+    # Halo under the V emblem, blurred before compositing the crisp ring in Tk.
+    halo=Image.new('RGBA',layer.size,(0,0,0,0))
+    hd=ImageDraw.Draw(halo,'RGBA')
+    hd.ellipse((13,17,158,162),fill=(*_rgb(GREEN),88))
+    halo=halo.filter(ImageFilter.GaussianBlur(26))
+    layer=Image.alpha_composite(halo,layer)
+    mask=Image.new('L',layer.size,0)
+    ImageDraw.Draw(mask).rounded_rectangle((0,0,layer.width-1,layer.height-1),radius=22,fill=255)
+    effective=Image.new('L',layer.size,0)
+    from PIL import ImageChops
+    effective=ImageChops.multiply(mask,layer.getchannel('A'))
+    canvas.paste(layer,(x1,y1),effective)
+
+
+def _section_card(canvas: Image.Image, rect, *, kind='regular', radius=18):
+    themes={'regular':('#13243F','#0F1D33','#273F60'),
+            'highlight':('#173564','#101F3F','#4775CC'),
+            'rail':('#162946','#101D33','#2A4369'),
+            'active':('#1E3F72','#14284A','#4F7BD8'),
+            'soft':('#152845','#10213A','#294566')}
+    top,bottom,stroke=themes.get(kind,themes['regular'])
+    _gradient(canvas,rect,top,bottom,radius,stroke)
+
+
+def _pill_background(canvas:Image.Image,rect,kind='quiet'):
+    top,bottom={'quiet':('#1C3558','#182B48'),
+                'active':('#244C88','#1D3767'),
+                'positive':('#15493E','#123D35'),
+                'warning':('#594328','#403624')}.get(kind,('#1C3558','#182B48'))
+    _gradient(canvas,rect,top,bottom,13,None)
+
+
+@lru_cache(maxsize=14)
+def background(width:int,height:int,page:str) -> Image.Image:
+    """Image-backed, scene-cached art direction for all six pages."""
+    w,h=max(MIN_WIDTH,width),max(MIN_HEIGHT,height)
+    image=Image.new('RGBA',(w,h),BG)
+    painter=ImageDraw.Draw(image)
     for y in range(h):
-        t = y/max(1,h-1)
-        pix.line((0,y,w,y),fill=(10+int(1*t),17+int(5*t),32+int(12*t)))
-    glow = Image.new('RGBA',(w,h),(0,0,0,0))
-    g = ImageDraw.Draw(glow,'RGBA')
-    g.ellipse((w-600,-470,w+240,365),fill=(43,92,232,55))
-    g.ellipse((140,h-160,690,h+380),fill=(25,109,230,32))
-    glow = glow.filter(ImageFilter.GaussianBlur(95))
-    image = Image.alpha_composite(image.convert('RGBA'),glow)
-    d = ImageDraw.Draw(image)
-    d.rectangle((0,0,239,h),fill='#0D192E')
-    d.line((239,0,239,h), fill='#28405F',width=1)
-    d.rectangle((239,0,w,75), fill='#0D172B')
-    d.line((239,75,w,75), fill='#203653')
-    d.line((263,h-36,w-23,h-36),fill='#24405E',width=1)
-    x, r = 271, w-28
+        t=y/max(h-1,1)
+        painter.line((0,y,w,y),fill=(*_blend('#070E1D','#0D1D34',t),255),width=1)
+    _glows(image, ((w*.78,65,245,BLUE,80),(w*.55,h*.83,230,CYAN,25),
+                   (w*.12,h*.22,195,'#2B71DE',15)),blur=85)
+    painter=ImageDraw.Draw(image,'RGBA')
+    painter.rectangle((0,0,LEFT,h),fill=(8,20,40,249))
+    painter.line((LEFT,0,LEFT,h),fill=(78,113,168,82))
+    painter.rectangle((LEFT,0,w,HEADER),fill=(10,20,38,216))
+    painter.line((LEFT,HEADER,w,HEADER),fill=(85,120,180,70))
+    painter.line((LEFT+25,h-39,w-26,h-39),fill=(83,124,178,68))
+    x,r=LEFT+PAD,w-PAD
     if page=='Главная':
-        _rounded(d,(x,216,r,380),fill='#142C51',border='#355DA6',radius=20)
-        col = (r-x-24)//3
-        for i in range(3):
-            left=x+i*(col+12)
-            _rounded(d,(left,394,left+col,514),radius=16)
-        _rounded(d,(x,527,r,h-54),radius=18)
+        # Hero receives its own glow/wave for an unmistakable premium focal area.
+        _section_card(image,(x,193,r,378),kind='highlight',radius=22)
+        _hero_decoration(image,x+1,194,r-1,377)
+        cw=(r-x-24)//3
+        for j in range(3):
+            sx=x+j*(cw+12)
+            _section_card(image,(sx,391,sx+cw,506),kind='regular',radius=17)
+        _section_card(image,(x,520,r,h-59),kind='regular',radius=19)
     elif page=='Диагностика':
+        _section_card(image,(x,185,r,h-58),kind='regular',radius=19)
         for i in range(5):
-            y=219+i*69
-            _rounded(d,(x,y,r,y+61),fill='#13223B',radius=12)
-        _rounded(d,(x,577,r,h-54),radius=14)
+            py=239+i*61
+            _section_card(image,(x+20,py,r-20,py+54),kind='soft',radius=12)
+        _section_card(image,(x+20,566,r-20,h-76),kind='rail',radius=13)
     elif page=='История':
-        _rounded(d,(x,210,r,h-55),radius=17)
-        for i in range(6):
-            y=290+i*55
-            if y+47<h-67:
-                _rounded(d,(x+18,y,r-18,y+47),fill='#172B4A' if i%2==0 else '#132239',border='#1C3250',radius=10)
+        _section_card(image,(x,185,r,h-58),kind='regular',radius=19)
+        _section_card(image,(x+20,254,r-20,h-83),kind='soft',radius=14)
+        for i in range(8):
+            py=319+i*45
+            if py+38 < h-88 and i%2==0:
+                _pill_background(image,(x+28,py,r-28,py+38),'quiet')
     elif page=='О проекте':
-        _rounded(d,(x,216,r,330),radius=18)
-        _rounded(d,(x,344,r,505),radius=18)
-        _rounded(d,(x,516,r,h-54),radius=18)
+        _section_card(image,(x,193,r,337),kind='highlight',radius=20)
+        _section_card(image,(x,350,r,525),kind='regular',radius=17)
+        _section_card(image,(x,538,r,h-58),kind='regular',radius=17)
     elif page=='Настройки':
-        width_left=int((r-x-12)*.53)
-        _rounded(d,(x,213,x+width_left,575),radius=17)
-        _rounded(d,(x+width_left+12,213,r,575),radius=17)
-        _rounded(d,(x,588,r,h-54),fill='#172B4A',radius=17)
+        total=r-x
+        l=int(total*.54)
+        _section_card(image,(x,192,x+l-7,h-177),kind='regular',radius=19)
+        _section_card(image,(x+l+7,192,r,h-177),kind='regular',radius=19)
+        _section_card(image,(x,h-164,r,h-58),kind='highlight',radius=19)
     else:
-        left=int((r-x-15)*.64)
-        _rounded(d,(x,213,x+left,515),radius=18)
-        _rounded(d,(x+left+15,213,r,515),radius=18)
-        _rounded(d,(x,530,r,h-54),radius=18)
+        total=r-x
+        l=int(total*.636)
+        _section_card(image,(x,192,x+l-7,519),kind='regular',radius=19)
+        _section_card(image,(x+l+7,192,r,519),kind='regular',radius=19)
+        _section_card(image,(x,533,r,h-58),kind='regular',radius=19)
     return image.convert('RGB')
 
 
+def _label_for_module(actual:str,selected:bool)->str:
+    if not selected:return 'Отключён в настройках'
+    return {'on':'Запущен','off':'Не запущен','error':'Требует внимания'}.get(actual,'Ожидание')
+
+
+@lru_cache(maxsize=32)
+def _service_icon(kind:str,size:int=42)->Image.Image:
+    """Original vector pictograms, no external icon fonts or network requests."""
+    s=size*3
+    image=Image.new('RGBA',(s,s),(0,0,0,0))
+    d=ImageDraw.Draw(image)
+    c={'discord':'#657DFF','youtube':'#FF435A','telegram':'#25A8E8',
+       'chatgpt':'#20BFA2','microsoft':'#6387EB','dpi':'#13BDA7','dns':'#648AFF',
+       'github':'#8BA7DC','info':'#6999EC','settings':'#7B91FF','history':'#5E96E9'}.get(kind,'#5C81D7')
+    d.rounded_rectangle((0,0,s-1,s-1),radius=s//4,fill=c)
+    white=(248,251,255,255)
+    def xy(a):return tuple(int(v*s/100) for v in a)
+    if kind=='youtube':
+        d.rounded_rectangle(xy((15,28,85,72)),radius=s//9,fill=white)
+        d.polygon([xy((44,36)),xy((44,65)),xy((66,50))],fill=c)
+    elif kind=='telegram':
+        d.polygon([xy((18,50)),xy((82,19)),xy((65,82)),xy((47,62))],fill=white)
+        d.line((xy((47,62)),xy((76,28))),fill=c,width=max(2,s//24))
+    elif kind=='discord':
+        d.rounded_rectangle(xy((20,34,80,68)),radius=s//8,fill=white)
+        d.polygon([xy((29,64)),xy((20,79)),xy((41,66))],fill=white)
+        for xx in (42,62):d.ellipse(xy((xx-5,47,xx+5,57)),fill=c)
+    elif kind=='microsoft':
+        for xx,yy in ((22,22),(53,22),(22,53),(53,53)):
+            d.rectangle(xy((xx,yy,xx+23,yy+23)),fill=white)
+    elif kind=='chatgpt':
+        # Interlocking rounded geometric symbol rather than copying a logo asset.
+        d.ellipse(xy((22,21,78,79)),outline=white,width=max(3,s//12))
+        d.arc(xy((31,31,69,69)),30,295,fill=c,width=max(3,s//12))
+    elif kind=='dpi':
+        d.polygon([xy((52,16)),xy((29,55)),xy((48,55)),xy((39,85)),xy((76,43)),xy((55,43))],fill=white)
+    elif kind=='dns':
+        d.ellipse(xy((18,18,82,82)),outline=white,width=max(3,s//17))
+        d.arc(xy((38,19,62,82)),95,275,fill=white,width=max(3,s//18))
+        d.line((xy((20,50)),xy((80,50))),fill=white,width=max(3,s//19))
+    elif kind=='settings':
+        d.ellipse(xy((26,26,74,74)),outline=white,width=max(3,s//10))
+        d.ellipse(xy((42,42,58,58)),fill=white)
+    elif kind=='history':
+        d.ellipse(xy((22,22,78,78)),outline=white,width=max(3,s//12))
+        d.line([xy((49,33)),xy((49,52)),xy((66,60))],fill=white,width=max(3,s//14))
+    else:
+        d.ellipse(xy((29,29,71,71)),outline=white,width=max(3,s//12))
+        d.line((xy((50,43)),xy((50,68))),fill=white,width=max(3,s//10))
+    return image.resize((size,size),Image.Resampling.LANCZOS)
+
+
 class Painter:
-    def __init__(self, app):
+    """Semantic controls, pixel-aligned canvas labels, and keyboard navigation."""
+    def __init__(self,app):
         self.app=app
         self.canvas=app.canvas
         self.w,self.h=app._logical_size
-        self.x,self.r=271,self.w-28
+        self.x,self.r=LEFT+PAD,self.w-PAD
+        self.cw=self.r-self.x
 
-    def text(self,x,y,s,size=11,color=TEXT,*,bold=False,width=0,anchor='nw'):
-        return self.app._text(x,y,str(s),size,color,anchor=anchor,weight='bold' if bold else 'normal',width=width)
+    def txt(self,x,y,value,size=11,color=TEXT,*,bold=False,anchor='nw',width=0):
+        return self.app._text(x,y,str(value),size,color,anchor=anchor,width=width,
+                              weight='bold' if bold else 'normal')
 
-    def line(self,x1,y1,x2,y2,color='#2B405E'):
+    def line(self,x1,y1,x2,y2,color=STROKE):
         self.canvas.create_line(x1,y1,x2,y2,fill=color)
 
     def dot(self,x,y,color=GREEN,r=4):
         self.canvas.create_oval(x-r,y-r,x+r,y+r,fill=color,outline='')
 
-    def button(self,x,y,w,h,label,callback,*,primary=False,disabled=False,small=False):
-        tag=f'neo_ctl_{self.app._control_serial}'
-        self.app._control_serial+=1
-        bounds=(x,y,x+w,y+h)
-        fg='#09152D' if primary else (DIM if disabled else TEXT)
-        outline='#85A2FF' if primary else '#2D4C75'
-        fill='#7696FF' if primary else '#1A3152'
-        shape=self.canvas.create_polygon(self.app._rounded_coords(*bounds,min(13,h//3)),
-                                          smooth=True,splinesteps=12,fill=fill,outline=outline,width=1,tags=(tag,))
-        self.canvas.create_text(x+w/2,y+h/2,text=label,anchor='center',
-             fill=fg,font=('Segoe UI',9 if small else 10,'bold'),tags=(tag,))
+    def icon(self,x,y,kind,size=38):
+        icon=ImageTk.PhotoImage(_service_icon(kind,size))
+        self.app._button_images.append(icon)  # image lifetime is bound to the redraw
+        self.canvas.create_image(x,y,image=icon,anchor='nw')
+
+    def badge(self,x,y,value,*,tone='quiet',width=None):
+        colors={'quiet':MUTED,'positive':GREEN,'warning':AMBER,'negative':RED,'active':BLUE_BRIGHT}
+        color=colors.get(tone,MUTED)
+        w=width or max(95,round(len(value)*6.4)+22)
+        self.canvas.create_polygon(self.app._rounded_coords(x,y,x+w,y+27,12),
+                smooth=True,splinesteps=10,fill={
+                'positive':'#124336','warning':'#4A382A','negative':'#49303E',
+                'active':'#263F73'}.get(tone,'#1A2D49'),outline='',width=0)
+        self.txt(x+w//2,y+13,value,9,color,bold=True,anchor='center')
+        return w
+
+    def button(self,x,y,w,h,text,callback,*,primary=False,disabled=False,
+               icon=None,selected=False,small=False):
+        """Custom controlled surface; no clickable decorative placeholders."""
+        if w < 38 or h < 24:return
+        a=self.app
+        serial=a._control_serial
+        a._control_serial+=1
+        tag=f'prod_ui_{serial}'
+        color=('#6C8DFA' if primary or selected else '#1B3558')
+        border=('#B0C4FF' if primary or selected else '#34537C')
+        if disabled: color,border='#1A2940','#2A3B53'
+        item=self.canvas.create_polygon(a._rounded_coords(x,y,x+w,y+h,min(14,h//3)),
+              smooth=True,splinesteps=12,fill=color,outline=border,width=1,tags=(tag,))
+        content=text
+        if icon:content=icon+'  '+text
+        self.canvas.create_text(x+w/2,y+h/2,text=content,anchor='center',
+             fill='#0A1430' if primary or selected else (DIM if disabled else TEXT),
+             font=('Segoe UI',9 if small else 10,'bold'),tags=(tag,))
         if not disabled:
-            index=self.app._register_control(bounds,callback,label)
-            self.canvas.tag_bind(tag,'<Button-1>',lambda _e,n=index:self.app._mouse_activate(n))
-            self.canvas.tag_bind(tag,'<Enter>',lambda _e,k=shape:self._hover(k,True,primary))
-            self.canvas.tag_bind(tag,'<Leave>',lambda _e,k=shape:self._hover(k,False,primary))
-        return shape
+            index=a._register_control((x,y,x+w,y+h),callback,text)
+            self.canvas.tag_bind(tag,'<Button-1>',lambda e,n=index:a._mouse_activate(n))
+            self.canvas.tag_bind(tag,'<Enter>',lambda e,i=item,p=primary or selected:self.hover(i,True,p))
+            self.canvas.tag_bind(tag,'<Leave>',lambda e,i=item,p=primary or selected:self.hover(i,False,p))
+        return item
 
-    def _hover(self,item,hovered,primary):
-        self.canvas.itemconfig(item,fill=('#A0B7FF' if hovered else '#7696FF') if primary else ('#294A76' if hovered else '#1A3152'))
-        self.canvas.configure(cursor='hand2' if hovered else '')
+    def hover(self,item,on,primary):
+        self.canvas.itemconfigure(item,fill=('#94ACFF' if on else '#6C8DFA') if primary else
+                                            ('#294A78' if on else '#1B3558'))
+        self.canvas.configure(cursor='hand2' if on else '')
 
-    def toggle(self,x,y,w,name,detail,value,handler):
-        self.text(x,y,name,11,bold=True)
-        self.text(x,y+22,detail,9,MUTED,width=w-102)
-        self.button(x+w-95,y,85,34,'ВКЛ' if value else 'ВЫКЛ',handler,primary=value,small=True)
-        self.line(x,y+55,x+w-8,y+55)
+    def switch(self,x,y,checked,action,*,disabled=False):
+        """Clickable modern pill switch with visible thumb, registered for Tab."""
+        a=self.app; w,h=52,28
+        tag=f'prod_switch_{a._control_serial}';a._control_serial+=1
+        self.canvas.create_polygon(a._rounded_coords(x,y,x+w,y+h,14),
+              smooth=True,splinesteps=12,fill=('#577EFD' if checked else '#304765'),
+              outline='#6A88BA' if checked else '#48607D',tags=(tag,))
+        center=(x+37 if checked else x+15,y+14)
+        self.canvas.create_oval(center[0]-10,center[1]-10,center[0]+10,center[1]+10,
+                 fill='#F6F9FF',outline='',tags=(tag,))
+        if not disabled:
+            index=a._register_control((x,y,x+w,y+h),action,'Переключатель')
+            self.canvas.tag_bind(tag,'<Button-1>',lambda e,n=index:a._mouse_activate(n))
+            self.canvas.tag_bind(tag,'<Enter>',lambda e:self.canvas.configure(cursor='hand2'))
+            self.canvas.tag_bind(tag,'<Leave>',lambda e:self.canvas.configure(cursor=''))
 
-    def title(self,headline,description):
-        self.text(self.x,112,headline,25,bold=True)
-        self.text(self.x,158,description,11,MUTED,width=self.r-self.x-15)
+    def preference(self,x,y,w,title,detail,checked,action,*,last=False):
+        self.txt(x,y,title,11,bold=True)
+        self.txt(x,y+24,detail,9,MUTED,width=max(110,w-79))
+        self.switch(x+w-59,y+3,checked,action)
+        if not last:self.line(x,y+61,x+w-4,y+61)
+
+    def header(self,title,subtitle,*,eyebrow=None):
+        # Eyebrow lives on every page for a consistent information hierarchy.
+        self.txt(self.x,98,eyebrow or 'VORQELI  /  WINDOWS',9,BLUE_BRIGHT,bold=True)
+        self.txt(self.x,120,title,24,bold=True)
+        self.txt(self.x,159,subtitle,10,MUTED,width=self.cw-20)
 
     def chrome(self):
         a=self.app
-        self.text(30,26,'V',23,ACCENT,bold=True)
-        self.text(67,19,'VORQELI',19,bold=True)
-        self.text(68,46,'CONNECT',10,MUTED,bold=True)
-        self.line(18,83,219,83)
-        self.text(32,105,'НАВИГАЦИЯ',9,DIM,bold=True)
-        items=[('Главная','⌂'),('Диагностика','◈'),('История','◷'),('О проекте','?'),('Настройки','⚙')]
-        for i,(page,symbol) in enumerate(items):
-            y=145+i*54
-            active=(page==a.selected_page or page=='Настройки' and a.selected_page=='Сеть и стратегии')
+        # Brand mark and sidebar spacing match concept more closely.
+        self.canvas.create_polygon(a._rounded_coords(26,25,79,78,14),
+            smooth=True,splinesteps=12,fill='#6C8FFF',outline='#91A9FF',width=1)
+        self.txt(52,51,'V',27,'#08162C',bold=True,anchor='center')
+        self.txt(89,26,'VORQELI',17,bold=True)
+        self.txt(90,50,'CONNECT',10,MUTED,bold=True)
+        self.line(22,101,214,101)
+        self.txt(28,121,'НАВИГАЦИЯ',9,DIM,bold=True)
+        nav=(('Главная','⌂'),('Диагностика','◇'),('История','◷'),
+             ('О проекте','?'),('Настройки','⚙'))
+        for i,(page,glyph) in enumerate(nav):
+            y=151+i*54
+            active=(a.selected_page==page or page=='Настройки' and a.selected_page=='Сеть и стратегии')
+            # Draw a left active indicator and embedded nav surface, not oversized
+            # saturated blue buttons used in the previous failed v0.37 design.
+            tag=f'nav_{i}'
             if active:
-                self.canvas.create_rectangle(22,y,26,y+40,fill=ACCENT,outline='')
-            self.button(30,y,197,40,f'{symbol}    {page}',lambda p=page:a._page(p),primary=active)
-        self.dot(34,self.h-107, GREEN if a.settings.desired_enabled else DIM)
-        self.text(48,self.h-116,'Режим подключения' if a.settings.desired_enabled else 'Режим ожидания',10,bold=True)
-        self.text(30,self.h-89,'WinWS · Telegram · GeoHide',9,MUTED)
-        self.text(30,self.h-58,'VORQELI · v'+VERSION,9,DIM)
-        self.text(self.x,29,'VORQELI / WINDOWS',10,MUTED,bold=True)
-        self.dot(self.r-132,40, GREEN if a.settings.desired_enabled else DIM)
-        self.text(self.r-120,33,'АКТИВЕН' if a.settings.desired_enabled else 'ОЖИДАНИЕ',9,MUTED,bold=True)
-        self.text(self.x,self.h-28,'VORQELI Connect  ·  Все данные хранятся локально',9,DIM)
-        self.text(self.r,self.h-28,'WINDOWS 10 / 11',9,DIM,anchor='ne')
+                self.canvas.create_polygon(a._rounded_coords(18,y,220,y+43,11),
+                         smooth=True,splinesteps=12,fill='#244373',outline='#375A90',tags=(tag,))
+                self.canvas.create_rectangle(17,y+6,21,y+37,fill=BLUE,outline='',tags=(tag,))
+            glyph_id=self.txt(40,y+21,glyph,18,BLUE_BRIGHT if active else '#7188AA',anchor='w')
+            label_id=self.txt(84,y+21,page,11,TEXT if active else MUTED,bold=active,anchor='w')
+            # Foreground text must share the same clickable tag.
+            self.canvas.addtag_withtag(tag,glyph_id)
+            self.canvas.addtag_withtag(tag,label_id)
+            index=a._register_control((18,y,220,y+43),lambda n=page:a._page(n),page)
+            self.canvas.tag_bind(tag,'<Button-1>',lambda e,n=index:a._mouse_activate(n))
+            self.canvas.tag_bind(tag,'<Enter>',lambda e:self.canvas.configure(cursor='hand2'))
+            self.canvas.tag_bind(tag,'<Leave>',lambda e:self.canvas.configure(cursor=''))
+        bottom=self.h-151
+        self.canvas.create_polygon(a._rounded_coords(21,bottom,216,bottom+98,14),
+            smooth=True,splinesteps=10,fill='#14253E',outline='#304D73')
+        report=a.controller.status()
+        state=report.overall if a.settings.desired_enabled else 'off'
+        self.dot(37,bottom+22,status_tone(state),5)
+        self.txt(52,bottom+15,'Соединение активно' if state=='connected' else
+                 'Часть модулей' if state=='partial' else 'Требует внимания' if state=='error'
+                 else 'Режим ожидания',10,bold=True)
+        self.txt(36,bottom+43,'WinWS  ·  Telegram  ·  DNS',9,MUTED)
+        self.txt(35,bottom+70,'v'+VERSION+'   /   Windows 10 · 11',9,DIM)
+        self.txt(self.x,29,'VORQELI   /   NETWORK CONTROL',10,MUTED,bold=True)
+        self.dot(self.r-128,41,status_tone(state),4)
+        self.txt(self.r-115,33,'АКТИВЕН' if state=='connected' else
+                 'ЧАСТИЧНО' if state=='partial' else 'ОШИБКА' if state=='error' else 'ОЖИДАНИЕ',9,MUTED,bold=True)
+        self.txt(self.x,self.h-29,'VORQELI Connect  ·  Локальное приложение',9,DIM)
+        self.txt(self.r,self.h-29,'WINDOWS 10 / 11',9,DIM,anchor='ne')
 
     def home(self):
         a=self.app
-        report=a.controller.status()
-        enabled=a.settings.desired_enabled
+        report=a.controller.status(); active=a.settings.desired_enabled
         busy=a.running_job or a._disconnecting
-        self.title('Управление подключением','Управляйте обходом ограничений и сетевыми компонентами в одном окне')
-        color=status_tone(report.overall if enabled else 'off')
-        self.dot(self.x+29,242,color,6)
-        self.text(self.x+44,232,'СИСТЕМА РАБОТАЕТ' if report.overall=='connected' else
-                  'ТРЕБУЕТ ВНИМАНИЯ' if enabled else 'ГОТОВО К ПОДКЛЮЧЕНИЮ',10,color,bold=True)
-        self.text(self.x+30,268,'Обход активен' if enabled else 'Обход отключён',22,bold=True)
-        self.text(self.x+31,307,'WinWS / '+str(a.controller.active_dpi_mode or a.settings.dpi_mode).upper(),10,MUTED)
-        self.text(self.x+31,331,str(a.detail).replace('\n',' ')[:88],9,MUTED,width=self.r-self.x-260)
-        self.button(self.r-198,273,169,53, 'ОТКЛЮЧИТЬ' if enabled else 'ПОДКЛЮЧИТЬ',
-                    a._start_disconnect if enabled else a._start_connect,primary=not enabled,
-                    disabled=a._disconnecting or (busy and not enabled))
-        items=[('DPI / WinWS','dpi',a.settings.connect_dpi,'DPI · Flowseal'),
-               ('Telegram','telegram',a.settings.connect_telegram,'MTProto-прокси'),
-               ('GeoHide DNS','dns',a.settings.connect_dns,a.settings.dns_mode.upper()+' · Windows')]
-        cw=(self.r-self.x-24)//3
-        for i,(label,key,selected,desc) in enumerate(items):
-            x=self.x+i*(cw+12)
-            state=getattr(report,key)
-            tone=status_tone(state if selected else 'off')
-            self.dot(x+27,422,tone)
-            self.text(x+41,414,label,13,bold=True)
-            self.text(x+20,447,'Запущен' if state=='on' and selected else
-                    'Выключен' if not selected or state=='off' else 'Требует внимания',11,tone,bold=True)
-            self.text(x+20,475,desc,9,MUTED,width=cw-40)
-        self.text(self.x+24,549,'Быстрые действия',14,bold=True)
-        self.text(self.x+24,579,'Управляйте соединением без перехода в настройки',9,MUTED)
-        span=self.r-self.x-48
-        button_width=(span-20)//3
-        for i,(label,call) in enumerate([
-          ('Диагностика',lambda:a._page('Диагностика')),
-          ('История',lambda:a._page('История')),
-          ('Параметры DNS',lambda:a._page('Сеть и стратегии'))]):
-            self.button(self.x+24+i*(button_width+10),612,button_width,42,label,call)
+        state=report.overall if active else 'off'
+        self.header('Управление подключением','Все важные сетевые инструменты — в одном окне',eyebrow='01  /  ГЛАВНАЯ')
+        hx,hy=self.x,193
+        # Functional visually expressive halo, not a fake VPN connection indicator.
+        cx,cy=hx+94,286
+        for rr,cc,width in ((76,'#31568A',2),(65,'#4977BE',2),(54,status_tone(state),4)):
+            self.canvas.create_oval(cx-rr,cy-rr,cx+rr,cy+rr,outline=cc,width=width)
+        self.canvas.create_oval(cx-42,cy-42,cx+42,cy+42,fill='#254981',outline=BLUE,width=2)
+        self.txt(cx,cy,'V',34,BLUE_BRIGHT,bold=True,anchor='center')
+        tx=hx+187
+        title=('Отключение…' if a._disconnecting else 'Обход активен' if state=='connected' else
+                'Частичное подключение' if state=='partial' else 'Подключение не удалось' if state=='error'
+                else 'Подключение…' if busy else 'Готов к подключению')
+        self.badge(tx,213, '●  ВСЕ МОДУЛИ ЗАПУЩЕНЫ' if state=='connected' else
+                           '●  НЕ ВСЕ МОДУЛИ РАБОТАЮТ' if state in ('partial','error')
+                           else '●  ОЖИДАНИЕ ПОДКЛЮЧЕНИЯ',tone='positive' if state=='connected'
+                           else 'warning' if state in ('partial','error') else 'quiet',width=229)
+        self.txt(tx,256,title,19,bold=True,width=max(200,self.cw-385))
+        strategy=(a.controller.active_dpi_mode or a.settings.dpi_mode).upper()
+        self.txt(tx,291,'WinWS · '+('Авто 1–13' if strategy=='ALT_AUTO' else strategy),10,MUTED)
+        selected=sum((a.settings.connect_dpi,a.settings.connect_telegram,a.settings.connect_dns))
+        count=sum(getattr(report,k)=='on' for k in ('dpi','telegram','dns'))
+        self.txt(tx,315,f'Модули: {count}/{selected}  ·  '+('Соединение проверяется' if busy else 'Локальный статус'),9,MUTED)
+        self.button(self.r-192,305,167,46,'ОТКЛЮЧИТЬ' if active else 'ПОДКЛЮЧИТЬ',
+                    a._start_disconnect if active else a._start_connect,primary=not active,
+                    disabled=a._disconnecting or (busy and not active))
+        cw=(self.cw-24)//3
+        cards=[('DPI / WinWS','dpi','dpi','Стратегия: '+strategy,a.settings.connect_dpi),
+               ('Telegram','telegram','telegram','MTProto / прокси',a.settings.connect_telegram),
+               ('GeoHide DNS','dns','dns','DoH · HTTPS' if a.settings.dns_mode=='doh' else
+                'IPv4 DNS · Windows',a.settings.connect_dns)]
+        for i,(name,kind,key,detail,enabled) in enumerate(cards):
+            xx=hx+i*(cw+12)
+            self.icon(xx+16,404,kind,43)
+            self.txt(xx+70,405,name,11,bold=True)
+            actual=getattr(report,key)
+            tone=status_tone(actual if enabled else 'off')
+            self.dot(xx+73,440,tone,4)
+            self.txt(xx+85,432,_label_for_module(actual,enabled),9,tone,bold=True,width=max(110,cw-95))
+            self.txt(xx+17,478,detail,9,MUTED,width=cw-30)
+        self.txt(hx+23,541,'Быстрые действия',14,bold=True)
+        self.txt(hx+23,568,'Подключение, диагностика и параметры подключения',9,MUTED)
+        available=self.cw-46
+        bw=(available-18)//3
+        opts=[('Диагностика',lambda:a._page('Диагностика')),
+              ('История событий',lambda:a._page('История')),
+              ('Настройки сети',lambda:a._page('Сеть и стратегии'))]
+        for j,(label,callback) in enumerate(opts):
+            self.button(hx+23+j*(bw+9),self.h-126,bw,43,label,callback)
+        if state in ('partial','error'):
+            self.txt(hx+25,self.h-78,str(a.detail).replace('\n',' ')[:112],9,AMBER,width=self.cw-50)
+        else:
+            self.txt(hx+25,self.h-78,'Проверка сайтов находится в разделе «Диагностика».',9,DIM)
 
     def diagnostics(self):
         a=self.app
-        self.title('Диагностика сети','HTTPS-ответы популярных сервисов; не проверяет авторизацию и функции аккаунта')
-        self.button(self.r-159,116,148,41,'ПРОВЕРИТЬ ВСЁ',a._diagnose,primary=True,disabled=a.running_job)
-        results=dict(a.last_results or [])
-        labels=[('Discord','Discord'),('YouTube','YouTube'),('Telegram','Telegram Web'),
-                ('ChatGPT','ChatGPT'),('Microsoft','Microsoft (Copilot, Designer, Xbox)')]
-        for i,(title,key) in enumerate(labels):
-            y=219+i*69
-            outcome=results.get(key,'Не проверено')
-            short,tone=service_summary(outcome)
-            self.dot(self.x+24,y+31,tone,5)
-            self.text(self.x+39,y+11,title,12,bold=True)
-            meta=('Copilot · Designer · Xbox' if title=='Microsoft' else
-                  'Проверка HTTPS-ответа' if title!='Telegram' else 'Telegram Web · HTTPS')
-            self.text(self.x+39,y+34,meta,9,MUTED)
-            self.text(self.r-166,y+20,short,9,tone,bold=True,anchor='ne')
-            self.button(self.r-143,y+13,127,35,'ПРОВЕРИТЬ',lambda name=key:a._diagnose_service(name),small=True,disabled=a.running_job)
-        self.text(self.x+22,594,'Инструменты проверки',11,bold=True)
-        span=self.r-self.x-44
-        bw=(span-22)//3
-        for i,(title,fn) in enumerate([
-           ('DNS / HOSTS',a._show_dns_audit),('ЖУРНАЛЫ',a._show_engine_logs),
-           ('TELEGRAM WEB',a._show_telegram_web_audit)]):
-            self.button(self.x+22+(bw+11)*i,618,bw,39,title,fn,small=True)
+        self.header('Диагностика сети','Реальные HTTPS-ответы. Статус не подтверждает вход в аккаунт.',eyebrow='02  /  ДИАГНОСТИКА')
+        self.button(self.r-173,112,170,42,'◌  ПРОВЕРИТЬ ВСЁ',a._diagnose,
+                    primary=True,disabled=a.running_job,small=True)
+        self.txt(self.x+23,203,'ДОСТУПНОСТЬ СЕРВИСОВ',10,BLUE_BRIGHT,bold=True)
+        result=dict(a.last_results or ())
+        for i,(title,key,kind) in enumerate((
+            ('Discord','Discord','discord'),('YouTube','YouTube','youtube'),
+            ('Telegram','Telegram Web','telegram'),('ChatGPT','ChatGPT','chatgpt'),
+            ('Microsoft','Microsoft (Copilot, Designer, Xbox)','microsoft'))):
+            y=239+i*61
+            self.icon(self.x+31,y+8,kind,38)
+            self.txt(self.x+82,y+7,title,12,bold=True)
+            self.txt(self.x+82,y+31,'Copilot · Designer · Xbox' if title=='Microsoft'
+                     else 'Telegram Web · HTTPS' if title=='Telegram' else 'HTTPS-проверка сервиса',9,MUTED)
+            value=result.get(key,'Не проверено')
+            summary,tone=service_summary(value)
+            self.dot(self.r-288,y+27,tone,4)
+            self.txt(self.r-277,y+19,summary,9,tone,bold=True,width=137)
+            self.button(self.r-139,y+10,113,34,'ПРОВЕРИТЬ',lambda n=key:a._diagnose_service(n),
+                        disabled=a.running_job,small=True)
+        self.txt(self.x+25,544,'СЕТЕВЫЕ ИНСТРУМЕНТЫ',10,BLUE_BRIGHT,bold=True)
+        labels=(('DNS / HOSTS',a._show_dns_audit),('ЖУРНАЛЫ',a._show_engine_logs),
+                ('TELEGRAM WEB',a._show_telegram_web_audit))
+        bw=(self.cw-80)//3
+        for j,(name,fn) in enumerate(labels):
+            self.button(self.x+30+j*(bw+9),584,bw,43,name,fn,small=True)
+        self.txt(self.x+25,self.h-76,'Microsoft показывается одной категорией; внутри проверяются 3 адреса.',9,MUTED,width=self.cw-55)
 
     def history(self):
         a=self.app
-        self.title('История действий','События приложения и проверки сохраняются локально')
-        self.button(self.r-165,116,155,40,'ЭКСПОРТ JSON',a._export_diagnostics,
+        self.header('История действий','Локальный журнал событий программы и проверок соединения',eyebrow='03  /  ИСТОРИЯ')
+        self.button(self.r-171,112,163,41,'ЭКСПОРТ JSON',a._export_diagnostics,
                     disabled=not bool(a.last_results),small=True)
-        self.text(self.x+26,231,'Последние события',13,bold=True)
-        self.text(self.x+30,268,'ВРЕМЯ',9,DIM,bold=True)
-        self.text(self.x+162,268,'СОБЫТИЕ',9,DIM,bold=True)
-        entries=recent_events(limit=16)
-        if not entries:self.text(self.x+29,306,'Здесь появятся подключения, проверки и изменения настроек.',11,MUTED)
-        for i,item in enumerate(entries[:min(6,max(0,(self.h-350)//55))]):
-            y=290+i*55
-            label=str(item.get('message',''))
-            self.text(self.x+29,y+15,str(item.get('timestamp',''))[11:19],10,MUTED)
-            self.text(self.x+162,y+15,label[:95],10,TEXT,width=self.r-self.x-205)
-        self.text(self.x+23,self.h-87,'Диагностических запусков: '+str(len(load_history())),9,MUTED)
+        # All tabs are interactive; the filter genuinely changes visible rows.
+        allowed=('Все события','Подключение','Настройки','Ошибки')
+        current=getattr(a,'_visual_history_filter','Все события')
+        for j,name in enumerate(allowed):
+            self.button(self.x+23+j*141,201,132,36,name,
+                       lambda n=name:self.change_history_filter(n),selected=current==name,small=True)
+        self.txt(self.x+30,276,'ВРЕМЯ',9,DIM,bold=True)
+        self.txt(self.x+166,276,'СОБЫТИЕ',9,DIM,bold=True)
+        self.txt(self.r-170,276,'ИСТОЧНИК',9,DIM,bold=True)
+        events=recent_events(limit=80)
+        for_filter={'Подключение':('connection','подключ','обход','отключ'),
+                    'Настройки':('settings','настро','профил','режим'),
+                    'Ошибки':('error','ошиб','не удалось','сбой')}
+        if current in for_filter:
+            keywords=for_filter[current]
+            events=[e for e in events if any(k in (str(e.get('kind',''))+' '+str(e.get('message',''))).lower() for k in keywords)]
+        cap=max(2,min(8,(self.h-398)//46))
+        if not events:self.txt(self.x+40,340,'Нет событий для выбранного фильтра.',12,MUTED)
+        for i,event in enumerate(events[:cap]):
+            y=317+i*45
+            text=str(event.get('message','')).replace('\n',' ')
+            ts=str(event.get('timestamp',''))
+            self.dot(self.x+39,y+19,RED if any(k in text.lower() for k in ('ошибка','сбой')) else BLUE,3)
+            self.txt(self.x+54,y+11,ts[11:19] or '--:--:--',10,MUTED)
+            self.txt(self.x+166,y+10,text[:92],10,TEXT,width=self.cw-356)
+            self.txt(self.r-160,y+11,str(event.get('kind','событие'))[:19],9,DIM)
+        self.txt(self.x+25,self.h-94,'Запусков сетевой диагностики: '+str(len(load_history())),9,MUTED)
+
+    def change_history_filter(self,name):
+        self.app._visual_history_filter=name
+        self.app._draw()
 
     def about(self):
         a=self.app
-        self.title('Поддержка и о проекте','Информация о приложении, компонентах и доступных материалах')
-        self.text(self.x+30,241,'VORQELI CONNECT',19,bold=True)
-        self.text(self.x+30,279,'Управление WinWS, Telegram MTProto и GeoHide DNS',10,MUTED)
-        self.text(self.r-38,245,'v'+VERSION,13,ACCENT,bold=True,anchor='ne')
-        self.text(self.x+24,363,'Документация и ссылки',13,bold=True)
-        links=[('Исходный код','https://github.com/Zeihos/VORQELI'),
-               ('GeoHide','https://geohide.ru/'),
-               ('Проверить обновления',None)]
-        span=self.r-self.x-48
-        bw=(span-20)//3
-        for i,(label,url) in enumerate(links):
+        self.header('Поддержка и о проекте','Информация о VORQELI Connect, документация и обновления',eyebrow='04  /  ПОДДЕРЖКА')
+        self.icon(self.x+28,224,'info',67)
+        self.txt(self.x+111,226,'VORQELI CONNECT',18,bold=True)
+        self.txt(self.x+112,257,'Windows 10 / 11 · сетевые инструменты',10,MUTED)
+        self.txt(self.x+112,279,'Без аккаунтов и скрытой телеметрии',9,DIM)
+        self.badge(self.r-129,226,'v'+VERSION,tone='active',width=103)
+        self.txt(self.x+24,373,'КАНАЛЫ И ДОКУМЕНТАЦИЯ',10,BLUE_BRIGHT,bold=True)
+        links=(('Исходный код','github','https://github.com/Zeihos/VORQELI'),
+               ('GeoHide DNS','dns','https://geohide.ru/'),
+               ('Обновления','history',None))
+        bw=(self.cw-66)//3
+        for i,(name,kind,url) in enumerate(links):
+            xx=self.x+22+i*(bw+11)
+            self.canvas.create_polygon(self.app._rounded_coords(xx,406,xx+bw,492,13),
+                  smooth=True,splinesteps=12,fill='#192D4B',outline='#304D73')
+            self.icon(xx+13,423,kind,36)
             callback=(lambda u=url:webbrowser.open(u)) if url else a._check_updates
-            self.button(self.x+24+i*(bw+10),419,bw,50,label,callback)
-        self.text(self.x+24,534,'Компоненты соединения',12,bold=True)
-        self.text(self.x+27,568,'WinWS / Flowseal      ·      Telegram MTProto      ·      GeoHide DNS',10,MUTED)
-        self.text(self.x+27,592,'DNS и HOSTS изменяются только по явному действию пользователя.',9,MUTED)
+            self.button(xx+57,429,max(51,bw-69),38,name,callback,small=True)
+        self.txt(self.x+26,557,'КОМПОНЕНТЫ ПРИЛОЖЕНИЯ',10,BLUE_BRIGHT,bold=True)
+        for j,(name,detail) in enumerate((('WinWS / Flowseal','DPI-обход'),
+                ('Telegram MTProto','Локальный прокси'),('GeoHide DNS','Сторонний DNS-провайдер'))):
+            yy=575+j*23
+            if yy>self.h-83:break
+            self.dot(self.x+34,yy+6,GREEN,4)
+            self.txt(self.x+47,yy,name,10,bold=True)
+            self.txt(self.x+271,yy,detail,10,MUTED)
 
     def settings(self):
         a=self.app
-        self.title('Настройки приложения','Параметры Windows, поведения окна и основных компонентов')
-        span=self.r-self.x-12
-        left_w=int(span*.53)
-        x1=self.x+22
-        x2=self.x+left_w+32
-        w1=left_w-43
-        w2=self.r-x2-20
-        self.text(x1,232,'ОБЩИЕ',10,ACCENT,bold=True)
-        general=[
-            ('Автозапуск Windows','Запускать при входе в систему','launch_at_startup'),
-            ('Восстановление режима','Включать последний выбранный режим','restore_last_mode'),
-            ('Сворачивать в трей','Продолжать работу после закрытия окна','minimize_to_tray'),
-            ('Права администратора','Запрашивать UAC при старте','admin_on_launch'),
-        ]
-        for i,(name,detail,key) in enumerate(general):
-            self.toggle(x1,263+i*73,w1,name,detail,getattr(a.settings,key),lambda k=key:a._toggle_setting(k))
-        self.text(x2,232,'КОМПОНЕНТЫ',10,ACCENT,bold=True)
-        components=[('Обход DPI / WinWS','Пакет Flowseal','connect_dpi'),
-                    ('Telegram MTProto','Локальный прокси','connect_telegram'),
-                    ('GeoHide DNS','Провайдер системного DNS','connect_dns')]
-        for i,(name,detail,key) in enumerate(components):
-            self.toggle(x2,267+i*84,w2,name,detail,getattr(a.settings,key),lambda k=key:a._toggle_setting(k))
-        self.text(self.x+25,607,'Сеть и стратегии DPI',14,bold=True)
-        self.text(self.x+25,632,'13 стратегий ALT · GeoHide DNS · HOSTS',9,MUTED)
-        self.button(self.r-199,606,178,45,'ОТКРЫТЬ  →',lambda:a._page('Сеть и стратегии'),primary=True)
+        self.header('Настройки приложения','Поведение при запуске Windows и управление компонентами',eyebrow='05  /  НАСТРОЙКИ')
+        left=int(self.cw*.54)
+        lx=self.x+23;rx=self.x+left+30
+        lw=left-49;rw=self.r-rx-23
+        self.txt(lx,215,'ОБЩИЕ',10,BLUE_BRIGHT,bold=True)
+        options=(('Автозапуск с Windows','Запускать при входе в систему','launch_at_startup'),
+                 ('Восстановление режима','Включать ранее выбранный режим','restore_last_mode'),
+                 ('Сворачивать в трей','Продолжать работу при закрытии окна','minimize_to_tray'),
+                 ('Запуск от администратора','Запрашивать UAC при запуске','admin_on_launch'))
+        for i,(name,desc,key) in enumerate(options):
+            self.preference(lx,246+i*65,lw,name,desc,getattr(a.settings,key),
+                            lambda k=key:a._toggle_setting(k),last=i==3)
+        self.txt(rx,215,'КОМПОНЕНТЫ',10,BLUE_BRIGHT,bold=True)
+        modules=(('Обход DPI / WinWS','Обход ограничений','connect_dpi'),
+                 ('Telegram MTProto','Локальный прокси Desktop','connect_telegram'),
+                 ('GeoHide DNS','Системное разрешение DNS','connect_dns'))
+        for i,(name,desc,key) in enumerate(modules):
+            self.preference(rx,252+i*84,rw,name,desc,getattr(a.settings,key),
+                            lambda k=key:a._toggle_setting(k),last=i==2)
+        self.icon(self.x+24,self.h-141,'settings',48)
+        self.txt(self.x+88,self.h-140,'Сеть и стратегии DPI',15,bold=True)
+        self.txt(self.x+88,self.h-109,'13 профилей · GeoHide DNS · HOSTS · восстановление',9,MUTED)
+        self.button(self.r-209,self.h-137,182,47,'ОТКРЫТЬ  →',lambda:a._page('Сеть и стратегии'),primary=True)
 
     def advanced(self):
         a=self.app
-        self.title('Сеть и стратегии DPI','Подробная конфигурация обхода и системного DNS')
-        span=self.r-self.x-15
-        left=int(span*.64)
-        lx=self.x+22
-        rx=self.x+left+36
-        rw=self.r-rx-15
-        self.text(lx,237,'СТРАТЕГИЯ DPI',10,ACCENT,bold=True)
+        self.header('Сеть и стратегии DPI','ALT1–ALT13, GeoHide DNS и инструменты восстановления',eyebrow='06  /  ПАРАМЕТРЫ СЕТИ')
+        left=int(self.cw*.636)
+        lx=self.x+23;rx=self.x+left+25
+        lw=left-38;rw=self.r-rx-17
+        self.txt(lx,213,'ПРОФИЛЬ DPI / WINWS',10,BLUE_BRIGHT,bold=True)
         chosen=a.settings.dpi_mode
-        self.text(lx,269,'Профиль подключения',11,bold=True)
-        self.button(self.x+left-173,258,159,42,'АВТО · ALT1–13',lambda:a._set_dpi_mode('alt_auto'),primary=chosen=='alt_auto',small=True)
-        self.text(lx,324,'Ручной выбор стратегии',10,MUTED)
-        cols=7
-        chip_w=max(43,min(59,(left-50-6*(cols-1))//cols))
+        self.txt(lx,250,'Подбор стратегии',11,bold=True)
+        self.button(self.x+left-183,239,161,41,'АВТО 1–13',lambda:a._set_dpi_mode('alt_auto'),
+                    selected=chosen=='alt_auto',small=True)
+        self.txt(lx,305,'РУЧНОЙ ВЫБОР',9,DIM,bold=True)
+        cols=7;gap=7
+        chip_width=max(39,min(59,(lw-12-(cols-1)*gap)//cols))
         for i,mode in enumerate(ALT_MODES):
-            if mode=='alt_auto': continue
-            idx=int(mode[3:])-1 if mode.startswith('alt') and mode[3:].isdigit() else i
-            col,row=idx%cols,idx//cols
-            self.button(lx+col*(chip_w+6),355+row*48,chip_w,39,mode.upper(),lambda m=mode:a._set_dpi_mode(m),primary=chosen==mode,small=True)
-        self.text(rx,237,'DNS И ТРАНСПОРТ',10,ACCENT,bold=True)
-        self.text(rx,272,'GeoHide DNS',13,bold=True)
-        self.text(rx,311,'Режим разрешения имён',9,MUTED)
-        gap=8
-        half=(rw-gap)//2
-        self.button(rx,341,half,39,'IPv4 DNS',lambda:a._set_dns_mode('plain'),primary=a.settings.dns_mode=='plain',disabled=a.settings.desired_enabled,small=True)
-        self.button(rx+half+gap,341,half,39,'DoH / HTTPS',lambda:a._set_dns_mode('doh'),primary=a.settings.dns_mode=='doh',disabled=a.settings.desired_enabled,small=True)
-        self.text(rx,402,'DoH требует поддержки Windows.',9,MUTED,width=rw)
-        self.text(rx,426,'Смена режима — после отключения.',9,MUTED,width=rw)
-        self.text(self.x+23,550,'ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ',10,ACCENT,bold=True)
-        self.text(self.x+23,582,'Сетевые фильтры задаются активной стратегией Flowseal.',10,MUTED)
-        width=(self.r-self.x-60)//3
-        for i,(name,fn) in enumerate([
-            ('ВОССТАНОВИТЬ DNS',a._restore_dns),
-            ('HOSTS / ДОПОЛНИТЕЛЬНО',a._show_hosts_manager),
-            ('НАЗАД К НАСТРОЙКАМ',lambda:a._page('Настройки'))]):
-            self.button(self.x+20+i*(width+10),616,width,40,name,fn,primary=i==2,small=True)
+            row,col=divmod(i,cols)
+            self.button(lx+col*(chip_width+gap),337+row*51,chip_width,37,
+                        mode.upper(),lambda m=mode:a._set_dpi_mode(m),selected=chosen==mode,small=True)
+        self.badge(lx,463,'Автоматический режим' if chosen=='alt_auto' else chosen.upper()+' выбран',
+                   tone='positive' if chosen=='alt_auto' else 'active',width=217)
+        self.txt(rx,213,'GEOHIDE DNS',10,BLUE_BRIGHT,bold=True)
+        self.icon(rx,248,'dns',39)
+        self.txt(rx+53,252,'Системный DNS',12,bold=True)
+        self.txt(rx,305,'ТРАНСПОРТ',9,DIM,bold=True)
+        sw=(rw-7)//2
+        self.button(rx,333,sw,42,'IPv4 DNS',lambda:a._set_dns_mode('plain'),
+                    selected=a.settings.dns_mode=='plain',disabled=a.settings.desired_enabled,small=True)
+        self.button(rx+sw+7,333,sw,42,'DoH / HTTPS',lambda:a._set_dns_mode('doh'),
+                    selected=a.settings.dns_mode=='doh',disabled=a.settings.desired_enabled,small=True)
+        self.txt(rx,402,'DoH зависит от поддержки Windows.',9,MUTED,width=rw)
+        self.txt(rx,426,'Переключение после отключения.',9,DIM,width=rw)
+        self.txt(self.x+24,553,'СЕТЕВЫЕ ИНСТРУМЕНТЫ',10,BLUE_BRIGHT,bold=True)
+        self.txt(self.x+24,577,'Параметры WinWS задаются выбранным профилем Flowseal.',9,MUTED)
+        bw=(self.cw-64)//3
+        for j,(name,callback) in enumerate((('ВОССТАНОВИТЬ DNS',a._restore_dns),
+                ('HOSTS / ПРАВИЛА',a._show_hosts_manager),
+                ('К НАСТРОЙКАМ',lambda:a._page('Настройки')))):
+            self.button(self.x+22+j*(bw+10),self.h-128,bw,43,name,callback,
+                        primary=j==2,small=True)
 
 
 def draw(app) -> None:
-    """Render the current page using existing controller/actions and keyboard map."""
+    """Main actual Win32/Tk renderer with cache, no network side effects."""
     if app._quitting or not app.winfo_exists():
         return
-    app._logical_size=(max(1060,app.canvas.winfo_width()),max(710,app.canvas.winfo_height()))
+    app._logical_size=(max(MIN_WIDTH,app.canvas.winfo_width()),
+                       max(MIN_HEIGHT,app.canvas.winfo_height()))
     w,h=app._logical_size
     app._widgets=[]
     app._button_images=[]
@@ -369,8 +649,8 @@ def draw(app) -> None:
     app.canvas.create_image(0,0,image=app._canvas_bg,anchor='nw')
     p=Painter(app)
     p.chrome()
-    pages={'Главная':p.home,'Диагностика':p.diagnostics,'История':p.history,
-           'О проекте':p.about,'Настройки':p.settings,'Сеть и стратегии':p.advanced}
-    pages.get(app.selected_page,p.home)()
+    actions={'Главная':p.home,'Диагностика':p.diagnostics,'История':p.history,
+             'О проекте':p.about,'Настройки':p.settings,'Сеть и стратегии':p.advanced}
+    actions.get(app.selected_page,p.home)()
     app._sync_scrollbars(w,h)
     app._render_focus()
