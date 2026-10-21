@@ -1,5 +1,5 @@
 {
-  "file_count": 171,
+  "file_count": 191,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -7,15 +7,15 @@
     },
     ".github/workflows/windows-build.yml": {
       "bytes": 6103,
-      "sha256": "5356abd2f1dd714fa69e15a5b058def2deb05dc181b34f9a7bef8aa2829cda15"
+      "sha256": "f4874ed22648a22c5dd41b54b14a39cf12b001525b80078cb1478c95f781ed21"
     },
     ".gitignore": {
       "bytes": 140,
       "sha256": "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
     },
     "CHANGELOG.md": {
-      "bytes": 23677,
-      "sha256": "a2cd4bfbbb2eefe63dc63dabb926e8a0f154699c4251ad7f0bd9c8d87bf75a46"
+      "bytes": 24291,
+      "sha256": "aacf84fb4a2c471d7f0c03f751d8f79e336178b6db0efd589271433282f7e09d"
     },
     "Compact-preview.png": {
       "bytes": 74045,
@@ -62,12 +62,12 @@
       "sha256": "66ebf4485b792f8aaef000043d242dc8379557814d1fcf7ea28bf584ee9d0b22"
     },
     "assets/VORQELI-logo.png": {
-      "bytes": 1024911,
-      "sha256": "111a42152ad3ccd6f537343924562fe15cdca7b2654c5e57d5631310ceff5f98"
+      "bytes": 239521,
+      "sha256": "cc64b3df129b7695b333cf6b2aa71cdfd612253a2361d54440acf43d0b69b93f"
     },
     "assets/VORQELI.ico": {
-      "bytes": 78604,
-      "sha256": "3224ffdcea1f6477cef1538715321861610adfb2532f96a1783079249906fb9f"
+      "bytes": 111574,
+      "sha256": "33da7f02a40ea6caea26e832d97a5dad2b0bb91fce0fc026b9fd556f1696caf1"
     },
     "assets/brand-banner.jpg": {
       "bytes": 61605,
@@ -219,11 +219,11 @@
     },
     "installer/VORQELI.iss": {
       "bytes": 2988,
-      "sha256": "f5b094ff1f1276b57afacf5c220ed5cc3f3bc9d4ca822c9f595cdd43a6e55746"
+      "sha256": "6213a5125380923e2d50264daf2f8095e4f69f2e01d310f88d9addc993adb11c"
     },
     "pyproject.toml": {
-      "bytes": 583,
-      "sha256": "7670e1e3fd3a49c9fc3673598bb46f7338e4238d828caa04bd17940b41286577"
+      "bytes": 635,
+      "sha256": "ba9356f88317a3c89cb05f31c6ddb59c342d7bdb02889d678991d1227579b7a7"
     },
     "scripts/__init__.py": {
       "bytes": 0,
@@ -279,15 +279,15 @@
     },
     "src/vorqeli_connect/__init__.py": {
       "bytes": 23,
-      "sha256": "189c32adc1f5789397fe9ffd1fe2d220c3b6003c6dc65edeb2d06e43b3e0cc23"
+      "sha256": "5362f7eec609c3fb90c163d70585fa5a7229282a7f408b9e29cda8aa075eb1c1"
     },
     "src/vorqeli_connect/__main__.py": {
       "bytes": 29,
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 82402,
-      "sha256": "8cfc4e0909c347422ae6118fb852bf2419a02de43551ec361e013cd553e451b3"
+      "bytes": 80500,
+      "sha256": "e319a29f2005d6ff6570732f3a6e16180e8333c0a42b3cb2188eaf901617ad53"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11063,
@@ -406,8 +406,8 @@
       "sha256": "66ebf4485b792f8aaef000043d242dc8379557814d1fcf7ea28bf584ee9d0b22"
     },
     "src/vorqeli_connect/ui_assets/VORQELI-logo.png": {
-      "bytes": 1024911,
-      "sha256": "111a42152ad3ccd6f537343924562fe15cdca7b2654c5e57d5631310ceff5f98"
+      "bytes": 239521,
+      "sha256": "cc64b3df129b7695b333cf6b2aa71cdfd612253a2361d54440acf43d0b69b93f"
     },
     "src/vorqeli_connect/ui_assets/VORQELI.ico": {
       "bytes": 78604,
@@ -684,6 +684,86 @@
     "docs/UI_PRODUCTION_V38.md": {
       "bytes": 2635,
       "sha256": "de5100087a05e49fd95c394bb171f566c22e83003ba50ce3ccc32262bd1600bf"
+    },
+    "src/vorqeli_connect/premium_ui.py": {
+      "bytes": 23397,
+      "sha256": "04237586dd8342f1722f323d0f6c3f080599c20e8a5f88f3a6d117d81246a9d5"
+    },
+    "src/vorqeli_connect/frameless.py": {
+      "bytes": 3310,
+      "sha256": "1fc1cf607412bf0dc84393e3a62d76380598d463bba3a9d5029fc39387f8ee4e"
+    },
+    "src/vorqeli_connect/premium_logs.py": {
+      "bytes": 5420,
+      "sha256": "53600d79fc852a19f7ddec42605868a40db12dd2e0f034928368ebb1f7395294"
+    },
+    "tests/test_premium_ui_v39.py": {
+      "bytes": 5412,
+      "sha256": "56c7ec23c143a2990b409f81844bb65cd667198c8d1f37f4015b573c557cc63c"
+    },
+    "docs/PREMIUM_UI_V39.md": {
+      "bytes": 4125,
+      "sha256": "a602382826546e8062d73309bd9a9035afdcb6cc70c279bde87773303b246bb1"
+    },
+    "assets/VORQELI-wordmark.png": {
+      "bytes": 749147,
+      "sha256": "20bed5e4619d1c8903f98ec2093ee6c741aaabf6f68df172cdf63e070088bb54"
+    },
+    "src/vorqeli_connect/ui_assets/premium/home.png": {
+      "bytes": 1643564,
+      "sha256": "3319548edfe12eaa351bee66ff3039cdf2b9ba7e4229e9eb0672ebde4d400791"
+    },
+    "src/vorqeli_connect/ui_assets/premium/diagnostics.png": {
+      "bytes": 1639812,
+      "sha256": "920df01d590ac9e5d0fda1355dd23ce52d0e0dcd38c973d3eeddcae5ec2d4794"
+    },
+    "src/vorqeli_connect/ui_assets/premium/history.png": {
+      "bytes": 1648851,
+      "sha256": "2300c3a598bfad92822effbcedbfbb250c12a5ac1adafcbdab51d70fd6121244"
+    },
+    "src/vorqeli_connect/ui_assets/premium/about.png": {
+      "bytes": 1770478,
+      "sha256": "26becf9ea03f912b38ad1b8ef1164c0fa9356fac5d5ff93283a5a5c247f43438"
+    },
+    "src/vorqeli_connect/ui_assets/premium/settings.png": {
+      "bytes": 1596485,
+      "sha256": "431c1e11a4857c916982c9b83ad8d2ecff8dd43f22f059491a632f11749bc2bb"
+    },
+    "src/vorqeli_connect/ui_assets/premium/network.png": {
+      "bytes": 1713800,
+      "sha256": "85732f4d51355667fad13ef3672df1c2fdf8fe1bf749a1cf06e5a7e727a7b888"
+    },
+    "src/vorqeli_connect/ui_assets/premium/brand/chatgpt.png": {
+      "bytes": 23477,
+      "sha256": "e5dc7bf987e4ba4e5e7bbf7cb21dcd67205c38f693a17abc4a8dd101497e28eb"
+    },
+    "src/vorqeli_connect/ui_assets/premium/brand/discord.png": {
+      "bytes": 2771,
+      "sha256": "0607b823ec00d3770b24fd5eda7320098147c5e4de474f6c005f583f9c42bca5"
+    },
+    "src/vorqeli_connect/ui_assets/premium/brand/discord.svg": {
+      "bytes": 1354,
+      "sha256": "722a1c0efc4598e1220becfe7e1c66689a697e030c3c7b439a5b5211287316fa"
+    },
+    "src/vorqeli_connect/ui_assets/premium/brand/microsoft.png": {
+      "bytes": 422,
+      "sha256": "3b71621736ac8e89ecbe7532b2f354a760446d2e28371505792928bd4be9d157"
+    },
+    "src/vorqeli_connect/ui_assets/premium/brand/telegram.png": {
+      "bytes": 3506,
+      "sha256": "2f38b69718e66991c65ee400d77f2064e1cca0db70f858a930f9659cead880e0"
+    },
+    "src/vorqeli_connect/ui_assets/premium/brand/telegram.svg": {
+      "bytes": 721,
+      "sha256": "004de53092a6cfd69252165020a14cdf1188aa5c3fe3426decce257f7eddaa0c"
+    },
+    "src/vorqeli_connect/ui_assets/premium/brand/youtube.png": {
+      "bytes": 1945,
+      "sha256": "fc45597abd05b201d4a2c71503620d25fc90654134001dbe23562a08668b22ca"
+    },
+    "src/vorqeli_connect/ui_assets/premium/brand/youtube.svg": {
+      "bytes": 439,
+      "sha256": "83f21db4834289327fec26798f3ae915efa72d877129eaab5f9eb6299f776b36"
     }
   },
   "version": "0.34.0"

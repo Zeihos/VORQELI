@@ -1,3 +1,12 @@
+## v0.39.0 — Fixed frameless premium Windows interface
+
+- Six fully themed screens reproduce the approved VORQELI visual compositions.
+- The six visual scenes are bundled locally; network health, HTTPS diagnoses, history, switches and selection never use mock status values.
+- Windows frameless fixed-size shell, controlled minimize/drag/close and visible taskbar integration.
+- App icon, installer ICO, taskbar/tray PNG and brand pictograms updated.
+- DPI/Telegram logs viewer redesigned; real logs remain bounded to 64KB and redacted.
+- WinWS, GeoHide, Telegram, startup privileges and HOSTS logic unchanged.
+
 ## v0.38.0 — Полная переработка оформления VORQELI Connect
 
 - Новый визуальный рендерер всех 6 экранов: иконки, градиенты, световые эффекты, переключатели и новые состояния.

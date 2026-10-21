@@ -33,6 +33,7 @@ from .engine_adapters import proxy_link
 from .flowseal_alts import ALT_MODES, ALT_PRIORITY
 from .hosts_overlay import (hosts_path, analyze_hosts, apply_optional_hosts, remove_optional_hosts)
 from .tray_assets import tray_icon
+from .frameless import minimize
 from .support_report import build_report
 from .ui_copy import main_status, module_caption, connection_disclaimer
 from .ui_navigation import cycle_focus, reveal_target
@@ -106,11 +107,8 @@ class ConnectApp(tk.Tk):
             self.iconphoto(True, self._window_icon)
         except (OSError, tk.TclError, ValueError):
             pass
-        from .window_state import safe_geometry
-        self.geometry(safe_geometry(self.settings.window_geometry,
-                                    self.winfo_screenwidth(),self.winfo_screenheight()))
-        from .window_state import minimum_window_size
-        self.minsize(*minimum_window_size(self.winfo_screenwidth(),self.winfo_screenheight()))
+        from .frameless import configure as configure_frameless
+        configure_frameless(self)
         self.events = queue.Queue()
         self.controller = UnifiedController(self.settings, emit=lambda typ, data:self.events.put((typ,data)))
         self.connected_text = 'Не подключено'
@@ -175,6 +173,7 @@ class ConnectApp(tk.Tk):
         self.bind('<Right>', self._keyboard_right)
         self.bind('<Left>', self._keyboard_left)
         self.bind('<Escape>', lambda e:self._window_close())
+        self.bind('<Alt-F4>', lambda e:self._window_close())
         self.bind('<Control-comma>',lambda e:self._page('Настройки'))
         self.bind('<Control-d>',lambda e:self._page('Диагностика'))
         for ix, page in enumerate(('Главная','Диагностика','История','Настройки','О проекте'),start=1):
@@ -273,7 +272,7 @@ class ConnectApp(tk.Tk):
             self._start_minimized = False
         else:
             # Still accessible through Windows taskbar if tray is unavailable.
-            self.iconify()
+            minimize(self)
 
     def _resize(self, event):
         if event.widget is not self and event.widget is not self.canvas: return
@@ -455,7 +454,12 @@ class ConnectApp(tk.Tk):
         self._draw()
 
     def _draw(self):
-        """Use the shipping dark-blue UI; retain legacy rendering for fallback."""
+        """Approved premium UI: dynamic text and real action handlers."""
+        from .premium_ui import draw
+        return draw(self)
+
+    def _draw_previous(self):
+        """Retained renderer for troubleshooting previous visual versions."""
         from .redesign_ui import draw
         return draw(self)
 
@@ -1008,43 +1012,9 @@ class ConnectApp(tk.Tk):
         threading.Thread(target=worker,daemon=True,name='TelegramWebAudit').start()
 
     def _show_engine_logs(self):
-        """Read a bounded, redacted log; never copy Telegram secrets into the window."""
-        dlg=tk.Toplevel(self)
-        dlg.title('VORQELI · Журналы компонентов')
-        dlg.configure(bg='#111629')
-        dlg.geometry('880x550')
-        dlg.minsize(640,400)
-        dlg.transient(self)
-        bar=tk.Frame(dlg,bg='#111629',pady=12,padx=18)
-        bar.pack(fill='x')
-        panel=tk.Frame(dlg,bg='#111629',padx=18,pady=10)
-        panel.pack(fill='both',expand=True)
-        text=tk.Text(panel,bg='#1B2238',fg=FG,insertbackground=FG,
-                     selectbackground='#65569A',font=('Consolas',10),wrap='word',
-                     bd=0,relief='flat',padx=18,pady=16,state='disabled')
-        text.pack(side='left',fill='both',expand=True)
-        scroll=tk.Scrollbar(panel,command=text.yview)
-        scroll.pack(side='right',fill='y')
-        text.configure(yscrollcommand=scroll.set)
-        def view(name):
-            logs={'DPI':APP_DIR/'dpi-engine.log','Telegram':APP_DIR/'telegram-engine.log'}
-            path=logs[name]
-            try:
-                content=redact_secrets(tail_log(path,max_bytes=65536),self.settings.telegram_secret)
-            except (ValueError,OSError) as exc:
-                content='Не удалось прочитать журнал: '+str(exc)
-            text.configure(state='normal')
-            text.delete('1.0','end')
-            text.insert('1.0',f'{name} / {path.name}\n'+'─'*60+'\n\n'+content)
-            text.configure(state='disabled')
-        for name in ('DPI','Telegram'):
-            tk.Button(bar,text=name,command=lambda n=name:view(n),
-                      bg='#33395C',fg=FG,activebackground='#7965B6',
-                      activeforeground=FG,bd=0,relief='flat',padx=18,pady=9,
-                      font=('Segoe UI',10,'bold'),cursor='hand2').pack(side='left',padx=(0,9))
-        tk.Label(bar,text='Последние 64 КБ · секреты скрыты',bg='#111629',
-                 fg=SECONDARY,font=('Segoe UI',10)).pack(side='right')
-        view('DPI')
+        """Premium UI for the existing bounded, redacted engine logs."""
+        from .premium_logs import show_engine_logs
+        return show_engine_logs(self)
 
     def _open_telegram_proxy(self):
         try:
@@ -1404,7 +1374,7 @@ class ConnectApp(tk.Tk):
         if self._tray_ready:
             self.withdraw()
         else:
-            self.iconify()  # Never silently kill a connection because tray failed.
+            minimize(self)  # Never silently kill a connection because tray failed.
 
     def quit_app(self):
         if self._quitting:return

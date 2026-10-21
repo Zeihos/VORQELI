@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vorqeli-connect"
-version = "0.38.0"
+version = "0.39.0"
 description = "Windows network connectivity control desktop app"
 requires-python = ">=3.10"
 dependencies = ["Pillow>=10,<13", "pystray>=0.19,<1"]
@@ -19,4 +19,4 @@ vorqeli-connect = "vorqeli_connect.app:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-vorqeli_connect = ["Flowseal-zapret-1.10.3-LICENSE.txt", "ui_assets/*"]
+vorqeli_connect = ["Flowseal-zapret-1.10.3-LICENSE.txt", "ui_assets/*", "ui_assets/premium/*", "ui_assets/premium/brand/*"]
