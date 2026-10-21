@@ -10,6 +10,15 @@ import re
 import sys
 
 REQUIRED_FILES = (
+    'tests/test_native_ui_v403.py',
+    'docs/NATIVE_UI_COMPACT_V403.md',
+    'tests/test_native_ui_v402.py',
+    'docs/NATIVE_UI_HARDENING_V402.md',
+    'src/vorqeli_connect/native_ui.py',
+    'tests/test_native_ui_v401.py',
+    'docs/NATIVE_INTERFACE_V401.md',
+    'docs/AUDIT_REPORT_V401.md',
+    'assets/VORQELI-wordmark.png',
     'pyproject.toml', 'README.md', 'LICENSE', 'NOTICE.md',
     'BUILD_MANIFEST.json', 'scripts/verify_build_manifest.py',
     'tests/test_build_manifest_v31.py', 'tests/test_update_security_v31.py',

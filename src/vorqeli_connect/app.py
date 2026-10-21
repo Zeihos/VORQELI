@@ -455,7 +455,7 @@ class ConnectApp(tk.Tk):
 
     def _draw(self):
         """Approved premium UI: dynamic text and real action handlers."""
-        from .premium_ui import draw
+        from .native_ui import draw
         return draw(self)
 
     def _draw_previous(self):
