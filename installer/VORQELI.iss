@@ -1,5 +1,5 @@
 #define MyAppName "VORQELI Connect"
-#define MyAppVersion "0.39.0"
+#define MyAppVersion "0.40.0"
 #define MyAppExeName "VORQELI-Connect.exe"
 
 [Setup]
@@ -67,7 +67,7 @@ begin
       '; uninstall denied.');
     if not UninstallSilent() then
       MsgBox('Не удалось безопасно подготовить удаление VORQELI. ' +
-        'Полностью закройте программу через трей и восстановите DNS. ' +
+        'Полностью закройте программу через трей и восстановите DNS и HOSTS (GeoHide RU / VORQELI). ' +
         'Если проблема осталась, запустите VORQELI от администратора ' +
         'и повторите удаление. Код: ' + IntToStr(ExitCode), mbError, MB_OK);
     Exit;

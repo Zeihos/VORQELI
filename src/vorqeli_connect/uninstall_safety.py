@@ -14,6 +14,9 @@ from pathlib import Path
 from typing import Callable
 
 from .geohide import STATE_FILE
+from .config import APP_DIR
+from .hosts_overlay import hosts_path
+from .geohide_uninstall_guard import inspect_pending
 from .geohide_doh import restore_geo_dns, _journal_path
 from .startup import configure_startup, registration_status
 
@@ -59,12 +62,24 @@ def startup_cleanup_confirmed(observed: str, *, windows: bool) -> bool:
     return observed == ('missing' if windows else 'unsupported')
 
 
+def managed_hosts_pending() -> bool:
+    """Refuse to delete the only cleanup UI while VORQELI HOSTS remains.
+
+    Off-Windows unit testing does not inspect the developer's real HOSTS.
+    A synthetic inspection may be injected by acceptance tests.
+    """
+    if os.name != 'nt':
+        return False
+    return inspect_pending(hosts_path(), APP_DIR / 'geohide-hosts-restore.json')['pending']
+
+
 def cleanup_for_uninstall(
     *,
     check_running: Callable[[], bool] = running_instance,
     disable_startup: Callable[[bool], str] = configure_startup,
     restore: Callable[[], bool] = restore_geo_dns,
     audit_startup: Callable[[], str] = registration_status,
+    pending_hosts: Callable[[], bool] = managed_hosts_pending,
     backup: Path | None = None,
 ) -> CleanupResult:
     """Perform reversible cleanup, returning failure if any critical step fails.
@@ -78,6 +93,17 @@ def cleanup_for_uninstall(
             return CleanupResult(False, ('Сначала полностью выйдите из VORQELI через трей.',))
     except Exception as exc:
         return CleanupResult(False, (f'Проверка работающего приложения: {exc}',))
+
+    # Check before altering registration or DNS: a failed uninstall must
+    # leave a usable app to undo the explicitly installed HOSTS mappings.
+    try:
+        if pending_hosts():
+            return CleanupResult(False, (
+                'В HOSTS остались правила VORQELI или GeoHide. '
+                'Откройте HOSTS / ПРАВИЛА, откатите GeoHide RU и удалите '
+                'оставшийся блок VORQELI перед повторным удалением.',))
+    except Exception as exc:
+        return CleanupResult(False, ('Не удалось безопасно проверить HOSTS: ' + str(exc),))
 
     try:
         outcome = disable_startup(False)

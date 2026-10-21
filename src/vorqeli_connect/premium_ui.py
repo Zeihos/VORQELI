@@ -8,11 +8,13 @@ No networking, registry or file mutation happens in this module.
 from __future__ import annotations
 
 from functools import lru_cache
+from datetime import datetime
+import json
 from pathlib import Path
 from typing import Callable
 import webbrowser
 
-from PIL import Image, ImageDraw, ImageFont, ImageTk
+from PIL import Image, ImageDraw, ImageFont, ImageTk, ImageFilter
 
 from . import __version__ as VERSION
 from .event_log import recent_events
@@ -58,10 +60,15 @@ def _font(size:int,bold=False) -> ImageFont.FreeTypeFont:
     return ImageFont.load_default(size=size)
 
 
-def _text(d:ImageDraw.ImageDraw,x:int,y:int,message:object,size=17,color='#F3F8FF',bold=False,max_chars=None):
+def _text(d:ImageDraw.ImageDraw,x:int,y:int,message:object,size=17,color='#F3F8FF',bold=False,max_chars=None,max_width=None):
     val=' '.join(str(message).split())
+    font=_font(size,bold)
     if max_chars is not None and len(val)>max_chars:val=val[:max_chars-1]+'…'
-    d.text((x,y),val,font=_font(size,bold),fill=color,stroke_width=0)
+    if max_width is not None and d.textbbox((0,0),val,font=font)[2]>max_width:
+        while val and d.textbbox((0,0),val+'…',font=font)[2]>max_width:
+            val=val[:-1]
+        val=val.rstrip()+'…' if val else '…'
+    d.text((x,y),val,font=font,fill=color,stroke_width=0)
 
 
 def _panel(d:ImageDraw.ImageDraw,rect,fill='#081B39',outline='#1F69C3',radius=15):
@@ -73,10 +80,12 @@ def _erase(d,box,color='#071D3A',radius=6):
 
 
 def _status(d,x,y,name,value):
+    """Paint a consistent, compact service badge without a black masking slab."""
     title,color=service_summary(value)
-    _erase(d,(x,y,x+255,y+37),'#061A35',9)
-    d.ellipse((x+1,y+12,x+18,y+29),fill=color)
-    _text(d,x+31,y+6,title,16,color,True,max_chars=30)
+    d.rounded_rectangle((x-3,y+1,x+258,y+39),radius=14,
+                        fill='#0A284B',outline='#1D507E',width=1)
+    d.ellipse((x+10,y+15,x+24,y+29),fill=color)
+    _text(d,x+36,y+9,title,15,color,True,max_width=208)
 
 
 def _switch(d,x,y,value,enabled=True):
@@ -87,11 +96,12 @@ def _switch(d,x,y,value,enabled=True):
     d.ellipse((px,y+7,px+25,y+32),fill='#F4F7FF')
 
 
-def _module_status(d,x,y,label,on):
-    _erase(d,(x,y,x+205,y+40),'#071B39',radius=6)
+def _module_status(d,x,y,on):
     color=COLORS['green'] if on else COLORS['muted']
-    d.ellipse((x,y+11,x+14,y+25),fill=color)
-    _text(d,x+22,y+4,'Запущен' if on else 'Отключён',16,color,True)
+    d.rounded_rectangle((x-4,y-3,x+173,y+35),radius=12,
+                        fill='#0A2748',outline='#23517E',width=1)
+    d.ellipse((x+8,y+9,x+22,y+23),fill=color)
+    _text(d,x+32,y+5,'Запущен' if on else 'Отключён',16,color,True,max_width=135)
 
 
 def _health(app):
@@ -104,6 +114,95 @@ def artwork(page:str)->Image.Image:
     img=Image.open(ASSET_DIR / ART_FILES[page]).convert('RGB')
     if img.size != (W,H):raise ValueError('Неверный размер темы '+page)
     return img
+
+
+@lru_cache(maxsize=4)
+def _live_hero(health:str)->Image.Image:
+    """Rebuild the complete hero background and status ring for OFF/PARTIAL/ON.
+
+    The previously approved illustration stays behind the other screens;
+    the live hero has no baked green ON ring when the connection is OFF.
+    """
+    width,height=1147,260
+    base=Image.new('RGBA',(width,height),(0,0,0,0))
+    mask=Image.new('L',(width,height),0)
+    md=ImageDraw.Draw(mask)
+    md.rounded_rectangle((0,0,width-1,height-1),radius=27,fill=255)
+    fill=Image.new('RGBA',(width,height))
+    fd=ImageDraw.Draw(fill)
+    for y in range(height):
+        # Layered midnight blue with subtle glow around the live emblem.
+        for_x=(13+int(9*y/height),35+int(18*y/height),77+int(21*y/height))
+        fd.line((0,y,width,y),fill=(*for_x,255))
+    background=Image.new('RGBA',(width,height))
+    background.paste(fill,(0,0),mask)
+    d=ImageDraw.Draw(background,'RGBA')
+    d.rounded_rectangle((1,1,width-2,height-2),radius=27,outline='#2787E3',width=2)
+    # Soft electric wave strokes remain behind real text.
+    for idx in range(14):
+        shade=16+(idx%4)*7
+        pts=[]
+        for x in range(745,width+4,9):
+            y=130 + int((idx-7)*7 + 26*__import__('math').sin((x-520)/112 + idx*.19))
+            pts.append((x,y))
+        d.line(pts,fill=(24,113+shade,231,21+idx%3*11),width=2)
+    # Glow is applied only around the new live central emblem.
+    aura=Image.new('RGBA',(width,height),(0,0,0,0))
+    ad=ImageDraw.Draw(aura)
+    tint=(39,231,182) if health=='connected' else (241,178,86) if health=='partial' else (65,135,239)
+    for r in (108,83,54):
+        ad.ellipse((155-r,130-r,155+r,130+r),outline=(*tint,170),width=7)
+    aura=aura.filter(ImageFilter.GaussianBlur(15))
+    background=Image.alpha_composite(background,aura)
+    d=ImageDraw.Draw(background,'RGBA')
+    for r,alpha,thick in ((108,85,1),(91,200,3),(72,250,4)):
+        d.ellipse((155-r,130-r,155+r,130+r),outline=(*tint,alpha),width=thick)
+    d.ellipse((100,75,210,185),fill=(11,45,109,250),outline=(62,164,252,255),width=3)
+    f=_font(78,True)
+    bbox=d.textbbox((0,0),'V',font=f)
+    d.text((155-(bbox[2]-bbox[0])/2,118-(bbox[3]-bbox[1])/2-bbox[1]),
+           'V',font=f,fill='#C0E9FF',stroke_width=1,stroke_fill='#20A5FE')
+    return background
+
+
+def _history_events(app)->list[dict]:
+    """Read the actual event schema: event_log uses `action`, not `kind`."""
+    events=recent_events(limit=100)
+    current=getattr(app,'_visual_history_filter','Все события')
+    filters={'Подключение':('connection','подключ','winws','telegram','dns','обход','disconnect'),
+             'Настройки':('setting','настрой','стратег','профил','запуск','option'),
+             'Ошибки':('error','ошибка','сбой','отказ','не удалось','failed')}
+    if current in filters:
+        events=[e for e in events if any(t in
+                (str(e.get('action',e.get('kind','')))+' '+str(e.get('message',''))).lower()
+                for t in filters[current])]
+    return events
+
+
+def export_history(app):
+    """Export the history actually on this page, not a diagnostic scan."""
+    from tkinter import filedialog, messagebox
+    from .log_tools import redact_secrets
+    import os
+    events=recent_events(limit=100)
+    cleaned=[]
+    for event in events:
+        if isinstance(event,dict):
+            cleaned.append({key:redact_secrets(str(value),getattr(app.settings,'telegram_secret',''))
+                            for key,value in event.items() if key in ('action','timestamp','message','kind')})
+    target=filedialog.asksaveasfilename(parent=app,defaultextension='.json',
+        filetypes=[('JSON','*.json')],initialfile='VORQELI-history.json')
+    if not target:return
+    payload={'version':VERSION,'exported_at':datetime.now().astimezone().isoformat(),
+             'limit':100,'events':cleaned}
+    path=Path(target)
+    temp=path.with_name(path.name+'.v39-export-tmp')
+    try:
+        temp.write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding='utf-8')
+        temp.replace(path)
+    except OSError as exc:
+        temp.unlink(missing_ok=True)
+        messagebox.showerror('Экспорт истории',str(exc),parent=app)
 
 
 def build_frame(app,page=None) -> Image.Image:
@@ -122,89 +221,109 @@ def build_frame(app,page=None) -> Image.Image:
     _text(d,1181,41,label,16,'#B9CFFF',True)
     # Keep the page header/sidebar controlled by the live application; only
     # navigation highlight, headings and blue artwork are static decorations.
-    _panel(d,(33,828,294,975),fill='#051B3D',outline='#067ADE',radius=17)
+    _panel(d,(33,807,294,975),fill='#051B3D',outline='#067ADE',radius=17)
     d.ellipse((53,853,73,873),fill=tone)
     _text(d,91,846,'Соединение активно' if overall=='connected' else
-          'Частичное соединение' if overall=='partial' else 'Ожидание',17,bold=True,max_chars=25)
+          'Частичное соединение' if overall=='partial' else 'Ожидание',15,bold=True,max_width=175)
     _text(d,55,894,'WinWS  ·  Telegram  ·  DNS',16,color=COLORS['sub'])
     d.line((55,925,270,925),fill='#235787',width=1)
     _text(d,55,938,'v'+VERSION+'  /  Windows 10 · 11',14,color=COLORS['sub'])
 
     if page=='Главная':
         count=sum(bool(getattr(settings,k,False)) for k in ('connect_dpi','connect_telegram','connect_dns'))
-        on=sum(getattr(report,k,'off')=='on' for k in ('dpi','telegram','dns'))
-        # Replace ALL demo connection information in the central hero.
-        _panel(d,(649,270,1190,472),fill='#051C3C',outline='#104D98',radius=22)
-        pill='ВСЕ МОДУЛИ ЗАПУЩЕНЫ' if count and on==count else 'ЧАСТЬ МОДУЛЕЙ НЕ РАБОТАЕТ' if is_on else 'ГОТОВО К ПОДКЛЮЧЕНИЮ'
-        _panel(d,(650,269,1036,316),fill='#073D42' if count and on==count else '#132E55',outline='#0C796B',radius=18)
-        d.ellipse((678,284,696,302),fill=tone)
-        _text(d,710,280,pill,18,'#47F0C7' if count and on==count else '#BCD2F9',True,max_chars=31)
-        _text(d,653,329,'Обход активен' if is_on else 'Обход отключён',38,bold=True)
+        on=sum(bool(getattr(settings,'connect_'+key,False)) and getattr(report,key,'off')=='on'
+               for key in ('dpi','telegram','dns'))
+        status='connected' if count and on==count and overall=='connected' else 'partial' if on else 'off'
+        hero=_live_hero(status)
+        im.paste(hero,(344,238),hero)
+        d=ImageDraw.Draw(im)
+        pill='ВСЕ МОДУЛИ ЗАПУЩЕНЫ' if status=='connected' else 'ЧАСТЬ МОДУЛЕЙ АКТИВНА' if status=='partial' else 'ГОТОВО К ПОДКЛЮЧЕНИЮ'
+        pill_color=COLORS['green'] if status=='connected' else COLORS['amber'] if status=='partial' else COLORS['sub']
+        _panel(d,(647,266,1054,314),fill='#073C41' if status=='connected' else '#122A4B',outline='#178C9D',radius=18)
+        d.ellipse((667,284,681,298),fill=pill_color)
+        _text(d,696,277,pill,17,pill_color,True,max_width=344)
+        _text(d,651,327,'Обход активен' if overall=='connected' else 'Обход частично активен' if overall=='partial' else
+              'Обход отключён',36,bold=True,max_width=545)
         mode=str(getattr(app.controller,'active_dpi_mode',None) or getattr(settings,'dpi_mode','alt_auto'))
-        _text(d,653,389,'WinWS · '+ ('AUTO 1–13' if mode=='alt_auto' else mode.upper()),23,COLORS['sub'])
-        _text(d,653,431,f'Модули: {on}/{count}  ·  Локальный статус',17,COLORS['sub'])
-        # Overlay action button so it always tells truth, retaining visual style.
-        _panel(d,(1200,402,1465,464),fill='#1458DB',outline='#4EE0FF',radius=13)
-        _text(d,1235,418,'⏻  '+('ОТКЛЮЧИТЬ' if is_on else 'ПОДКЛЮЧИТЬ'),20,bold=True)
-        for x,name,enabled in [(464,'dpi',settings.connect_dpi),(828,'telegram',settings.connect_telegram),(1205,'dns',settings.connect_dns)]:
-            _module_status(d,x,580,'',enabled and getattr(report,name,'off')=='on')
-        # Remove the baked ALT11 detail if current differs.
-        _erase(d,(361,644,698,678),'#061A37')
-        _text(d,369,647,'Стратегия: '+mode.upper().replace('ALT_AUTO','AUTO 1–13'),16,COLORS['sub'])
-        _erase(d,(1123,644,1480,678),'#061A37')
-        _text(d,1133,647,('DoH / HTTPS' if settings.dns_mode=='doh' else 'IPv4 DNS')+' · Windows',16,COLORS['sub'])
+        mode_label='AUTO 1–13' if mode=='alt_auto' else mode.upper()
+        _text(d,653,391,'WinWS · '+mode_label,22,COLORS['sub'],max_width=510)
+        _text(d,653,430,f'Модули: {on}/{count}  ·  Локальный статус',16,COLORS['sub'],max_width=505)
+        d.rounded_rectangle((1201,400,1464,467),radius=13,fill='#175CE4',outline='#52CBFF',width=2)
+        # Draw a universal power glyph, avoiding tofu squares from missing fonts.
+        d.arc((1226,417,1253,445),27,332,fill='#FFFFFF',width=3)
+        d.line((1240,410,1240,431),fill='#FFFFFF',width=3)
+        _text(d,1261,420,'ОТКЛЮЧИТЬ' if is_on else 'ПОДКЛЮЧИТЬ',18,bold=True,max_width=185)
+        for x,key in ((464,'dpi'),(828,'telegram'),(1205,'dns')):
+            _module_status(d,x,580,getattr(settings,'connect_'+key,False) and getattr(report,key,'off')=='on')
+        # Transparent glass footers hide demo ALT11/DoH without black stripes.
+        for x,txt,maxw in ((368,'Стратегия: '+mode_label,318),
+                            (1132,('DoH / HTTPS' if settings.dns_mode=='doh' else 'IPv4 DNS')+' · Windows',320)):
+            d.rounded_rectangle((x-5,644,x+maxw,681),radius=8,fill='#0B264B',outline='#163D68',width=1)
+            _text(d,x,651,txt,15,COLORS['sub'],max_width=maxw-16)
     elif page=='Диагностика':
         results=dict(getattr(app,'last_results',[]) or [])
         for i,service in enumerate(SERVICE_NAMES):
             _status(d,994,331+i*88,service,results.get(service,'Не проверено'))
     elif page=='История':
         current=getattr(app,'_visual_history_filter','Все события')
-        events=recent_events(limit=120)
-        patterns={'Подключение':('connection','подключ','winws','telegram','dns','обход'),
-                  'Настройки':('setting','настрой','стратег','профил','запуск'),
-                  'Ошибки':('error','ошибка','сбой','отказ','не удалось')}
-        if current in patterns:
-            events=[e for e in events if any(q in (str(e.get('kind',''))+' '+str(e.get('message',''))).lower() for q in patterns[current])]
-        # The approved art's sample history is replaced, not shown as user's data.
-        _panel(d,(348,343,1486,943),fill='#071B3A',outline='#1665B2',radius=17)
-        for i,ev in enumerate(events[:10]):
-            y=350+i*56
-            if i%2==0:d.rounded_rectangle((358,y,1476,y+53),radius=11,fill='#112D56')
+        events=_history_events(app)
+        page_number=max(0,int(getattr(app,'_visual_history_page',0)))
+        pages=max(1,(len(events)+9)//10)
+        page_number=min(page_number,pages-1)
+        visible=events[page_number*10:page_number*10+10]
+        _panel(d,(348,300,1486,943),fill='#071B3A',outline='#1665B2',radius=17)
+        _text(d,374,318,'ВРЕМЯ',15,COLORS['sub'],True)
+        _text(d,554,318,'СОБЫТИЕ',15,COLORS['sub'],True)
+        _text(d,1135,318,'ТИП СОБЫТИЯ',15,COLORS['sub'],True)
+        d.line((365,352,1474,352),fill='#2B5E8A',width=1)
+        for i,ev in enumerate(visible):
+            y=363+i*54
+            if i%2==0:d.rounded_rectangle((358,y,1476,y+52),radius=10,fill='#112B51')
             msg=' '.join(str(ev.get('message','')).split())
-            kind=str(ev.get('kind','событие'))
+            action=str(ev.get('action',ev.get('kind','событие')))
             timestamp=str(ev.get('timestamp',''))
-            danger=any(x in (kind+' '+msg).lower() for x in ('ошибка','error','сбой','отказ'))
+            danger=any(x in (action+' '+msg).lower() for x in ('ошибка','error','сбой','отказ','failed'))
             clr=COLORS['red'] if danger else COLORS['cyan'] if 'настрой' in msg.lower() else COLORS['green']
-            d.ellipse((374,y+18,390,y+34),fill=clr)
-            _text(d,413,y+14,timestamp[11:19] or '--:--:--',16,COLORS['sub'])
-            _text(d,551,y+10,msg,17,bold=True,max_chars=54)
-            _text(d,1133,y+12,'Ошибка' if danger else kind[:24],16,clr,True,max_chars=25)
-        if not events:_text(d,617,597,'Событий для этого фильтра пока нет',23,COLORS['sub'])
-        _erase(d,(345,942,1460,987),'#06182F')
-        _text(d,354,951,f'Запусков сетевой диагностики: {len(load_history())}   |   Показано: {min(len(events),10)} из {len(events)}',15,COLORS['sub'])
-        # The segmented control cannot have a baked-in wrong selection.
+            d.ellipse((372,y+18,388,y+34),fill=clr)
+            _text(d,410,y+14,timestamp[11:19] or '--:--:--',16,COLORS['sub'],max_width=120)
+            _text(d,551,y+13,msg or '(пустое событие)',15,bold=True,max_width=552)
+            _text(d,1135,y+14,action,15,clr,True,max_width=285)
+        if not events:_text(d,570,611,'Пока нет сохранённых событий',22,COLORS['sub'])
+        _erase(d,(348,944,1482,988),'#06182F',radius=9)
+        _text(d,365,957,f'Сетевых проверок: {len(load_history())}  ·  Событий: {len(events)}',14,COLORS['sub'])
+        _text(d,1230,955,f'{page_number+1} / {pages}',15,COLORS['sub'],True)
+        for label,l,r in [('‹',1320,1385),('›',1395,1460)]:
+            d.rounded_rectangle((l,945,r,981),radius=9,fill='#10305C',outline='#246CAC')
+            _text(d,l+22,950,label,17,COLORS['text'],True)
         filt=[('Все события',352,581),('Подключение',590,844),('Настройки',850,1070),('Ошибки',1080,1290)]
         for name,l,r in filt:
             _panel(d,(l,235,r,286),fill='#1254D4' if name==current else '#061C3C',outline='#1689FF',radius=12)
-            _text(d,l+20,249,name,17,bold=name==current)
+            _text(d,l+20,249,name,17,bold=name==current,max_width=r-l-33)
     elif page=='О проекте':
         _panel(d,(1365,242,1473,282),fill='#073069',outline='#1674C8')
         _text(d,1380,247,'v'+VERSION,17,COLORS['sub'])
-        # Component version tags in mockup are illustrative; no claim of v1.0.0 for dependencies.
-        for x in (640,1000,1403):
-            _erase(d,(x,713,x+75,754),'#09254C',radius=10)
-        # The reference's green "installed" labels were illustrative.
-        for x,key in ((543,'dpi'),(878,'telegram'),(1230,'dns')):
-            _erase(d,(x,787,x+145,819),'#082951',radius=7)
-            is_running=getattr(report,key,'off')=='on'
-            color=COLORS['green'] if is_running else COLORS['muted']
-            _text(d,x+4,792,'Запущен' if is_running else 'Не запущен',13,color,True)
+        # No invented versions of third-party components. The small badge
+        # states the component name; the entire footer is repainted so no
+        # baked green "Installed" fragment remains when it is switched OFF.
+        for x,label in ((630,'WinWS'),(997,'MTProto'),(1400,'DNS')):
+            d.rounded_rectangle((x,708,x+81,758),radius=10,fill='#09264F')
+            _text(d,x+9,722,label,14,COLORS['sub'],True,max_width=65)
+        for left,right,key in ((340,715,'dpi'),(725,1090,'telegram'),(1106,1480,'dns')):
+            d.rounded_rectangle((left+6,781,right-6,819),radius=9,fill='#09264F')
+            active=getattr(report,key,'off')=='on'
+            color=COLORS['green'] if active else COLORS['muted']
+            d.ellipse((left+190,793,left+204,807),fill=color)
+            _text(d,left+216,788,'Запущен' if active else 'Не запущен',15,color,True,max_width=130)
+        # Do not imply Telegram/VK cards lead to an official account.
+        for left,right in ((438,695),(828,1075)):
+            d.rounded_rectangle((left,558,right,596),radius=7,fill='#09254B')
+            _text(d,left+5,565,'Ссылка ещё не указана',14,COLORS['muted'],max_width=right-left-16)
     elif page=='Настройки':
         for y,key in [(381,'launch_at_startup'),(476,'restore_last_mode'),(574,'minimize_to_tray'),(670,'admin_on_launch')]:
-            _erase(d,(816,y-7,916,y+48),'#061B3C')
+            _erase(d,(805,y-27,925,y+58),'#081D3C',radius=13)
             _switch(d,820,y,bool(getattr(settings,key,False)))
         for y,key in [(381,'connect_dpi'),(487,'connect_telegram'),(594,'connect_dns')]:
-            _erase(d,(1376,y-8,1484,y+47),'#061B3C')
+            _erase(d,(1365,y-26,1487,y+59),'#081D3C',radius=13)
             _switch(d,1382,y,bool(getattr(settings,key,False)))
     elif page=='Сеть и стратегии':
         mode=str(settings.dpi_mode)
@@ -232,41 +351,62 @@ def build_frame(app,page=None) -> Image.Image:
 
 
 class HitRegistry:
-    """Pointer + keyboard activations go through one ConnectApp registry."""
+    """Zero-overdraw pointer hitboxes + existing accessible keyboard registry.
+
+    A previous version used black stippled rectangles over every button,
+    visibly darkening the approved design and changing its contrast.
+    """
     def __init__(self,app,scale_x,scale_y):
         self.app=app;self.canvas=app.canvas;self.sx=scale_x;self.sy=scale_y
-        self.n=0
+        self.targets=[]
 
     def target(self,rect,callback:Callable,label:str,enabled=True):
         if not enabled:return
         x1,y1,x2,y2=rect
         bounds=(int(x1*self.sx),int(y1*self.sy),int(x2*self.sx),int(y2*self.sy))
         idx=self.app._register_control(bounds,callback,label)
-        tag=f'premium_hit_{self.n}';self.n+=1
-        # Transparent outlines are Tk hit-tested if the fill is nonempty. Using
-        # stipple avoids obscuring raster artwork while creating a reliable hit.
-        item=self.canvas.create_rectangle(*bounds,fill='#000001',stipple='gray12',outline='',tags=(tag,))
-        self.canvas.tag_bind(tag,'<Button-1>',lambda _e,i=idx:self.app._mouse_activate(i))
-        self.canvas.tag_bind(tag,'<Enter>',lambda _e:self.canvas.configure(cursor='hand2'))
-        self.canvas.tag_bind(tag,'<Leave>',lambda _e:self.canvas.configure(cursor=''))
+        self.targets.append((bounds,idx))
+
+    def _hit(self,event):
+        x=int(self.canvas.canvasx(event.x));y=int(self.canvas.canvasy(event.y))
+        for (x1,y1,x2,y2),idx in reversed(self.targets):
+            if x1<=x<=x2 and y1<=y<=y2:
+                return idx
+        return None
+
+    def install(self):
+        def click(event):
+            idx=self._hit(event)
+            if idx is not None:
+                self.app._mouse_activate(idx)
+                return 'break'
+        def motion(event):
+            self.canvas.configure(cursor='hand2' if self._hit(event) is not None else '')
+        self.canvas.bind('<Button-1>',click,add='+')
+        self.canvas.bind('<Motion>',motion)
 
 
 def _event_popup(app,index):
     from tkinter import messagebox
-    events=recent_events(limit=120)
-    current=getattr(app,'_visual_history_filter','Все события')
-    filters={'Подключение':('connection','подключ','winws','telegram','dns','обход'),
-            'Настройки':('setting','настрой','стратег','профил','запуск'),
-            'Ошибки':('error','ошибка','сбой','отказ','не удалось')}
-    if current in filters:
-        events=[e for e in events if any(t in (str(e.get('kind',''))+' '+str(e.get('message',''))).lower() for t in filters[current])]
-    if 0<=index<len(events):
-        e=events[index]
-        messagebox.showinfo('VORQELI · событие',f"Время: {e.get('timestamp','')}\nТип: {e.get('kind','')}\n\n{e.get('message','')}",parent=app)
+    events=_history_events(app)
+    offset=max(0,int(getattr(app,'_visual_history_page',0)))*10
+    if 0<=offset+index<len(events):
+        e=events[offset+index]
+        messagebox.showinfo('VORQELI · событие',
+            f"Время: {e.get('timestamp','')}\nТип: {e.get('action',e.get('kind',''))}\n\n{e.get('message','')}",parent=app)
+
+
+def _history_turn(app,step):
+    count=len(_history_events(app))
+    pages=max(1,(count+9)//10)
+    current=max(0,int(getattr(app,'_visual_history_page',0)))
+    app._visual_history_page=min(pages-1,max(0,current+step))
+    app._draw()
 
 
 def _filter(app,name):
     app._visual_history_filter=name
+    app._visual_history_page=0
     app._draw()
 
 
@@ -289,7 +429,6 @@ def draw(app):
     canvas.delete('all')
     canvas.configure(cursor='')
     app._controls=[];app._button_images=[];app._widgets=[]
-    app._focused_control_index=None
     canvas.create_image(0,0,image=app._canvas_bg,anchor='nw')
     h=HitRegistry(app,cw/W,ch/H)
     # Custom native-feeling titlebar; fixed-size window has no maximize action.
@@ -297,10 +436,18 @@ def draw(app):
     h.target((1350,20,1406,77),lambda:minimize(app),'Свернуть')
     drag_box=(int(324*cw/W),int(8*ch/H),int(1120*cw/W),int(76*ch/H))
     drag_tag='premium_window_drag'
-    canvas.create_rectangle(*drag_box,fill='#000001',stipple='gray12',outline='',tags=(drag_tag,))
-    canvas.tag_bind(drag_tag,'<ButtonPress-1>',lambda e:begin_move(app,e.x_root,e.y_root))
-    canvas.tag_bind(drag_tag,'<B1-Motion>',lambda e:move(app,e.x_root,e.y_root))
-    canvas.tag_bind(drag_tag,'<ButtonRelease-1>',lambda e:end_move(app))
+    # Bind drag to the actual canvas: no translucent rectangle over the header.
+    def topbar(event):
+        x,y=int(canvas.canvasx(event.x)),int(canvas.canvasy(event.y))
+        return drag_box[0]<=x<=drag_box[2] and drag_box[1]<=y<=drag_box[3]
+    def start_drag(event):
+        if topbar(event):begin_move(app,event.x_root,event.y_root)
+    def step_drag(event):
+        if getattr(app,'_frameless_mouse',None) is not None:
+            move(app,event.x_root,event.y_root)
+    canvas.bind('<ButtonPress-1>',start_drag)
+    canvas.bind('<B1-Motion>',step_drag)
+    canvas.bind('<ButtonRelease-1>',lambda event:end_move(app))
     h.target((1460,20,1514,77),app._window_close,'Закрыть')
     pages=[('Главная',205,272),('Диагностика',274,341),('История',345,415),('О проекте',418,487),('Настройки',489,559)]
     for page,top,bottom in pages:
@@ -327,19 +474,16 @@ def draw(app):
                                    ((1100,840,1475,929),app._show_telegram_web_audit,'TELEGRAM WEB')]:
             h.target(box,callback,label)
     elif page=='История':
-        h.target((1260,122,1500,194),app._export_diagnostics,'ЭКСПОРТ JSON')
+        h.target((1260,122,1500,194),lambda:export_history(app),'ЭКСПОРТ ИСТОРИИ JSON')
         for name,left,right in [('Все события',348,581),('Подключение',587,849),
                                 ('Настройки',852,1073),('Ошибки',1078,1297)]:
             h.target((left,226,right,294),lambda n=name:_filter(app,n),'Фильтр: '+name)
-        shown=recent_events(limit=120)
-        filt=getattr(app,'_visual_history_filter','Все события')
-        keys={'Подключение':('connection','подключ','winws','telegram','dns','обход'),
-              'Настройки':('setting','настрой','стратег','профил','запуск'),
-              'Ошибки':('error','ошибка','сбой','отказ','не удалось')}
-        if filt in keys:
-            shown=[v for v in shown if any(t in (str(v.get('kind',''))+' '+str(v.get('message',''))).lower() for t in keys[filt])]
-        for i in range(min(10,len(shown))):
-            h.target((350,347+i*56,1484,399+i*56),lambda j=i:_event_popup(app,j),f'Событие {i+1}')
+        shown=_history_events(app)
+        page_number=min(max(0,int(getattr(app,'_visual_history_page',0))),max(0,(len(shown)-1)//10))
+        for i in range(min(10,len(shown[page_number*10:page_number*10+10]))):
+            h.target((350,363+i*54,1484,415+i*54),lambda j=i:_event_popup(app,j),f'Событие {i+1}')
+        if page_number>0:h.target((1320,945,1385,981),lambda:_history_turn(app,-1),'Предыдущая страница истории')
+        if (page_number+1)*10<len(shown):h.target((1395,945,1460,981),lambda:_history_turn(app,1),'Следующая страница истории')
     elif page=='О проекте':
         from tkinter import messagebox
         def unavailable():
@@ -374,5 +518,6 @@ def draw(app):
         h.target((333,868,698,943),app._restore_dns,'ВОССТАНОВИТЬ DNS')
         h.target((707,868,1080,943),app._show_hosts_manager,'HOSTS / ПРАВИЛА')
         h.target((1091,868,1492,943),lambda:app._page('Настройки'),'К НАСТРОЙКАМ')
+    h.install()
     app._sync_scrollbars(cw,ch)
     app._render_focus()

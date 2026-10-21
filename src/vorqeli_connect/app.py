@@ -800,6 +800,9 @@ class ConnectApp(tk.Tk):
             content.insert('1.0',info)
             content.configure(state='disabled')
         def apply():
+            if '# VORQELI GEOHIDE HOSTS START' in hosts_path().read_text(encoding='utf-8',errors='replace'):
+                messagebox.showwarning('HOSTS','Сначала удалите официальный GeoHide HOSTS через «GEOHIDE RU».',parent=window)
+                return
             if not messagebox.askyesno('HOSTS',
                 'Добавить недостающие статические IP в системный HOSTS?\n'
                 'Они могут быть устаревшими. Для записи нужны права администратора.',parent=window):
@@ -812,6 +815,9 @@ class ConnectApp(tk.Tk):
                 messagebox.showerror('HOSTS',str(exc),parent=window)
             refresh()
         def remove():
+            if '# VORQELI GEOHIDE HOSTS START' in hosts_path().read_text(encoding='utf-8',errors='replace'):
+                messagebox.showwarning('HOSTS','Сначала удалите официальный GeoHide HOSTS через «GEOHIDE RU».',parent=window)
+                return
             if not messagebox.askyesno('HOSTS','Удалить только блок VORQELI из HOSTS?',parent=window):
                 return
             try:
@@ -822,11 +828,152 @@ class ConnectApp(tk.Tk):
             refresh()
         toolbar=tk.Frame(window,bg='#111629',pady=12)
         toolbar.pack(fill='x',padx=15)
-        for title, callback in (('ОБНОВИТЬ',refresh),('ДОБАВИТЬ',apply),('УБРАТЬ БЛОК',remove)):
+        for title, callback in (('ОБНОВИТЬ',refresh),('ДОБАВИТЬ',apply),('УБРАТЬ БЛОК',remove),('GEOHIDE RU',self._show_geohide_hosts_manager)):
             tk.Button(toolbar,text=title,command=callback,bg='#33395C',fg=FG,
                       activebackground='#6054A0',activeforeground=FG,
                       font=('Segoe UI',10,'bold'),bd=0,padx=18,pady=9).pack(side='left',padx=5)
         refresh()
+
+    def _show_geohide_hosts_manager(self):
+        """Official GeoHide RU classical HOSTS with explicit preview and rollback."""
+        from . import geohide_hosts_feed as feed
+        from tkinter import scrolledtext
+        window = tk.Toplevel(self)
+        window.title('VORQELI · GeoHide HOSTS (RU)')
+        window.geometry('780x640')
+        window.minsize(690,540)
+        window.configure(bg='#0C1730')
+        window.transient(self)
+        tk.Label(window,text='GEOHIDE · HOSTS / RU',bg='#0C1730',fg='#C5E7FF',
+                 font=('Segoe UI',17,'bold'),pady=15).pack()
+        tk.Label(window,text='Официальный классический HOSTS · все IP-альтернативы · Telegram сохранён',
+                 bg='#0C1730',fg='#94B2DE',font=('Segoe UI',10)).pack()
+        output=scrolledtext.ScrolledText(window,wrap='word',height=19,relief='flat',bd=0,
+                 font=('Consolas',10),bg='#111F3C',fg='#DDEBFF',
+                 insertbackground='#FFFFFF',state='disabled',padx=14,pady=11)
+        output.pack(expand=True,fill='both',padx=16,pady=14)
+        prepared={'snapshot':None}
+        journal=APP_DIR/'geohide-hosts-restore.json'
+
+        def show(text):
+            if not window.winfo_exists():return
+            output.configure(state='normal')
+            output.delete('1.0','end')
+            output.insert('1.0',text)
+            output.configure(state='disabled')
+
+        def local_plan(snapshot):
+            existing=feed._decode(feed._bytes(hosts_path()))
+            state=feed._journal_read(journal)
+            legacy=asset('VORQELI-hosts-optional.txt').read_text(encoding='utf-8')
+            return feed.preview(existing,snapshot,legacy,state)
+
+        def receive(text):
+            try:
+                snapshot=feed.parse_official(text)
+                plan=local_plan(snapshot)
+            except (OSError,ValueError,RuntimeError) as exc:
+                prepared['snapshot']=None
+                show('Не удалось проверить официальный HOSTS:\n'+str(exc))
+                return
+            prepared['snapshot']=snapshot
+            show('ИСТОЧНИК\n'+feed.SOURCE_PAGE+'\n\n'
+                 'Регион: RU   Формат: classic hosts\n'
+                 'Обновлено в источнике: '+snapshot.updated+'\n'
+                 f'Уникальных доменов: {snapshot.domain_count}\n'
+                 f'Все IP-записи: {len(snapshot.records)}\n'
+                 f'Будет добавлено GeoHide-записей: {plan["official_entries"]}\n'
+                 f'Сохранено дополнительных правил, включая Telegram: {plan["legacy_entries"]}\n'
+                 f'Домены с собственными системными HOSTS: {plan["protected_domains"]}\n'
+                 f'Итого доменов в управляемом блоке: {plan["unique_domains"]}\n\n'
+                 'Изменения требуют отдельного подтверждения.\n'
+                 'Ручные HOSTS вне блоков VORQELI остаются нетронутыми.\n'
+                 'При удалении текущий HOSTS-блок VORQELI восстанавливается.\n\n'
+                 'ВАЖНО: часть сайтов будет обращаться к сторонним IP GeoHide.\n'
+                 'Это не гарантия работы Claude/ChatGPT, авторизации или HTTPS.\n'
+                 'Браузерный Secure DNS может использовать отдельный резолвер.')
+
+        def online():
+            show('Получаю официальный GeoHide RU HOSTS...\n' + feed.SOURCE_PAGE)
+            def worker():
+                try:result=('ok',feed.fetch_official())
+                except Exception as exc:result=('err',str(exc))
+                def done():
+                    if not window.winfo_exists():return
+                    if result[0]=='err':
+                        show('Не удалось загрузить официальный GeoHide:\n'+result[1]+
+                             '\n\nМожно скачать классический RU hosts на сайте GeoHide и нажать «ИЗ ФАЙЛА».')
+                    else:receive(result[1])
+                try:self.after(0,done)
+                except tk.TclError:pass
+            threading.Thread(target=worker,daemon=True,name='geohide-hosts-fetch').start()
+
+        def select_file():
+            name=filedialog.askopenfilename(parent=window,title='Официальный GeoHide RU hosts',
+                         filetypes=[('HOSTS и TXT','*.txt *.hosts *.*')])
+            if not name:return
+            try:
+                path=Path(name)
+                if not path.is_file() or path.stat().st_size>feed.MAX_SOURCE:
+                    raise ValueError('Файл превышает допустимый размер')
+                receive(path.read_text(encoding='utf-8-sig'))
+            except (OSError,ValueError,UnicodeError) as exc:
+                show('Ошибка файла: '+str(exc))
+
+        def commit():
+            snapshot=prepared['snapshot']
+            if snapshot is None:
+                messagebox.showwarning('GeoHide','Сначала проверьте официальный HOSTS.',parent=window)
+                return
+            if not is_admin():
+                messagebox.showwarning('GeoHide','Для изменения Windows HOSTS нужны права администратора.',parent=window)
+                return
+            if not messagebox.askyesno('GeoHide HOSTS',
+                  'Установить официальный GeoHide RU классический HOSTS?\n\n'
+                  'Многие домены будут направлены на сторонние серверы. '
+                  'Текущий управляемый блок VORQELI будет сохранён в журнале для отката. '
+                  'Ручные строки HOSTS вне VORQELI не изменятся. Продолжить?',parent=window):return
+            try:
+                legacy=asset('VORQELI-hosts-optional.txt').read_text(encoding='utf-8')
+                result=feed.apply(hosts_path(),snapshot,journal,legacy)
+                self.detail='GeoHide HOSTS RU применён. Перезапустите приложения, чтобы обновить разрешение имён.'
+                messagebox.showinfo('GeoHide',
+                    f'Записей GeoHide: {result["official_entries"]}. '
+                    f'Дополнительных правил: {result["legacy_entries"]}.\n'
+                    'Перезапустите браузер/программы для обновления соединений.',parent=window)
+            except (OSError,ValueError,RuntimeError) as exc:
+                messagebox.showerror('GeoHide',str(exc),parent=window)
+            self._draw()
+
+        def undo():
+            if not is_admin():
+                messagebox.showwarning('GeoHide','Нужны права администратора.',parent=window)
+                return
+            if not messagebox.askyesno('GeoHide','Удалить GeoHide HOSTS и вернуть прежний блок Telegram/VORQELI?',parent=window):return
+            try:
+                removed=feed.remove(hosts_path(),journal)
+                messagebox.showinfo('GeoHide',
+                  'Прежний управляемый блок восстановлен.' if removed else 'GeoHide HOSTS не установлен.',parent=window)
+                if removed:self.detail='GeoHide HOSTS удалён, прежние правила восстановлены.'
+            except (OSError,ValueError,RuntimeError) as exc:
+                messagebox.showerror('GeoHide',str(exc),parent=window)
+            self._draw()
+
+        toolbar=tk.Frame(window,bg='#0C1730')
+        toolbar.pack(fill='x',padx=13,pady=(2,15))
+        for label,cmd in (('ОФИЦИАЛЬНЫЙ RU',online),('ИЗ ФАЙЛА',select_file),
+                          ('ПРИМЕНИТЬ',commit),('ОТКАТИТЬ',undo)):
+            tk.Button(toolbar,text=label,command=cmd,bg='#203A66',fg='#EAF3FF',
+                      activebackground='#3C72CF',activeforeground='#FFFFFF',
+                      font=('Segoe UI',9,'bold'),bd=0,padx=12,pady=10).pack(side='left',padx=4)
+        show('GEOHIDE · HOSTS / RU\n\n'
+             'Нажмите «ОФИЦИАЛЬНЫЙ RU», чтобы получить последнюю версию из GitHub.\n'
+             'В отсутствие интернета скачайте GeoHide → Другие форматы → RU → hosts → Классический, '
+             'затем выберите «ИЗ ФАЙЛА».\n\n'
+             'Установка не выполняется автоматически при запуске VORQELI.\n'
+             'После просмотра состава нажмите «ПРИМЕНИТЬ».\n\n'
+             'Источник: '+feed.SOURCE_PAGE)
+
 
     def _set_dpi_mode(self, mode: str):
         if self.running_job or mode not in (*ALT_MODES, 'alt_auto') or self.settings.dpi_mode==mode:
@@ -1426,6 +1573,8 @@ def main():
     parser.add_argument('--port',type=int,default=1443)
     parser.add_argument('--minimized',action='store_true')
     parser.add_argument('--self-test',action='store_true')
+    parser.add_argument('--geohide-hosts-status',action='store_true',
+                        help='Только чтение: состояние GeoHide HOSTS и журнала')
     parser.add_argument('--doctor',action='store_true',help='JSON-отчёт о локальной установке (без сетевых изменений)')
     parser.add_argument('--doctor-output',type=str,default='',help='Сохранить отчёт JSON в файл')
     parser.add_argument('--elevation-retry',action='store_true')
@@ -1443,6 +1592,16 @@ def main():
     if args.doctor:
         from .doctor import print_diagnostic
         print_diagnostic(args.doctor_output or None)
+        return
+    if args.geohide_hosts_status:
+        from .geohide_hosts_feed import readonly_status
+        try:
+            status = readonly_status(hosts_path(), APP_DIR/'geohide-hosts-restore.json')
+        except (OSError, ValueError, RuntimeError) as exc:
+            print(json.dumps({'schema': 1, 'status': 'needs_attention',
+                              'error_type': type(exc).__name__}, ensure_ascii=False))
+            raise SystemExit(7)
+        print(json.dumps(status, ensure_ascii=False))
         return
     if args.self_test:
         if not asset('VORQELI-logo.png').is_file():

@@ -66,15 +66,27 @@ def end_move(app):
 
 
 def minimize(app):
-    """An override-redirect window cannot be iconified by Tk directly."""
+    """Minimize a frameless Tk window, with a safe native-iconify fallback.
+
+    GUI-independent callers (including historical reliability tests) have
+    `iconify` but no Tk `winfo_exists`/`overrideredirect`. Real Tk windows
+    retain the original override-redirect minimize/restore behavior.
+    """
+    if (not callable(getattr(app, 'winfo_exists', None)) or
+            not callable(getattr(app, 'overrideredirect', None))):
+        app.iconify()
+        return
     if not app.winfo_exists():return
     try:
         if app.overrideredirect():
             app.overrideredirect(False)
             app._premium_minimized=True
-        app.iconify()
-        if getattr(app,'_premium_minimized',False):
+        if getattr(app,'_premium_minimized',False) and not getattr(app,'_premium_map_bound',False):
+            # Install ONCE. Repeated minimize/restores must not accumulate
+            # delayed callbacks or introduce flicker on Windows.
             app.bind('<Map>',lambda event:app.after(60,lambda:_restore(app)),add='+')
+            app._premium_map_bound=True
+        app.iconify()
     except Exception:
         # Last resort stays visible in the taskbar instead of disappearing.
         try:app.deiconify()

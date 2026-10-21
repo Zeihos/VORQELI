@@ -1,21 +1,21 @@
 {
-  "file_count": 191,
+  "file_count": 201,
   "files": {
     ".gitattributes": {
       "bytes": 99,
       "sha256": "5caab612d19030c1253ea6417303b7d09e62c825024057359befe8cd3ca27796"
     },
     ".github/workflows/windows-build.yml": {
-      "bytes": 6103,
-      "sha256": "f4874ed22648a22c5dd41b54b14a39cf12b001525b80078cb1478c95f781ed21"
+      "bytes": 6241,
+      "sha256": "7d23a4b26aa57eea81f12e376fe9ca0508fbf677b9fa17d3d3a28d5788f34b5d"
     },
     ".gitignore": {
       "bytes": 140,
       "sha256": "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
     },
     "CHANGELOG.md": {
-      "bytes": 24291,
-      "sha256": "aacf84fb4a2c471d7f0c03f751d8f79e336178b6db0efd589271433282f7e09d"
+      "bytes": 25938,
+      "sha256": "69aaef916f67b35d219eeb99215428988adc663d7a8c93d97c1dd24fd0f29afe"
     },
     "Compact-preview.png": {
       "bytes": 74045,
@@ -218,12 +218,12 @@
       "sha256": "0206dbdf844e1a3586ae6000c5e4c30d2731e3cc0bd27098ab9b8c7c3e4073d5"
     },
     "installer/VORQELI.iss": {
-      "bytes": 2988,
-      "sha256": "6213a5125380923e2d50264daf2f8095e4f69f2e01d310f88d9addc993adb11c"
+      "bytes": 3020,
+      "sha256": "5ee0d1576fa7ef6fcb381454f140390b6103d6b2444edf5f1c8e00759df97ada"
     },
     "pyproject.toml": {
       "bytes": 635,
-      "sha256": "ba9356f88317a3c89cb05f31c6ddb59c342d7bdb02889d678991d1227579b7a7"
+      "sha256": "e41036f72b5ae96a8001e003ac20f4577d0d9373e648cf2c89e55e4cd69466b2"
     },
     "scripts/__init__.py": {
       "bytes": 0,
@@ -279,15 +279,15 @@
     },
     "src/vorqeli_connect/__init__.py": {
       "bytes": 23,
-      "sha256": "5362f7eec609c3fb90c163d70585fa5a7229282a7f408b9e29cda8aa075eb1c1"
+      "sha256": "fc4c5a1b9e4bdfca8a41958052bd8e0bac1b977ee927d1930a3b6a41b09dc01d"
     },
     "src/vorqeli_connect/__main__.py": {
       "bytes": 29,
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 80500,
-      "sha256": "e319a29f2005d6ff6570732f3a6e16180e8333c0a42b3cb2188eaf901617ad53"
+      "bytes": 91066,
+      "sha256": "f32344c16515e0c31feb733f5f1c5dfbcab4980065fa7461c932a41b27dbbb90"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11063,
@@ -410,8 +410,8 @@
       "sha256": "cc64b3df129b7695b333cf6b2aa71cdfd612253a2361d54440acf43d0b69b93f"
     },
     "src/vorqeli_connect/ui_assets/VORQELI.ico": {
-      "bytes": 78604,
-      "sha256": "3224ffdcea1f6477cef1538715321861610adfb2532f96a1783079249906fb9f"
+      "bytes": 111574,
+      "sha256": "33da7f02a40ea6caea26e832d97a5dad2b0bb91fce0fc026b9fd556f1696caf1"
     },
     "src/vorqeli_connect/ui_copy.py": {
       "bytes": 1566,
@@ -426,8 +426,8 @@
       "sha256": "08ca52402523b2ee19ffc988521e2959cfd966b3ffe7c6e5e060e3121990375b"
     },
     "src/vorqeli_connect/uninstall_safety.py": {
-      "bytes": 4478,
-      "sha256": "2c8c9ae36305e609ce5626da1d25d9750daf76780e709d325862f05ed311f5ce"
+      "bytes": 5730,
+      "sha256": "d94657761c242eeb60ba8f0dcd78bd3d487695e0b7c245234efe01410b2d36d1"
     },
     "src/vorqeli_connect/update_checker.py": {
       "bytes": 14633,
@@ -686,12 +686,12 @@
       "sha256": "de5100087a05e49fd95c394bb171f566c22e83003ba50ce3ccc32262bd1600bf"
     },
     "src/vorqeli_connect/premium_ui.py": {
-      "bytes": 23397,
-      "sha256": "04237586dd8342f1722f323d0f6c3f080599c20e8a5f88f3a6d117d81246a9d5"
+      "bytes": 29754,
+      "sha256": "fb3e52650732a17e543c4e6ecbb4417bd667f1327268dda9663308b133150c4f"
     },
     "src/vorqeli_connect/frameless.py": {
-      "bytes": 3310,
-      "sha256": "1fc1cf607412bf0dc84393e3a62d76380598d463bba3a9d5029fc39387f8ee4e"
+      "bytes": 3931,
+      "sha256": "ae8201aa0ca9f41d7bae99f4ee29c5cb23dd62d6bbd065f490b85828f7f63a3f"
     },
     "src/vorqeli_connect/premium_logs.py": {
       "bytes": 5420,
@@ -764,6 +764,46 @@
     "src/vorqeli_connect/ui_assets/premium/brand/youtube.svg": {
       "bytes": 439,
       "sha256": "83f21db4834289327fec26798f3ae915efa72d877129eaab5f9eb6299f776b36"
+    },
+    "tests/test_ui_polish_v391.py": {
+      "bytes": 5059,
+      "sha256": "3bc2599aea5551d4cc930920a83da8120f3a32b40204706f169cd84f91f05fc4"
+    },
+    "docs/UI_POLISH_V391.md": {
+      "bytes": 3303,
+      "sha256": "b5f7a13574d9ddd8950ccd7239ed0172c56e2042de9026655bcd3f5710f538c1"
+    },
+    "src/vorqeli_connect/geohide_hosts_feed.py": {
+      "bytes": 14791,
+      "sha256": "35d1bd7a50235c4780d8d1b1e0e93655391a702e0b14f3126f739a09de169bd5"
+    },
+    "tests/test_geohide_official_hosts_v391.py": {
+      "bytes": 4638,
+      "sha256": "9abcb913adc0973795d90afbe93e9272b0d60d0101da642fe417476152dc845b"
+    },
+    "docs/OFFICIAL_GEOHIDE_HOSTS_V391.md": {
+      "bytes": 4545,
+      "sha256": "d80d51ba835f532d0ae45cf80f0c8aa537e9ad4438e371c94e097724952e526d"
+    },
+    "src/vorqeli_connect/geohide_uninstall_guard.py": {
+      "bytes": 1980,
+      "sha256": "4878c39d0e4e3ce5bfaaa2e3f666ea468ae49d23915f98145659ff84596d04c8"
+    },
+    "scripts/windows_geohide_rc_readonly_smoke.py": {
+      "bytes": 1146,
+      "sha256": "56f10b6bc20b378ab07e55d4781e5242ed61061e9f1812756ba307b6b6ff90df"
+    },
+    "tests/test_geohide_rc_guard_v40.py": {
+      "bytes": 4761,
+      "sha256": "38bb3e9bf155dae5534dfb638a75b512a63a3f2d084cf6c7bef7497055deffd9"
+    },
+    "docs/RC40_SAFETY_GATE.md": {
+      "bytes": 4161,
+      "sha256": "50cd56e3c16dccd754221a8fcb8a353b0c875e384c640b41806eb67603542287"
+    },
+    "tests/test_rc40_gui_tray_hotfix.py": {
+      "bytes": 1112,
+      "sha256": "9cff524ffd84947197606c50ef230cac1732520f69aaa09e727d838facddc385"
     }
   },
   "version": "0.34.0"

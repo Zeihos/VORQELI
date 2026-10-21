@@ -1,3 +1,26 @@
+## v0.40.0 — safety gate for GeoHide HOSTS (release candidate, not stable)
+
+- Uninstaller fails closed if either VORQELI optional HOSTS block or official
+  GeoHide RU block remains, or the GeoHide recovery journal is unresolved.
+- The guard runs before startup and DNS mutations so failed removal keeps
+  the app available for manual rollback.
+- `--geohide-hosts-status` provides a bounded read-only, redacted JSON health
+  summary of the managed block and recovery journal.
+- CI adds an isolated temp-file test; no system HOSTS/DNS changes.
+- Final Windows networking, signing and user acceptance are mandatory for v1.0.
+
+## v0.39.1 — Visual polish and correct history UI
+
+- No visible stipple hit-target overlay. Pointer clicks and keyboard controls remain functional.
+- OFF/PARTIAL/ON hero artwork and module statuses are generated from actual runtime health.
+- History event schema, 10-event paging, real event JSON export and secret redaction fixed.
+- Diagnostics status badges, long text clipping and about-page component state refined.
+- Repeated frameless minimization no longer accumulates Map handlers.
+- Network/DNS/HOSTS/Telegram/WinWS implementations are unchanged.
+- Официальный GeoHide RU classic HOSTS: загрузка из Internet-Helper/GeoHideDNS или из проверенного файла; все IP-альтернативы, предварительный просмотр, объединение Telegram, отдельное подтверждение и откат.
+- Блокирующая ошибка CI исправлена: восстановлен VORQELI-wordmark.png с точным SHA-256.
+
+
 ## v0.39.0 — Fixed frameless premium Windows interface
 
 - Six fully themed screens reproduce the approved VORQELI visual compositions.
