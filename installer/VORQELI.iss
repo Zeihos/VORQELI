@@ -1,5 +1,5 @@
 #define MyAppName "VORQELI Connect"
-#define MyAppVersion "0.40.3"
+#define MyAppVersion "0.40.6"
 #define MyAppExeName "VORQELI-Connect.exe"
 
 [Setup]

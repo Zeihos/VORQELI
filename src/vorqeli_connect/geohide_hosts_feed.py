@@ -295,13 +295,36 @@ def remove(path: Path, journal_path: Path) -> bool:
     original=_decode(before)
     unmanaged,geo,legacy=_outside(original)
     if not geo:
-        return False
+        if journal is None:
+            return False
+        # A crash between writing the journal and replacing HOSTS can leave
+        # a valid journal without any corresponding managed section. The
+        # previous implementation returned False forever, blocking uninstall.
+        # Explicit user recovery may remove ONLY this orphaned journal.
+        if legacy:
+            raise ValueError('Сохранился старый HOSTS-блок VORQELI: сначала удалите его через менеджер')
+        for key in ('active_block_sha256', 'source_sha256'):
+            digest=journal.get(key)
+            if not isinstance(digest,str) or re.fullmatch(r'[0-9a-f]{64}',digest) is None:
+                raise ValueError('Невозможно подтвердить целостность журнала GeoHide')
+        existing_journal=_bytes(journal_path)
+        if _bytes(path) != before or _bytes(journal_path) != existing_journal:
+            raise RuntimeError('HOSTS или журнал изменился во время восстановления')
+        journal_path.unlink()
+        return True
     _assert_known_geo_block(geo,journal)
     if legacy:
         raise ValueError('Unexpected legacy HOSTS block alongside GeoHide')
     saved=journal.get('legacy_block','')
     if saved:
-        # Insert legacy only if it doesn't overwrite new manual additions.
+        # Do not reintroduce an old Telegram mapping if the user has manually
+        # added any mapping for the same domain since enabling GeoHide. That
+        # would create conflicting HOSTS rows outside VORQELI's managed block.
+        restored_names={host for _,host in _legacy_records(saved,'')}
+        conflicts=restored_names & _unmanaged_domains(unmanaged)
+        if conflicts:
+            raise ValueError('Ручные записи HOSTS пересекаются с восстанавливаемыми Telegram-правилами: '
+                             + str(len(conflicts)) + '. Проверьте HOSTS перед откатом.')
         insertion='' if not unmanaged or unmanaged.endswith(('\r','\n')) else ('\r\n' if '\r\n' in unmanaged else '\n')
         unmanaged+=insertion+saved
     _atomic(path,_encode(unmanaged),expected=before)

@@ -12,6 +12,7 @@ import sys
 import webbrowser
 from functools import lru_cache
 from pathlib import Path
+import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 from typing import Callable
@@ -49,6 +50,34 @@ def classify_service(value: str) -> tuple[str,str]:
     return value[:54],C['amber']
 
 
+
+def diagnostic_scope(app):
+    """Keep the active job independent of progress text, which other modules may update.
+
+    The text-only fallback is strictly for older standalone test harnesses.
+    Production ConnectApp always provides _diagnostic_scope explicitly.
+    """
+    if not bool(getattr(app, 'running_job', False)):
+        return None
+    if hasattr(app, '_diagnostic_scope'):
+        scope = app._diagnostic_scope
+        return scope if scope == 'all' or scope in SERVICES else None
+    detail = str(getattr(app, 'detail', ''))
+    if detail.startswith('Диагностика выполняется'):
+        return 'all'
+    if detail.startswith('Проверяем сервис: '):
+        target = detail[len('Проверяем сервис: '):].strip()
+        return target if target in SERVICES else None
+    return None
+
+
+def diagnostic_result(name: str, value: str, fresh_names=None):
+    """Do not present results restored from a previous app run as live checks."""
+    label, color = classify_service(value)
+    if fresh_names is not None and name not in fresh_names and value not in ('Не проверено', 'Ожидание'):
+        return 'Ранее: ' + label, C['dim']
+    return label, color
+
 def history_events(app):
     all_items=recent_events(limit=100)
     current=getattr(app,'_native_history_filter','Все события')
@@ -84,6 +113,10 @@ class Scene:
         self.sx=self.sy=self.sf=scale
         self.content_width=round(W*scale)
         self.content_height=round(H*scale)
+        # ConnectApp._focus_control relies on this extent when a Canvas
+        # control is clicked or focused with Tab.  Without it every click
+        # raises AttributeError on a fresh native-UI application instance.
+        self.app._logical_size=(self.content_width,self.content_height)
         self.count=0
         self.report=app.controller.status()
         self.settings=app.settings
@@ -160,7 +193,7 @@ class Scene:
             self.app._native_images.append(photo)
             self.cv.create_image(*self.xy(x,y),image=photo,anchor='nw')
             return True
-        except (OSError,ValueError,ImportError,RuntimeError):
+        except (OSError,ValueError,ImportError,RuntimeError,tk.TclError):
             return False
 
     def brand_icon(self,stem,x,y,size=42):
@@ -175,7 +208,7 @@ class Scene:
             self.app._native_images.append(photo)
             self.cv.create_image(*self.xy(x,y),image=photo,anchor='nw')
             return True
-        except (OSError,ValueError,ImportError,RuntimeError):
+        except (OSError,ValueError,ImportError,RuntimeError,tk.TclError):
             return False
 
     def section(self,title,subtitle=''):
@@ -199,7 +232,7 @@ class Scene:
         self.txt(358,964,'VORQELI Connect  ·  Локальное приложение',15,'muted')
         self.txt(1493,963,'WINDOWS 10 / 11',14,'muted',anchor='ne')
         status=getattr(self.report,'overall','off')
-        clr='green' if status=='connected' else 'amber' if status in ('partial','error') else 'dim'
+        clr='green' if status=='connected' else 'amber' if status=='partial' else 'red' if status=='error' else 'dim'
         text='АКТИВНО' if status=='connected' else 'ЧАСТИЧНО' if status=='partial' else 'ОШИБКА' if status=='error' else 'ОЖИДАНИЕ'
         self.pill((1113,36,1320,74),text,clr)
         self.button((1346,29,1407,76),'—',lambda:self._minimize(),kind='secondary')
@@ -227,7 +260,7 @@ class Scene:
             self.cv.tag_bind(name,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,c))
         self.rr((35,822,298,979),'surface','edgehi',17)
         self.circle(62,859,10,clr)
-        self.txt(85,842,'Соединение активно' if status=='connected' else 'Частичное соединение' if status=='partial' else 'Ожидание',17,'text',True,width=201)
+        self.txt(85,842,'Соединение активно' if status=='connected' else 'Частичное соединение' if status=='partial' else 'Ошибка соединения' if status=='error' else 'Ожидание',17,'text',True,width=201)
         self.txt(53,901,'WinWS · Telegram · DNS',15,'muted')
         self.line(52,935,273,935,'edge')
         self.txt(54,947,'v'+VERSION+' · Windows 10/11',13,'dim')
@@ -291,7 +324,13 @@ class Scene:
     def diagnostics(self):
         self.header(2,'Диагностика сервисов','HTTPS-проверки не подтверждают вход в учётную запись или обход блокировок')
         busy=bool(getattr(self.app,'running_job',False))
-        self.button((1207,142,1487,214),'ВЫПОЛНЯЕТСЯ…' if busy else 'ПРОВЕРИТЬ ВСЁ',
+        scope=diagnostic_scope(self.app)
+        all_pending=scope=='all'
+        one_pending=scope if scope in SERVICES else None
+        # None in old test harnesses retains their original semantics;
+        # a production application always owns an explicit set of fresh names.
+        fresh=getattr(self.app,'_diagnostic_fresh',None)
+        self.button((1207,142,1487,214),'ВЫПОЛНЯЕТСЯ…' if all_pending else 'ЗАНЯТО' if busy else 'ПРОВЕРИТЬ ВСЁ',
                     self.app._diagnose,size=19,enabled=not busy)
         result=dict(getattr(self.app,'last_results',[]) or [])
         for i,name in enumerate(SERVICE_NAMES):
@@ -302,15 +341,18 @@ class Scene:
                 self.circle(377,y+46,15,['cyan','red','cyan','green','blue'][i])
             self.txt(416,y+16,name,21,'text',True,width=540)
             self.txt(416,y+53,'Проверка HTTPS-ответа',15,'muted')
-            state,col=classify_service(result.get(name,'Не проверено'))
+            pending=busy and (all_pending or one_pending==name)
+            state,col=('Проверяется…','amber') if pending else diagnostic_result(name,result.get(name,'Не проверено'),fresh)
             self.txt(963,y+31,state,16,col,True,width=253)
-            self.button((1269,y+20,1464,y+73),'ПРОВЕРЯЕТСЯ…' if busy else 'ПРОВЕРИТЬ',
+            self.button((1269,y+20,1464,y+73),'ПРОВЕРЯЕТСЯ…' if pending else 'ЗАНЯТО' if busy else 'ПРОВЕРИТЬ',
                         lambda n=name:self.app._diagnose_service(n),kind='secondary',size=16,
                         enabled=not busy)
         if busy:
             # The app's existing worker updates detail; do not invent progress.
-            self.txt(360,777,str(getattr(self.app,'detail','Диагностика выполняется…')),
-                     15,'amber',width=1070)
+            caption=('Проверяем все сервисы…' if all_pending else
+                     'Проверяем: '+one_pending if one_pending else
+                     str(getattr(self.app,'detail','Выполняется другая операция…')))
+            self.txt(360,777,caption,15,'amber',width=1070)
         else:
             self.txt(360,787,'Дополнительная проверка',20,'text',True)
         for i,(name,cb) in enumerate((('DNS / HOSTS',self.app._show_dns_audit),('ЖУРНАЛЫ',self.app._show_engine_logs),('TELEGRAM WEB',self.app._show_telegram_web_audit))):
@@ -461,12 +503,12 @@ class Scene:
         self.button((1253,431,1464,502),'DoH / HTTPS',lambda:self.app._set_dns_mode('doh'),kind='primary' if self.settings.dns_mode=='doh' else 'secondary',enabled=idle,size=18)
         self.txt(1035,546,'Смена транспорта доступна при отключении.',16,'muted',width=423)
         dns=getattr(self.report,'dns','off')
-        self.txt(1035,617,'Модуль: '+('запущен' if dns=='on' else 'не запущен'),18,'green' if dns=='on' else 'muted',True)
+        self.txt(1035,617,'Модуль: '+('запущен' if dns=='on' else 'ошибка' if dns=='error' else 'не запущен'),18,'green' if dns=='on' else 'red' if dns=='error' else 'muted',True)
         self.txt(365,743,'Сетевые инструменты',24,'text',True)
         for i,(label,cb) in enumerate((('Проверка',lambda:self.app._page('Диагностика')),('DNS / HOSTS',self.app._show_dns_audit),('Правила HOSTS',self.app._show_hosts_manager),('Настройки',lambda:self.app._page('Настройки')))):
             x=345+i*287
             self.button((x,796,x+274,864),label,cb,kind='secondary',size=17)
-        self.button((349,877,698,936),'ВОССТАНОВИТЬ DNS',self.app._restore_dns,kind='secondary',size=17)
+        self.button((349,877,698,936),'ВОССТАНАВЛИВАЕМ…' if getattr(self.app,'_dns_restore_busy',False) else 'ВОССТАНОВИТЬ DNS',self.app._restore_dns,kind='secondary',size=17,enabled=not getattr(self.app,'_dns_restore_busy',False) and not getattr(self.app,'running_job',False) and not getattr(self.app,'_disconnecting',False))
         self.button((707,877,1071,936),'HOSTS / ПРАВИЛА',self.app._show_hosts_manager,kind='secondary',size=17)
 
 

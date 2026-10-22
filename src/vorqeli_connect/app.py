@@ -138,11 +138,14 @@ class ConnectApp(tk.Tk):
         self._dns_audit_window = None
         self._dns_audit_text = None
         self._dns_audit_busy = False
+        self._dns_restore_busy = False  # Guard concurrent DNS restoration requests
         self._telegram_web_window = None
         self._telegram_web_text = None
         self._telegram_web_busy = False
         previous = load_history()
         self.last_results = list(previous[-1]['results'].items()) if previous else []
+        self._diagnostic_scope = None  # 'all', a single service or None
+        self._diagnostic_fresh = set()  # results checked in this process only
         # A compact/150%-scaled display exposes scrollbars rather than
         # cutting off the settings, sidebar, or connect action.
         self.viewport = tk.Frame(self, bg=BG, bd=0, highlightthickness=0)
@@ -1299,23 +1302,43 @@ class ConnectApp(tk.Tk):
             self.events.put(('idle','disconnect'))
 
     def _restore_dns(self):
+        # Never race a connect/disconnect worker or start two PowerShell DNS
+        # restorations for the same adapter backup. The toggle is reset only
+        # by the worker completion event on the Tk thread.
+        if (self._quitting or self.running_job or self._disconnecting
+                or self._dns_restore_busy):
+            return
         if self.settings.desired_enabled:
             messagebox.showwarning('GeoHide', 'Сначала отключите VORQELI, чтобы восстановить DNS.', parent=self)
             return
         if not (STATE_FILE.exists() or DOH_STATE_FILE.exists()):
             messagebox.showinfo('GeoHide','Сохранённых DNS-настроек нет.',parent=self)
             return
-        threading.Thread(target=self._worker_restore_dns,daemon=True).start()
+        self._dns_restore_busy = True
+        self.detail = 'Восстанавливаем DNS…'
+        self._draw()
+        try:
+            threading.Thread(target=self._worker_restore_dns,daemon=True,name='GeoHideDnsRestore').start()
+        except (RuntimeError,OSError) as exc:
+            self._dns_restore_busy = False
+            self.detail = 'Не удалось начать восстановление DNS: ' + str(exc)
+            self._draw()
 
     def _worker_restore_dns(self):
         try:
-            restore_geo_dns()
-            self.events.put(('progress','Исходные DNS-настройки восстановлены.'))
-        except Exception as exc:self.events.put(('error',f'Не удалось восстановить DNS: {exc}'))
+            restored = restore_geo_dns()
+            self.events.put(('progress','Исходные DNS-настройки восстановлены.'
+                             if restored else 'Сохранённых DNS-настроек уже нет.'))
+        except Exception as exc:
+            self.events.put(('error',f'Не удалось восстановить DNS: {exc}'))
+        finally:
+            self.events.put(('dns_restore_done',None))
 
     def _diagnose(self):
         if self.running_job:return
         self._begin_job()
+        self._diagnostic_scope = 'all'
+        self._diagnostic_fresh.clear()
         self.detail='Диагностика выполняется…'
         self._draw()
         threading.Thread(target=self._scan_worker,daemon=True).start()
@@ -1325,6 +1348,8 @@ class ConnectApp(tk.Tk):
         if self.running_job or name not in SERVICES:
             return
         self._begin_job()
+        self._diagnostic_scope = name
+        self._diagnostic_fresh.discard(name)
         self.detail = 'Проверяем сервис: ' + name
         self._draw()
         def worker():
@@ -1368,6 +1393,7 @@ class ConnectApp(tk.Tk):
                     self._jobs=max(0,self._jobs-1)
                     self.running_job=self._jobs > 0
                     if value=='disconnect':self._disconnecting=False
+                    if value=='diagnostics':self._diagnostic_scope=None
                     redraw=True
                 elif typ=='startup_error':
                     request,enabled,msg=value
@@ -1438,6 +1464,9 @@ class ConnectApp(tk.Tk):
                 elif typ=='connect':self._start_connect()
                 elif typ=='disconnect':self._start_disconnect()
                 elif typ=='quit':self.quit_app()
+                elif typ=='dns_restore_done':
+                    self._dns_restore_busy = False
+                    redraw = True
                 elif typ=='dns_audit':
                     self._dns_audit_busy = False
                     self._set_dns_audit_text(str(value))
@@ -1449,12 +1478,14 @@ class ConnectApp(tk.Tk):
                     merged = dict(self.last_results)
                     merged[name] = status
                     self.last_results = [(key, merged[key]) for key in SERVICES if key in merged]
+                    self._diagnostic_fresh.add(name)
                     try:record_scan(self.last_results)
                     except OSError:pass
                     self.detail = 'Проверен сервис: ' + name
                     redraw = True
                 elif typ=='diagnostics':
                     self.last_results=value
+                    self._diagnostic_fresh.update(name for name, _ in value if name in SERVICES)
                     try:record_scan(value)
                     except OSError:pass
                     self.detail='Диагностика выполнена: '+datetime.now().strftime('%H:%M:%S')

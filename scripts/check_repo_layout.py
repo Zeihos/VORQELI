@@ -10,6 +10,13 @@ import re
 import sys
 
 REQUIRED_FILES = (
+    'tests/test_geohide_recovery_v406.py',
+    'tests/test_dns_restore_ui_v406.py',
+    'docs/GEOHIDE_RECOVERY_AND_DNS_V406.md',
+    'tests/test_native_ui_v405.py',
+    'docs/NATIVE_UI_DIAGNOSTICS_V405.md',
+    'tests/test_native_ui_v404.py',
+    'docs/NATIVE_UI_RELEASE_GUARDS_V404.md',
     'tests/test_native_ui_v403.py',
     'docs/NATIVE_UI_COMPACT_V403.md',
     'tests/test_native_ui_v402.py',

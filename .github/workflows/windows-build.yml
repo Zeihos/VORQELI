@@ -143,7 +143,7 @@ jobs:
       - name: Upload Windows application
         uses: actions/upload-artifact@v6
         with:
-          name: VORQELI-Connect-v0.40.3-Windows
+          name: VORQELI-Connect-v0.40.6-Windows
           path: |
             dist/VORQELI-Connect.exe
             dist/VORQELI-Connect-Setup.exe
