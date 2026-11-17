@@ -1,3 +1,10 @@
+## Premium Dark 2026 UI refinement (on v0.41.0 RC)
+
+- Redesigned the native Tkinter visual hierarchy: neutral graphite canvas, controlled violet accents, calmer sidebar and smaller logo footprint.
+- Clarified that running local modules is not a live site-access test; no fabricated connection diagnostics.
+- Preserved all six pages, existing callbacks, keyboard accessibility and repeated pointer activation.
+- Added offline UI regression tests and design review checklist.
+
 ## v0.41.0 RC — Obsidian Desktop: рабочий чёрно-фиолетовый UI
 
 - Полностью переработаны реальные Tkinter Canvas-экраны: тихие тёмные поверхности, строгая иерархия, компактная навигация и выделенная кнопка подключения.
