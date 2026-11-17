@@ -30,7 +30,7 @@ SERVICE_NAMES = tuple(SERVICES)
 # Obsidian 2026: functional contrast, restrained violet accent and quiet surfaces.
 # Rendered from native Canvas primitives: no static screenshot under hitboxes.
 C = {
-    'bg':'#0B0A10', 'sidebar':'#111018', 'surface':'#191721',
+    'bg':'#0C0A12', 'sidebar':'#111018', 'surface':'#191721',
     'surface2':'#24202F', 'edge':'#302B3C', 'edgehi':'#8964D2',
     'text':'#F7F5FA','muted':'#BFB6CE','dim':'#978CA9',
     'cyan':'#D2B1FF','blue':'#543281','strong':'#7042BF',
@@ -315,7 +315,7 @@ class Scene:
         self.txt(528,398,'DPI / WinWS  ·  '+('AUTO 1–13' if strategy=='alt_auto' else strategy.upper()),17,'muted')
         selected=[name for name in ('dpi','telegram','dns') if getattr(self.settings,'connect_'+name,False)]
         on=sum(getattr(self.report,n,'off')=='on' for n in selected)
-        self.txt(528,439,f'Модули: {on}/{len(selected)}  ·  Доступность сайтов не проверена',14,'dim',width=630)
+        self.txt(528,439,f'Модули: {on}/{len(selected)} · не проверка доступа к сайтам',14,'dim',width=630)
         desired=bool(getattr(self.settings,'desired_enabled',False))
         self.button((1179,385,1457,463),'ПОДКЛЮЧЕНИЕ...' if getattr(self.app,'running_job',False) else 'ОТКЛЮЧИТЬ' if desired else 'ПОДКЛЮЧИТЬ',self.app._start_disconnect if desired else self.app._start_connect,enabled=not getattr(self.app,'_disconnecting',False) and not getattr(self.app,'running_job',False),size=19)
         cards=[('DPI / WinWS','dpi','Сеть и стратегии'),('Telegram','telegram','Настройки'),('GeoHide DNS','dns','Сеть и стратегии')]

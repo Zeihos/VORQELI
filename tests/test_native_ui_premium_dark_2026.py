@@ -14,7 +14,7 @@ def stable_assets(monkeypatch):
 
 
 def test_premium_palette_is_neutral_and_legible():
-    assert ui.C['bg'] == '#0B0A10'
+    assert ui.C['bg'] == '#0C0A12'
     assert ui.C['sidebar'] != ui.C['surface']
     assert ui.C['strong'].startswith('#')
     assert ui.C['red'] != ui.C['green']

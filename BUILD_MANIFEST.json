@@ -430,8 +430,8 @@
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
     },
     "src/vorqeli_connect/native_ui.py": {
-      "bytes": 35269,
-      "sha256": "10877ec7ad2ad2dbd9ff793264d74bcf81147fd7121222dc1596320409cebcdb"
+      "bytes": 35260,
+      "sha256": "5e1e607539dc89c669956c16919ffc1684be2cf09e6b80c242efea4b9d636353"
     },
     "src/vorqeli_connect/network_audit.py": {
       "bytes": 15192,
@@ -875,7 +875,7 @@
     },
     "tests/test_native_ui_premium_dark_2026.py": {
       "bytes": 2317,
-      "sha256": "3fd4eead49f43a2234b6a23ec85e35c93eaeda2d7c87762a47ee9a2d5dcae5b6"
+      "sha256": "11c0ef6409f72e4357d1d6671f16f21fa6fe5fb67b0f48cc46abc2cc8cab23ad"
     },
     "docs/PREMIUM_DARK_2026.md": {
       "bytes": 1052,
