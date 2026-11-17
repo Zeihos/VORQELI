@@ -1,3 +1,10 @@
+## Native navigation / focus stability
+
+- All six pages are directly reachable from sidebar.
+- Canvas vector pictograms replace font-dependent sidebar glyphs.
+- Keyboard focus no longer transfers to a different control after a redraw.
+- Added offline regression tests and user-acceptance checklist.
+
 ## Premium Dark 2026 UI refinement (on v0.41.0 RC)
 
 - Redesigned the native Tkinter visual hierarchy: neutral graphite canvas, controlled violet accents, calmer sidebar and smaller logo footprint.
