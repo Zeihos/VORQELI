@@ -1,0 +1,23 @@
+name: "Предложить улучшение"
+description: "Новая функция, UX-предложение или улучшение VORQELI Connect"
+title: "[Предложение]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Какую проблему нужно решить?"
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: "Предлагаемое решение"
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Альтернативы и дополнительные сведения"
+    validations:
+      required: false

@@ -1,17 +1,39 @@
+# Python and packaging
 __pycache__/
 *.py[cod]
+*.pyo
+*.egg-info/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
 .venv/
 venv/
-*.egg-info/
 build/
 dist/
 *.spec
-*.log
-*.tmp
-*.zip
-.env
+.coverage
+htmlcov/
+
+# Editors and operating systems
 .vscode/
 .idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Secrets, local state and generated data
+.env
+.env.*
+!.env.example
 *.local.json
 *.db
+*.sqlite3
+*.log
+*.tmp
+*.bak
+*.orig
+*.zip

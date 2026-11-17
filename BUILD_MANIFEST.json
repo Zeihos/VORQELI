@@ -10,24 +10,12 @@
       "sha256": "85a92ebe1f047040abe51d22d5db075571d3c60892801412373be7411d9b4ee9"
     },
     ".gitignore": {
-      "bytes": 140,
-      "sha256": "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
+      "bytes": 390,
+      "sha256": "f49cb8c6b61accfd8d619d7f3748f1f166cf5c95bfbc38a7c807985774fcf753"
     },
     "CHANGELOG.md": {
-      "bytes": 33582,
-      "sha256": "c3e3f3c8bf07e12dca325f8f4faaf02e4dbdcb3e9b00cd0959940c4c91840458"
-    },
-    "Compact-preview.png": {
-      "bytes": 74045,
-      "sha256": "41ddf4fd81330616e25f995e5c4b2d2d594b6b29e46458962b9974b100e7efac"
-    },
-    "Diagnostics-preview.png": {
-      "bytes": 91806,
-      "sha256": "4ef1758f859976214005a36079d03f72e683f42e08589c34b7abb698e81a9c06"
-    },
-    "Keyboard-preview.png": {
-      "bytes": 103834,
-      "sha256": "dd073579edf3fffb2ccaaab6f7123d020a80a467cb557cc5ce2b4346b5e9bc73"
+      "bytes": 34379,
+      "sha256": "3227cd28a4af76361bb33b51a8e1c233b277035c4988fadd96ebf97b285c6b00"
     },
     "LICENSE": {
       "bytes": 1077,
@@ -38,20 +26,8 @@
       "sha256": "f93ea6f00a0bfb5deb9ada33d7efbe5c683fa585dcbbcf4bc5d8e92e3a2f7a77"
     },
     "README.md": {
-      "bytes": 19030,
-      "sha256": "f45e03a4c3ee7ebb4600a560bc57ba8614d23db58c7d0564483e4a33041e015f"
-    },
-    "Settings-preview.png": {
-      "bytes": 116184,
-      "sha256": "e668f5f1665f1454a9cf5d752fb6b84cf2ce41c3854844c70715183aa06a6de0"
-    },
-    "UI-preview.png": {
-      "bytes": 108123,
-      "sha256": "0df2b9540b3a70aeb4f52bf793d5a5b1cf4a017c055993b6516500dfdcc434c6"
-    },
-    "Update-preview.png": {
-      "bytes": 97197,
-      "sha256": "471756b36cbfe188345fff6027928b3f27f844bda17de0cc89e0cf2c436c9808"
+      "bytes": 9981,
+      "sha256": "fd58bb27b4d7263d13dcdbee7c07daf472f3765f4f928876ed2651fae537c320"
     },
     "assets/Flowseal-zapret-1.10.3-LICENSE.txt": {
       "bytes": 2105,
@@ -158,8 +134,8 @@
       "sha256": "a602382826546e8062d73309bd9a9035afdcb6cc70c279bde87773303b246bb1"
     },
     "docs/QUICK_START.md": {
-      "bytes": 3663,
-      "sha256": "d3f9cfe482bc327448d2ccfc04b3ad413abf39316f418c686200cc97de741363"
+      "bytes": 6078,
+      "sha256": "87ed63f9197b02ffcd22af2f1115e8b63c9b9a0c7c6b097e49cf62aa15922253"
     },
     "docs/RC40_SAFETY_GATE.md": {
       "bytes": 4161,
@@ -194,8 +170,8 @@
       "sha256": "e81c07730b1bb60d90382c333bdb0b9561b68938f1a196155a3b02a54f1ae682"
     },
     "docs/ROADMAP.md": {
-      "bytes": 6136,
-      "sha256": "1ea209aa232e927686e8608a4d927748165c174450e8e649f5eb01faeef5d6fb"
+      "bytes": 3437,
+      "sha256": "92bce12ae4768bfea41fa2631d2335c8ff681f4d0250b8c1b45ffa525aa7da9f"
     },
     "docs/SERVICES_AND_GEOHIDE_HOSTS_V363.md": {
       "bytes": 3225,
@@ -290,8 +266,8 @@
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "scripts/check_repo_layout.py": {
-      "bytes": 6558,
-      "sha256": "a840be37f673d4b4756c99062edd1c019362eaeb00e4f7e8f150f0443506dbcd"
+      "bytes": 6731,
+      "sha256": "32f5b7e64c7c10baa408dbcfd686692e6fb09de7a87529d4b3fd3b48d5da76e7"
     },
     "scripts/gui_keyboard_smoke.py": {
       "bytes": 2081,
@@ -302,8 +278,8 @@
       "sha256": "29a3cefccef1dab861470db4c58453ee4ffe14914064dc2c71c32d0f4b95e1f4"
     },
     "scripts/verify_build_manifest.py": {
-      "bytes": 5286,
-      "sha256": "261ec26507cea70ecba6d31cad699debaacdebec7376a2b811467a7ce940e5fd"
+      "bytes": 5324,
+      "sha256": "4e700ba1b6dc53b4f91fae3d416db6ccd7a734e60b4c7368339cc615c057a078"
     },
     "scripts/windows_adapter_identity_smoke.py": {
       "bytes": 816,
@@ -888,7 +864,31 @@
     "docs/NATIVE_NAVIGATION_FOCUS_2026.md": {
       "bytes": 1189,
       "sha256": "c300b5ce2e219f8d0ea60748419fab13ccd527647ebec46990914c20984f1a79"
+    },
+    "CONTRIBUTING.md": {
+      "bytes": 3456,
+      "sha256": "68bb0be7638044621f28441207182164592843a1efe3e6cffdd3d7b30c69e5ca"
+    },
+    "SECURITY.md": {
+      "bytes": 2695,
+      "sha256": "5251e8b9b56e57f45bc781a1810701f977cc309ece1f55897c2abebbfc4db3dc"
+    },
+    ".github/ISSUE_TEMPLATE/bug_report.yml": {
+      "bytes": 1932,
+      "sha256": "8d62780c435a5df686db191e87d896f7133c873f687d814a5e7fe017844b1bdd"
+    },
+    ".github/ISSUE_TEMPLATE/feature_request.yml": {
+      "bytes": 706,
+      "sha256": "4dd8701ccc20a516c5082deb63320cf1eb71e69ee7bec085dab9e61ca831644c"
+    },
+    ".github/PULL_REQUEST_TEMPLATE.md": {
+      "bytes": 729,
+      "sha256": "1155d813ef0d40377f853d8ee9f2243c8c3d8cff8bd8fa8051fbb6207907820c"
+    },
+    "tests/test_public_repo_hygiene.py": {
+      "bytes": 1432,
+      "sha256": "5b2bb2f41d40d242a511d3f53d4c040f9d19229dcab751fe99c15dc996b5c867"
     }
   },
-  "version": "0.34.0"
+  "version": "0.41.0"
 }
