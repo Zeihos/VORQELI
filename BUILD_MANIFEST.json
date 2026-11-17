@@ -6,8 +6,8 @@
       "sha256": "5caab612d19030c1253ea6417303b7d09e62c825024057359befe8cd3ca27796"
     },
     ".github/workflows/windows-build.yml": {
-      "bytes": 6241,
-      "sha256": "355bda5835723fe8df4a2d2dfd479a987188db424ff9621b527531a33a2a7fc7"
+      "bytes": 6358,
+      "sha256": "85a92ebe1f047040abe51d22d5db075571d3c60892801412373be7411d9b4ee9"
     },
     ".gitignore": {
       "bytes": 140,
@@ -430,8 +430,8 @@
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
     },
     "src/vorqeli_connect/native_ui.py": {
-      "bytes": 36973,
-      "sha256": "d84360be1ca067919ca8b6db587e3e151618dfc8b6c05af005509a174b2a0312"
+      "bytes": 36817,
+      "sha256": "104ed9964b36ef28f165fe32f5e920c76e355e3fef452dab16dc2e7b78ea1611"
     },
     "src/vorqeli_connect/network_audit.py": {
       "bytes": 15192,

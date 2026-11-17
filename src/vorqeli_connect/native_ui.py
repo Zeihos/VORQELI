@@ -243,7 +243,7 @@ class Scene:
 
 
     def nav_icon(self, kind, x, y, tag, active=False):
-        """Resolution-independent Canvas pictograms. All strokes share the row's click tag."""
+        """Canvas-native pictograms. All shapes share the navigation row's hit tag."""
         color=C['cyan'] if active else C['muted']
         weight=max(2,round(self.sf*2.2))
         def path(*coords):
@@ -275,35 +275,28 @@ class Scene:
                 a,b=math.cos(angle),math.sin(angle)
                 path(x+11*a,y+11*b,x+14*a,y+14*b)
         elif kind=='network':
-            path(x,y-9,x-10,y+9)
-            path(x,y-9,x+10,y+9)
-            path(x-10,y        nav=[
-            ('Главная','home'),
-            ('Диагностика','activity'),
-            ('История','history'),
-            ('О проекте','about'),
-            ('Настройки','settings'),
-            ('Сеть и стратегии','network'),
-        ]
-        for i,(page,icon) in enumerate(nav):
-            y=205+i*65
-            selected=self.app.selected_page==page
-            name=f'nav_{i}'
-            fill='surface2' if selected else 'sidebar'
-            shape=self.rr((34,y,298,y+54),fill,'edge' if selected else '',10,tags=(name,))
-            if selected:
-                self.rr((35,y+10,39,y+44),'cyan','',2,tags=(name,))
-            self.nav_icon(icon,62,y+27,name,active=selected)
-            self.txt(104,y+27,page,17,'text' if selected else 'muted',
-                     selected,anchor='w',tags=(name,))
-            idx=self.app._register_control(self._rect_coords((34,y,298,y+54)),
-                lambda p=page:self.app._page(p),'Раздел: '+page)
-            self.cv.tag_bind(name,'<Button-1>',lambda e,n=idx:self.activate_mouse(n))
-            self.cv.tag_bind(name,'<Enter>',lambda e,s=shape,a=selected:
-                self._hover(s,C['surface2'] if a else '#211D2A'))
-            self.cv.tag_bind(name,'<Leave>',lambda e,s=shape,c=fill:
-                self._hover(s,C.get(c,c)))
-tton((1449,30,1505,76),'✕',self.app._window_close,kind='secondary')
+            path(x,y-9,x-10,y+9,x+10,y+9,x,y-9)
+            ring(x,y-9,3)
+            ring(x-10,y+9,3)
+            ring(x+10,y+9,3)
+
+    def chrome(self):
+        """Calm Windows desktop shell: one prominent accent, not a neon frame."""
+        self.cv.create_rectangle(0,0,*self.xy(W,H),fill=C['bg'],outline='')
+        self.rr((18,19,1518,1005),'bg','edge',16)
+        self.rr((21,21,312,1002),'sidebar','',13)
+        self.line(320,31,320,993,'edge')
+        self.txt(356,43,'VORQELI  /  CONNECT',16,'text',True)
+        self.txt(357,71,'Центр управления сетью',13,'dim')
+        self.line(346,953,1490,953,'edge')
+        self.txt(357,972,'VORQELI Connect · Только локальные данные',13,'dim')
+        self.txt(1490,972,'Windows 10 / 11',13,'dim',anchor='ne')
+        status=getattr(self.report,'overall','off')
+        clr='green' if status=='connected' else 'amber' if status=='partial' else 'red' if status=='error' else 'dim'
+        text='АКТИВНО' if status=='connected' else 'ЧАСТИЧНО' if status=='partial' else 'ОШИБКА' if status=='error' else 'ОЖИДАНИЕ'
+        self.pill((1130,36,1328,76),text,clr)
+        self.button((1351,30,1409,76),'—',lambda:self._minimize(),kind='secondary')
+        self.button((1449,30,1505,76),'✕',self.app._window_close,kind='secondary')
         if not self.logo(52,42,68):
             self.rr((52,42,120,110),'strong','edgehi',12)
             self.txt(86,77,'V',38,'text',True,anchor='center')
@@ -311,21 +304,26 @@ tton((1449,30,1505,76),'✕',self.app._window_close,kind='secondary')
         self.txt(136,83,'C O N N E C T',12,'cyan',True)
         self.line(48,145,285,145,'edge')
         self.txt(48,171,'НАВИГАЦИЯ',12,'dim',True)
-        nav=[('Главная','⌂'),('Диагностика','◇'),('История','◷'),('О проекте','ⓘ'),('Настройки','⚙')]
-        for i,(page,symbol) in enumerate(nav):
-            y=208+i*69
-            selected=self.app.selected_page==page or (page=='Настройки' and self.app.selected_page=='Сеть и стратегии')
-            name=f'nav_{i}'
+        nav=[('Главная','home'),('Диагностика','activity'),('История','history'),
+             ('О проекте','about'),('Настройки','settings'),('Сеть и стратегии','network')]
+        for i,(page,icon) in enumerate(nav):
+            y=202+i*65
+            selected=self.app.selected_page==page
+            tag=f'nav_{i}'
             fill='surface2' if selected else 'sidebar'
-            shape=self.rr((34,y,298,y+56),fill,'edge' if selected else '',10,tags=(name,))
+            shape=self.rr((34,y,298,y+54),fill,'edge' if selected else '',10,tags=(tag,))
             if selected:
-                self.rr((35,y+11,39,y+45),'cyan','',2)
-            self.txt(62,y+28,symbol,24,'cyan' if selected else 'dim',anchor='center',tags=(name,))
-            self.txt(108,y+28,page,18,'text' if selected else 'muted',selected,anchor='w',tags=(name,))
-            idx=self.app._register_control(self._rect_coords((34,y,298,y+56)),lambda p=page:self.app._page(p),'Раздел: '+page)
-            self.cv.tag_bind(name,'<Button-1>',lambda e,n=idx:self.activate_mouse(n))
-            self.cv.tag_bind(name,'<Enter>',lambda e,s=shape,a=selected:self._hover(s,C['surface2'] if a else '#211D2A'))
-            self.cv.tag_bind(name,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,C.get(c,c)))
+                self.rr((35,y+10,39,y+44),'cyan','',2,tags=(tag,))
+            self.nav_icon(icon,62,y+27,tag,active=selected)
+            self.txt(104,y+27,page,17,'text' if selected else 'muted',
+                     selected,anchor='w',tags=(tag,))
+            idx=self.app._register_control(self._rect_coords((34,y,298,y+54)),
+                lambda p=page:self.app._page(p),'Раздел: '+page)
+            self.cv.tag_bind(tag,'<Button-1>',lambda e,n=idx:self.activate_mouse(n))
+            self.cv.tag_bind(tag,'<Enter>',lambda e,s=shape,a=selected:
+                self._hover(s,C['surface2'] if a else '#211D2A'))
+            self.cv.tag_bind(tag,'<Leave>',lambda e,s=shape,c=fill:
+                self._hover(s,C.get(c,c)))
         self.rr((35,842,298,976),'surface','edge',12)
         self.circle(61,869,6,clr)
         self.txt(80,854,'Модули запущены' if status=='connected' else 'Частично запущены' if status=='partial' else 'Ошибка соединения' if status=='error' else 'Готово к работе',15,'text',True,width=202)
