@@ -10,6 +10,8 @@ import re
 import sys
 
 REQUIRED_FILES = (
+    'tests/test_obsidian_ui_v410.py',
+    'docs/OBSIDIAN_DESKTOP_UI_V410.md',
     'tests/test_geohide_recovery_v406.py',
     'tests/test_dns_restore_ui_v406.py',
     'docs/GEOHIDE_RECOVERY_AND_DNS_V406.md',

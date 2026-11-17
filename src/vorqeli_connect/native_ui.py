@@ -27,12 +27,14 @@ W, H = 1536, 1024
 MIN_READABLE_SCALE = 0.80  # smaller screens scroll; never shrink the UI to illegibility
 PAGES = ('Главная','Диагностика','История','О проекте','Настройки','Сеть и стратегии')
 SERVICE_NAMES = tuple(SERVICES)
+# Obsidian 2026: functional contrast, restrained violet accent and quiet surfaces.
+# Rendered from native Canvas primitives: no static screenshot under hitboxes.
 C = {
-    'bg':'#020C21', 'sidebar':'#03132E', 'surface':'#061A39',
-    'surface2':'#092347', 'edge':'#14549C', 'edgehi':'#168BFF',
-    'text':'#EDF5FF','muted':'#94B4E2','dim':'#6A8BB7',
-    'cyan':'#39CAFF','blue':'#116BEC','strong':'#1252D8',
-    'green':'#2DE8AD','amber':'#FFD071','red':'#FF6E8C',
+    'bg':'#0C0A12', 'sidebar':'#121019', 'surface':'#191620',
+    'surface2':'#241E2F', 'edge':'#383043', 'edgehi':'#7958AB',
+    'text':'#F5F1F9','muted':'#B8AEC5','dim':'#8B8097',
+    'cyan':'#BE92F3','blue':'#563388','strong':'#7045B4',
+    'green':'#48CDA2','amber':'#F3BC70','red':'#EC829D',
 }
 
 
@@ -99,6 +101,7 @@ def _scaled_icon(file: Path, pixels: int):
     remain per-window and are retained by app._native_images until next redraw.
     """
     with Image.open(file) as source:
+        # Keep the genuine approved violet mark (including texture/alpha).
         return source.convert('RGBA').resize((pixels,pixels),Image.Resampling.LANCZOS)
 
 
@@ -126,12 +129,21 @@ class Scene:
         self.app._button_images=[]
         self.app._native_images=[]
         self.cv.configure(background=C['bg'],cursor='')
+        # Keep the native Tk shell and letterboxed viewport the same shade.
+        # Older releases used a blue root background that leaked at small sizes.
+        for widget in (app, getattr(app, 'viewport', None)):
+            method = getattr(widget, 'configure', None)
+            if callable(method):
+                try:
+                    method(bg=C['bg'])
+                except (tk.TclError, TypeError):
+                    pass
 
     def xy(self,x,y):return round(x*self.sx),round(y*self.sy)
     def _rect_coords(self,rect):
         a,b,c,d=rect
         return (*self.xy(a,b),*self.xy(c,d))
-    def rr(self,rect,fill='surface',outline='edge',radius=19,width=1,tags=()):
+    def rr(self,rect,fill='surface',outline='edge',radius=15,width=1,tags=()):
         x1,y1,x2,y2=self._rect_coords(rect)
         rad=max(0,min(round(radius*self.sf),(x2-x1)//2,(y2-y1)//2))
         color=C.get(fill,fill); edge=C.get(outline,outline) if outline else ''
@@ -151,30 +163,44 @@ class Scene:
         if width:opts['width']=round(width*self.sx)
         return self.cv.create_text(*self.xy(x,y),**opts)
     def header(self,index,title,description):
-        self.txt(361,100,f'{index:02d}  /  {self.app.selected_page.upper()}',17,'cyan',True)
-        self.txt(361,139,title,42,'text',True,width=1110)
-        self.txt(361,195,description,19,'muted',width=845 if self.app.selected_page in ('Диагностика','История') else 1110)
+        # A deliberate type hierarchy: eyebrow, page title, single-line help.
+        self.txt(361,111,f'{index:02d}  /  {self.app.selected_page.upper()}',14,'cyan',True)
+        self.txt(361,147,title,36,'text',True,width=1105)
+        self.txt(361,209,description,16,'muted',width=825 if self.app.selected_page in ('Диагностика','История') else 1105)
 
     def button(self,rect,label,callback:Callable,*,kind='primary',size=18,enabled=True):
         self.count+=1
         name=f'control_{self.count}'
         fill='strong' if kind=='primary' else 'surface2' if kind=='secondary' else 'surface'
-        hover='#247FFC' if kind=='primary' else '#103967'
-        if not enabled:fill='#10213D'
-        shape=self.rr(rect,fill, 'edgehi' if kind=='primary' and enabled else 'edge',radius=14,tags=(name,))
+        hover='#845BC6' if kind=='primary' else '#30273D'
+        if not enabled:fill='#1E1B24'
+        shape=self.rr(rect,fill, 'edgehi' if kind=='primary' and enabled else 'edge',radius=11,tags=(name,))
         x1,y1,x2,y2=rect
         self.txt((x1+x2)/2,(y1+y2)/2,label,size,'text' if enabled else 'dim',True,anchor='center',width=x2-x1-15,tags=(name,))
         if enabled:
             ix=self.app._register_control(self._rect_coords(rect),callback,str(label))
-            self.cv.tag_bind(name,'<Button-1>',lambda e,n=ix:self.app._mouse_activate(n))
+            self.cv.tag_bind(name,'<Button-1>',lambda e,n=ix:self.activate_mouse(n))
             self.cv.tag_bind(name,'<Enter>',lambda e,s=shape,h=hover:self._hover(s,h))
             self.cv.tag_bind(name,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,C.get(c,c)))
         return shape
+    def activate_mouse(self,index):
+        """Pointer input activates repeatedly without a keyboard-only focus ring.
+
+        Keyboard Tab/Enter/Space remain handled by ConnectApp for accessibility.
+        Capture the callback before redraw; a toggle may recreate all controls.
+        """
+        if not 0 <= index < len(self.app._controls):
+            return
+        callback = self.app._controls[index][1]
+        self.app._focused_control_index = None
+        self.cv.delete('keyboard_focus_ring')
+        callback()
+
     def _hover(self,item,color):
         try:self.cv.itemconfigure(item,fill=color)
         except Exception:pass
     def card(self,rect,title,subtitle='',*,color='edge'):
-        self.rr(rect,'surface',color,20)
+        self.rr(rect,'surface',color,14)
         x1,y1,x2,y2=rect
         self.txt(x1+24,y1+22,title,21,'text',True,width=x2-x1-45)
         if subtitle:self.txt(x1+24,y1+59,subtitle,16,'muted',width=x2-x1-45)
@@ -216,55 +242,47 @@ class Scene:
         if subtitle:self.txt(365,285,subtitle,17,'muted')
 
     def chrome(self):
+        """Calm Windows desktop shell: one prominent accent, not a neon frame."""
         self.cv.create_rectangle(0,0,*self.xy(W,H),fill=C['bg'],outline='')
-        # Genuine scalable geometry and typography, not pre-rendered UI pictures.
-        self.rr((18,19,1518,1005),'bg','edgehi',23)
-        # Native layered neon strokes rather than a flattened screenshot.
-        for j in range(14):
-            blue=18+j*5
-            color=f'#{8:02X}{max(27,min(150,blue)):02X}{max(66,min(244,blue+78)):02X}'
-            coords=[*self.xy(1050,220+j*4),*self.xy(1230,156+j*3),
-                    *self.xy(1360,150+j*2),*self.xy(1500,194+j*2)]
-            self.cv.create_line(*coords,fill=color,width=max(1,round(self.sf)),smooth=True)
-        self.rr((21,21,312,1002),'sidebar','edge',22)
-        self.line(320,77,320,944,'edge')
-        self.txt(356,48,'VORQELI  /  NETWORK CONTROL',17,'muted')
-        self.txt(358,964,'VORQELI Connect  ·  Локальное приложение',15,'muted')
-        self.txt(1493,963,'WINDOWS 10 / 11',14,'muted',anchor='ne')
+        self.rr((18,19,1518,1005),'bg','edge',15)
+        self.rr((21,21,312,1002),'sidebar','edge',13)
+        self.line(320,88,320,954,'edge')
+        self.txt(357,47,'VORQELI CONNECT',17,'text',True)
+        self.txt(357,72,'Управление сетью · Windows',14,'dim')
+        self.txt(358,969,'VORQELI Connect · Локальное приложение',14,'dim')
+        self.txt(1490,969,'WINDOWS 10 / 11',13,'dim',anchor='ne')
         status=getattr(self.report,'overall','off')
         clr='green' if status=='connected' else 'amber' if status=='partial' else 'red' if status=='error' else 'dim'
         text='АКТИВНО' if status=='connected' else 'ЧАСТИЧНО' if status=='partial' else 'ОШИБКА' if status=='error' else 'ОЖИДАНИЕ'
-        self.pill((1113,36,1320,74),text,clr)
-        self.button((1346,29,1407,76),'—',lambda:self._minimize(),kind='secondary')
-        self.button((1447,29,1506,76),'✕',self.app._window_close,kind='secondary')
-        # The branding is the actual project logo asset, unchanged.
-        if not self.logo(43,42,82):
-            self.rr((45,44,123,122),'strong','cyan',13)
-            self.txt(85,82,'V',52,'cyan',True,anchor='center')
-        self.txt(138,50,'VORQELI',29,'text',True)
-        self.txt(139,86,'C O N N E C T',16,'cyan',True)
-        self.line(48,143,284,143,'edge')
-        self.txt(48,168,'НАВИГАЦИЯ',15,'muted',True)
+        self.pill((1113,37,1318,75),text,clr)
+        self.button((1351,30,1409,76),'—',lambda:self._minimize(),kind='secondary')
+        self.button((1449,30,1505,76),'✕',self.app._window_close,kind='secondary')
+        if not self.logo(52,42,68):
+            self.rr((52,42,120,110),'strong','edgehi',12)
+            self.txt(86,77,'V',38,'text',True,anchor='center')
+        self.txt(135,51,'VORQELI',25,'text',True)
+        self.txt(136,83,'C O N N E C T',12,'cyan',True)
+        self.line(48,145,285,145,'edge')
+        self.txt(48,171,'РАЗДЕЛЫ',13,'dim',True)
         nav=[('Главная','⌂'),('Диагностика','◇'),('История','◷'),('О проекте','ⓘ'),('Настройки','⚙')]
         for i,(page,symbol) in enumerate(nav):
-            y=207+i*70
+            y=208+i*69
             selected=self.app.selected_page==page or (page=='Настройки' and self.app.selected_page=='Сеть и стратегии')
             name=f'nav_{i}'
-            fill='#10417F' if selected else 'sidebar'
-            shape=self.rr((33,y,299,y+61),fill,'edgehi' if selected else 'sidebar',13,tags=(name,))
-            self.txt(61,y+30,symbol,27,'cyan',anchor='center',tags=(name,))
-            self.txt(109,y+30,page,18,'text' if selected else 'muted',selected,anchor='w',tags=(name,))
-            idx=self.app._register_control(self._rect_coords((33,y,299,y+61)),lambda p=page:self.app._page(p),'Раздел: '+page)
-            self.cv.tag_bind(name,'<Button-1>',lambda e,n=idx:self.app._mouse_activate(n))
-            self.cv.tag_bind(name,'<Enter>',lambda e,s=shape:self._hover(s,'#103463'))
-            self.cv.tag_bind(name,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,c))
-        self.rr((35,822,298,979),'surface','edgehi',17)
-        self.circle(62,859,10,clr)
-        self.txt(85,842,'Соединение активно' if status=='connected' else 'Частичное соединение' if status=='partial' else 'Ошибка соединения' if status=='error' else 'Ожидание',17,'text',True,width=201)
-        self.txt(53,901,'WinWS · Telegram · DNS',15,'muted')
-        self.line(52,935,273,935,'edge')
-        self.txt(54,947,'v'+VERSION+' · Windows 10/11',13,'dim')
-        # Only the blank top title area can be used to drag the frameless window.
+            fill='surface2' if selected else 'sidebar'
+            shape=self.rr((34,y,298,y+56),fill,'edgehi' if selected else '',11,tags=(name,))
+            self.txt(62,y+28,symbol,24,'cyan' if selected else 'dim',anchor='center',tags=(name,))
+            self.txt(108,y+28,page,18,'text' if selected else 'muted',selected,anchor='w',tags=(name,))
+            idx=self.app._register_control(self._rect_coords((34,y,298,y+56)),lambda p=page:self.app._page(p),'Раздел: '+page)
+            self.cv.tag_bind(name,'<Button-1>',lambda e,n=idx:self.activate_mouse(n))
+            self.cv.tag_bind(name,'<Enter>',lambda e,s=shape,a=selected:self._hover(s,C['surface2'] if a else '#201B29'))
+            self.cv.tag_bind(name,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,C.get(c,c)))
+        self.rr((35,832,298,976),'surface','edge',13)
+        self.circle(62,868,8,clr)
+        self.txt(84,853,'Соединение активно' if status=='connected' else 'Частичное соединение' if status=='partial' else 'Ошибка соединения' if status=='error' else 'Ожидание',16,'text',True,width=200)
+        self.txt(52,905,'WinWS · Telegram · DNS',14,'muted')
+        self.line(52,938,277,938,'edge')
+        self.txt(54,950,'v'+VERSION+' · Windows 10/11',12,'dim')
         from .frameless import begin_move,move,end_move
         def begin(e):
             xx=self.cv.canvasx(e.x)/self.sx; yy=self.cv.canvasy(e.y)/self.sy
@@ -279,50 +297,45 @@ class Scene:
         minimize(self.app)
 
     def home(self):
-        self.header(1,'Управление подключением','Сетевые инструменты и состояния — в одном окне')
-        self.rr((344,238,1490,498),'surface2','edgehi',24)
-        # Power ring changes color based on observed modules, not preference.
+        self.header(1,'Управление подключением','Состояние модулей и быстрые действия в одном месте')
+        self.rr((344,244,1490,505),'surface','edge',17)
         status=getattr(self.report,'overall','off')
         clr='green' if status=='connected' else 'amber' if status=='partial' else 'red' if status=='error' else 'cyan'
-        self.circle(500,367,111,'surface')
-        self.circle(500,367,95,clr)
-        self.circle(500,367,90,'surface')
-        self.circle(500,367,76,'blue')
-        self.circle(500,367,71,'surface')
-        if not self.logo(433,300,134):
-            self.txt(500,359,'V',85,'cyan',True,anchor='center')
-        self.pill((651,273,1100,314),'МОДУЛИ ЗАПУЩЕНЫ' if status=='connected' else 'ЧАСТЬ МОДУЛЕЙ ЗАПУЩЕНА' if status=='partial' else 'ОШИБКА МОДУЛЕЙ' if status=='error' else 'ГОТОВО К ПОДКЛЮЧЕНИЮ','green' if status=='connected' else 'amber' if status=='partial' else 'red' if status=='error' else 'muted')
+        self.rr((375,291,520,443),'surface2','edge',16)
+        if not self.logo(387,302,120):
+            self.txt(448,371,'V',80,'cyan',True,anchor='center')
+        self.pill((551,269,910,308),'МОДУЛИ ЗАПУЩЕНЫ' if status=='connected' else 'ЧАСТЬ МОДУЛЕЙ ЗАПУЩЕНА' if status=='partial' else 'ОШИБКА МОДУЛЕЙ' if status=='error' else 'ГОТОВО К ПОДКЛЮЧЕНИЮ',clr)
         active=status=='connected'
         label='Модули запущены' if active else 'Часть модулей запущена' if status=='partial' else 'Ошибка подключения' if status=='error' else 'Обход отключён'
-        self.txt(652,333,label,36,'text',True,width=535)
+        self.txt(550,328,label,34,'text',True,width=590)
         strategy=getattr(self.app.controller,'active_dpi_mode',None) or self.settings.dpi_mode
-        self.txt(654,397,'WinWS · '+('AUTO 1–13' if strategy=='alt_auto' else strategy.upper()),20,'muted')
+        self.txt(551,395,'WinWS · '+('AUTO 1–13' if strategy=='alt_auto' else strategy.upper()),18,'muted')
         selected=[name for name in ('dpi','telegram','dns') if getattr(self.settings,'connect_'+name,False)]
         on=sum(getattr(self.report,n,'off')=='on' for n in selected)
-        self.txt(654,441,f'Модули: {on}/{len(selected)} · не проверка доступа к сайтам',16,'muted',width=520)
+        self.txt(551,433,f'Модули: {on}/{len(selected)} · не проверка доступа к сайтам',15,'dim',width=600)
         desired=bool(getattr(self.settings,'desired_enabled',False))
-        self.button((1189,398,1470,470),'ПОДКЛЮЧЕНИЕ...' if getattr(self.app,'running_job',False) else 'ОТКЛЮЧИТЬ' if desired else 'ПОДКЛЮЧИТЬ',self.app._start_disconnect if desired else self.app._start_connect,enabled=not getattr(self.app,'_disconnecting',False) and not getattr(self.app,'running_job',False),size=20)
+        self.button((1195,387,1465,464),'ПОДКЛЮЧЕНИЕ...' if getattr(self.app,'running_job',False) else 'ОТКЛЮЧИТЬ' if desired else 'ПОДКЛЮЧИТЬ',self.app._start_disconnect if desired else self.app._start_connect,enabled=not getattr(self.app,'_disconnecting',False) and not getattr(self.app,'running_job',False),size=19)
         cards=[('DPI / WinWS','dpi','Сеть и стратегии'),('Telegram','telegram','Настройки'),('GeoHide DNS','dns','Сеть и стратегии')]
         for i,(title,key,target) in enumerate(cards):
             left=344+i*382
-            self.card((left,520,left+364,690),title)
+            self.card((left,526,left+364,696),title)
             stat=getattr(self.report,key,'off')
-            color='green' if stat=='on' else 'amber' if stat=='error' else 'dim'
-            self.circle(left+34,604,8,color)
-            self.txt(left+54,592,'Запущен' if stat=='on' else 'Ошибка' if stat=='error' else 'Отключён',17,color,True)
-            self.line(left+25,639,left+338,639,'edge')
+            color='green' if stat=='on' else 'red' if stat=='error' else 'dim'
+            self.circle(left+33,611,7,color)
+            self.txt(left+53,595,'Запущен' if stat=='on' else 'Ошибка' if stat=='error' else 'Отключён',16,color,True)
+            self.line(left+24,643,left+340,643,'edge')
             note=('Стратегия: '+self.settings.dpi_mode.upper()) if key=='dpi' else 'Локальный MTProto' if key=='telegram' else ('DoH / HTTPS' if self.settings.dns_mode=='doh' else 'IPv4 DNS')
-            self.txt(left+27,652,note,16,'muted',width=315)
-            self.button((left+295,551,left+345,603),'›',lambda p=target:self.app._page(p),kind='secondary',size=26)
-        self.rr((344,711,1490,930),'surface','edge',23)
-        self.txt(382,738,'Быстрые действия',29,'text',True)
-        self.txt(382,782,'Диагностика соединения, события и параметры сети',18,'muted')
-        for i,(s,page) in enumerate((('Диагностика','Диагностика'),('История событий','История'),('Настройки сети','Сеть и стратегии'))):
-            left=368+i*373
-            self.button((left,830,left+351,911),s+'   ›',lambda p=page:self.app._page(p),kind='secondary',size=20)
+            self.txt(left+25,657,note,15,'muted',width=317)
+            self.button((left+294,555,left+345,602),'›',lambda p=target:self.app._page(p),kind='secondary',size=25)
+        self.rr((344,721,1490,935),'surface','edge',17)
+        self.txt(381,742,'Быстрые действия',25,'text',True)
+        self.txt(382,784,'Проверка сервисов, история событий и параметры сети',17,'muted')
+        for i,(name,page) in enumerate((('Диагностика','Диагностика'),('История событий','История'),('Настройки сети','Сеть и стратегии'))):
+            left=367+i*373
+            self.button((left,835,left+351,916),name+'   ›',lambda p=page:self.app._page(p),kind='secondary',size=19)
 
     def diagnostics(self):
-        self.header(2,'Диагностика сервисов','HTTPS-проверки не подтверждают вход в учётную запись или обход блокировок')
+        self.header(2,'Диагностика сервисов','HTTPS-проверки не гарантируют вход в аккаунт или обход блокировок')
         busy=bool(getattr(self.app,'running_job',False))
         scope=diagnostic_scope(self.app)
         all_pending=scope=='all'
@@ -330,12 +343,12 @@ class Scene:
         # None in old test harnesses retains their original semantics;
         # a production application always owns an explicit set of fresh names.
         fresh=getattr(self.app,'_diagnostic_fresh',None)
-        self.button((1207,142,1487,214),'ВЫПОЛНЯЕТСЯ…' if all_pending else 'ЗАНЯТО' if busy else 'ПРОВЕРИТЬ ВСЁ',
+        self.button((1207,153,1487,215),'ВЫПОЛНЯЕТСЯ…' if all_pending else 'ЗАНЯТО' if busy else 'ПРОВЕРИТЬ ВСЁ',
                     self.app._diagnose,size=19,enabled=not busy)
         result=dict(getattr(self.app,'last_results',[]) or [])
         for i,name in enumerate(SERVICE_NAMES):
             y=254+i*103
-            self.rr((344,y,1490,y+91),'surface','edge',17)
+            self.rr((344,y,1490,y+91),'surface','edge',12)
             symbol=('discord','youtube','telegram','chatgpt','microsoft')[i]
             if not self.brand_icon(symbol,356,y+25,42):
                 self.circle(377,y+46,15,['cyan','red','cyan','green','blue'][i])
@@ -343,7 +356,7 @@ class Scene:
             self.txt(416,y+53,'Проверка HTTPS-ответа',15,'muted')
             pending=busy and (all_pending or one_pending==name)
             state,col=('Проверяется…','amber') if pending else diagnostic_result(name,result.get(name,'Не проверено'),fresh)
-            self.txt(963,y+31,state,16,col,True,width=253)
+            self.txt(963,y+31,state if len(state)<=32 else state[:31]+'…',16,col,True,width=253)
             self.button((1269,y+20,1464,y+73),'ПРОВЕРЯЕТСЯ…' if pending else 'ЗАНЯТО' if busy else 'ПРОВЕРИТЬ',
                         lambda n=name:self.app._diagnose_service(n),kind='secondary',size=16,
                         enabled=not busy)
@@ -381,7 +394,7 @@ class Scene:
         page_count=max(1,math.ceil(len(events)/10))
         page=min(max(0,int(getattr(self.app,'_native_history_page',0))),page_count-1)
         self.app._native_history_page=page
-        self.rr((344,318,1490,922),'surface','edge',20)
+        self.rr((344,318,1490,922),'surface','edge',14)
         for x,s in ((377,'ВРЕМЯ'),(566,'СОБЫТИЕ'),(1200,'ТИП')):
             self.txt(x,337,s,15,'muted',True)
         self.line(370,375,1468,375,'edge')
@@ -404,8 +417,8 @@ class Scene:
             callback=lambda item=event:self._show_history_event(item)
             index=self.app._register_control(self._rect_coords((354,y,1480,y+46)),
                                              callback,'Событие: '+(msg[:50] or action))
-            self.cv.tag_bind(name,'<Button-1>',lambda e,n=index:self.app._mouse_activate(n))
-            self.cv.tag_bind(name,'<Enter>',lambda e,s=shape:self._hover(s,'#123765'))
+            self.cv.tag_bind(name,'<Button-1>',lambda e,n=index:self.activate_mouse(n))
+            self.cv.tag_bind(name,'<Enter>',lambda e,s=shape:self._hover(s,'#2B2437'))
             self.cv.tag_bind(name,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,C[c]))
         self.txt(370,875,f'Событий: {len(events)} · Диагностик: {len(_load_history())}',14,'muted')
         self.txt(1280,875,f'{page+1} / {page_count}',15,'muted',True)
@@ -429,7 +442,7 @@ class Scene:
 
     def about(self):
         self.header(4,'О проекте VORQELI','Локальное приложение для управления сетевыми компонентами Windows')
-        self.rr((344,242,1490,489),'surface2','edgehi',22)
+        self.rr((344,242,1490,489),'surface2','edge',16)
         self.txt(405,288,'VORQELI CONNECT',42,'text',True)
         self.txt(405,357,'Обход DPI · Telegram MTProto · GeoHide DNS',21,'muted')
         self.pill((1210,266,1450,313),'v'+VERSION,'cyan')
@@ -462,7 +475,7 @@ class Scene:
             y=348+i*94
             self._setting(363,y,920,left)
             if right:self._setting(974,y,1470,right)
-        self.rr((344,772,1490,924),'surface2','edgehi',21)
+        self.rr((344,772,1490,924),'surface2','edge',16)
         self.txt(378,799,'Сеть и стратегии DPI',28,'text',True)
         self.txt(379,847,'ALT1–ALT13 · GeoHide DNS · HOSTS · восстановление',18,'muted')
         self.button((1200,801,1464,890),'ОТКРЫТЬ  →',lambda:self.app._page('Сеть и стратегии'),size=20)
@@ -477,11 +490,11 @@ class Scene:
         self.txt(x+22,y+17,name,19,'text',True,width=right-x-153,tags=(tag,))
         self.txt(x+22,y+49,desc,15,'muted',width=right-x-153,tags=(tag,))
         cx=right-67;cy=y+44
-        self.rr((cx-42,cy-20,cx+43,cy+20),'blue' if state else '#193456','cyan' if state else 'edge',18,tags=(tag,))
+        self.rr((cx-42,cy-20,cx+43,cy+20),'blue' if state else '#332C3D','edgehi' if state else 'edge',18,tags=(tag,))
         self.circle(cx+19 if state else cx-20,cy,15,'text',tags=(tag,))
         idx=self.app._register_control(self._rect_coords(rect),lambda k=key:self.app._toggle_setting(k),'Переключить '+name)
-        self.cv.tag_bind(tag,'<Button-1>',lambda e,n=idx:self.app._mouse_activate(n))
-        self.cv.tag_bind(tag,'<Enter>',lambda e,s=shape:self._hover(s,'#123361'))
+        self.cv.tag_bind(tag,'<Button-1>',lambda e,n=idx:self.activate_mouse(n))
+        self.cv.tag_bind(tag,'<Enter>',lambda e,s=shape:self._hover(s,'#2E253A'))
         self.cv.tag_bind(tag,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,C[c]))
 
     def network(self):

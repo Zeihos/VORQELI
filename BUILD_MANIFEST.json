@@ -1,5 +1,5 @@
 {
-  "file_count": 216,
+  "file_count": 218,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -7,15 +7,15 @@
     },
     ".github/workflows/windows-build.yml": {
       "bytes": 6241,
-      "sha256": "300ba37bb42ebd79bfe4ef7b5311513bafb3b05a0ae731d3d71194d0fbc4d1e4"
+      "sha256": "355bda5835723fe8df4a2d2dfd479a987188db424ff9621b527531a33a2a7fc7"
     },
     ".gitignore": {
       "bytes": 140,
       "sha256": "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
     },
     "CHANGELOG.md": {
-      "bytes": 31484,
-      "sha256": "e7d9a89fffed80b938673ccc81011b9b14441b95ebcb7dfcdd2287b3f71659b4"
+      "bytes": 32807,
+      "sha256": "b1d553e3ed1ac2cabfafc960891b7223764fc5fea114e981f291b095d3425bc5"
     },
     "Compact-preview.png": {
       "bytes": 74045,
@@ -62,16 +62,16 @@
       "sha256": "66ebf4485b792f8aaef000043d242dc8379557814d1fcf7ea28bf584ee9d0b22"
     },
     "assets/VORQELI-logo.png": {
-      "bytes": 239521,
-      "sha256": "cc64b3df129b7695b333cf6b2aa71cdfd612253a2361d54440acf43d0b69b93f"
+      "bytes": 383411,
+      "sha256": "70d4093684535c0fab3b51bdcb9fbea9a41fd117ffc7b0ae7537731e7efbda42"
     },
     "assets/VORQELI-wordmark.png": {
-      "bytes": 749147,
-      "sha256": "20bed5e4619d1c8903f98ec2093ee6c741aaabf6f68df172cdf63e070088bb54"
+      "bytes": 91061,
+      "sha256": "61297841fa4a07c82b9f3ba3b29bad5c55e357a1b211c1761b4a9d0ef47bd9e3"
     },
     "assets/VORQELI.ico": {
-      "bytes": 111574,
-      "sha256": "33da7f02a40ea6caea26e832d97a5dad2b0bb91fce0fc026b9fd556f1696caf1"
+      "bytes": 168025,
+      "sha256": "79c803233acc62b0e8c714a6e56082932e8b23908178b04655c41ab6f49f69f1"
     },
     "assets/brand-banner.jpg": {
       "bytes": 61605,
@@ -140,6 +140,10 @@
     "docs/NATIVE_UI_RELEASE_GUARDS_V404.md": {
       "bytes": 3251,
       "sha256": "7a471613df81d9436345b40e347072539263c5bee788aefa004b602b50b1d68d"
+    },
+    "docs/OBSIDIAN_DESKTOP_UI_V410.md": {
+      "bytes": 3493,
+      "sha256": "bb173d7a53cb18e087f67dc5556761f469345dcb142b289f3a25031bce94fb6f"
     },
     "docs/OFFICIAL_GEOHIDE_HOSTS_V391.md": {
       "bytes": 4545,
@@ -275,19 +279,19 @@
     },
     "installer/VORQELI.iss": {
       "bytes": 3020,
-      "sha256": "f8ad412ec732496d5124f3b815fbf8fa9e12b730ef892b4716dd2428e83ae4a7"
+      "sha256": "b1cb16d1d25b1da2cece9c8878177b9c15c5f5f5d7aed60f126c5bf92b00ca85"
     },
     "pyproject.toml": {
       "bytes": 635,
-      "sha256": "cf70753e2357f4a11f2f7a63e954e676ec72fcdcc6bef4b477aa767e1e5137bd"
+      "sha256": "4c8689d9f39ea34cbd267b45902970818322bb237e56815063004ee2e4d0a373"
     },
     "scripts/__init__.py": {
       "bytes": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     "scripts/check_repo_layout.py": {
-      "bytes": 6480,
-      "sha256": "6ac0480bb37ba8c206ea81bacb6c60822db06b6c5b87b5926912f850bc74e768"
+      "bytes": 6558,
+      "sha256": "a840be37f673d4b4756c99062edd1c019362eaeb00e4f7e8f150f0443506dbcd"
     },
     "scripts/gui_keyboard_smoke.py": {
       "bytes": 2081,
@@ -339,7 +343,7 @@
     },
     "src/vorqeli_connect/__init__.py": {
       "bytes": 23,
-      "sha256": "51f7c71d7117837acd1e42ee3089c6bed9b6d3f9dc79e852dc3b93abec84408a"
+      "sha256": "5aacde4ca55ef50ed07a239ad8a86889e0621b1cc72be19bd93be7c9e20910a9"
     },
     "src/vorqeli_connect/__main__.py": {
       "bytes": 29,
@@ -426,8 +430,8 @@
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
     },
     "src/vorqeli_connect/native_ui.py": {
-      "bytes": 34624,
-      "sha256": "f40b0e5fc56ec35aba9131fd63521f1a9a108ae2c6c33e7e0f8e3a4f7e398146"
+      "bytes": 35118,
+      "sha256": "66344579d284ef2593968f6973241acbe4e703a908bd0f44dba029b4a5f6990b"
     },
     "src/vorqeli_connect/network_audit.py": {
       "bytes": 15192,
@@ -494,12 +498,12 @@
       "sha256": "66ebf4485b792f8aaef000043d242dc8379557814d1fcf7ea28bf584ee9d0b22"
     },
     "src/vorqeli_connect/ui_assets/VORQELI-logo.png": {
-      "bytes": 239521,
-      "sha256": "cc64b3df129b7695b333cf6b2aa71cdfd612253a2361d54440acf43d0b69b93f"
+      "bytes": 383411,
+      "sha256": "70d4093684535c0fab3b51bdcb9fbea9a41fd117ffc7b0ae7537731e7efbda42"
     },
     "src/vorqeli_connect/ui_assets/VORQELI.ico": {
-      "bytes": 111574,
-      "sha256": "33da7f02a40ea6caea26e832d97a5dad2b0bb91fce0fc026b9fd556f1696caf1"
+      "bytes": 168025,
+      "sha256": "79c803233acc62b0e8c714a6e56082932e8b23908178b04655c41ab6f49f69f1"
     },
     "src/vorqeli_connect/ui_assets/premium/about.png": {
       "bytes": 1770478,
@@ -716,6 +720,10 @@
     "tests/test_network_tools.py": {
       "bytes": 1240,
       "sha256": "82c32a2ebc40785f358c9b2a13aaecfc921267273557b31124fc9ad6a62b3a23"
+    },
+    "tests/test_obsidian_ui_v410.py": {
+      "bytes": 3221,
+      "sha256": "cddbca1423f2cf1d21d9d89a9bd450d69966351fc244057ed21c1ab92be42c49"
     },
     "tests/test_off_intent_v33.py": {
       "bytes": 5100,
