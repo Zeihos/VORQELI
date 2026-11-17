@@ -1,28 +1,39 @@
 <div align="center">
 
-<img src="assets/VORQELI-logo.png" alt="VORQELI Connect" width="108">
+<img src="assets/VORQELI-logo.png" alt="VORQELI Connect" width="112">
 
 # VORQELI Connect
 
-**Центр управления подключением для Windows 10/11**
+### Подключение под твоим контролем
 
-Управление DPI / WinWS, локальным Telegram MTProto и GeoHide DNS в одном приложении.
+**Удобное Windows-приложение для работы с DPI, Telegram-прокси и GeoHide DNS.**  
+Стратегии подключения, диагностика и восстановление сетевых настроек — в одном интерфейсе.
 
 [![Windows CI](https://github.com/Zeihos/VORQELI/actions/workflows/windows-build.yml/badge.svg)](https://github.com/Zeihos/VORQELI/actions/workflows/windows-build.yml)
-![Версия](https://img.shields.io/badge/версия-0.41.0_RC-8f69ca)
+![Версия](https://img.shields.io/badge/версия-v0.41.0%20RC-8f69ca)
 ![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-30313f)
-[![Лицензия MIT](https://img.shields.io/badge/лицензия-MIT-6a5acd)](LICENSE)
+[![MIT](https://img.shields.io/badge/лицензия-MIT-6a5acd)](LICENSE)
 
-[**Скачать тестовую Windows-сборку**](https://github.com/Zeihos/VORQELI/actions/workflows/windows-build.yml) ·
+[**Скачать тестовую сборку**](https://github.com/Zeihos/VORQELI/actions/workflows/windows-build.yml) ·
 [**Быстрый старт**](docs/QUICK_START.md) ·
 [**Сообщить об ошибке**](https://github.com/Zeihos/VORQELI/issues)
 
 </div>
 
-![Фирменное оформление VORQELI Connect](assets/brand-banner.jpg)
+![Фирменный баннер VORQELI Connect](assets/brand-banner.jpg)
+
+<div align="center">
+
+[Возможности](#возможности) · [Интерфейс](#интерфейс) · [Установка](#установка-на-windows) · [Разработка](#запуск-из-исходников) · [Состояние](#состояние-проекта) · [Безопасность](#участие-и-безопасность)
+
+</div>
 
 > [!IMPORTANT]
-> **v0.41.0 — Release Candidate, не стабильная v1.0.0.** Автоматические тесты Windows, создание EXE и установщика не доказывают доступность отдельных сайтов и корректность обхода на любой сети. Требуются ручные испытания на Windows 10/11. Сборки из GitHub Actions могут не иметь цифровой подписи издателя.
+> **v0.41.0 RC — тестовая версия, не стабильный релиз.** Автоматические проверки и создание EXE не подтверждают работу на любой сети. Перед стабильным выпуском необходимы реальные испытания Windows 10/11. Установщик может не иметь цифровой подписи издателя.
+
+| DPI / WinWS | Telegram | GeoHide |
+| :---: | :---: | :---: |
+| Стратегии AUTO и ALT1–ALT13 | Локальный MTProto-прокси | DNS, DoH и дополнительные HOSTS |
 
 ## Возможности
 
@@ -53,6 +64,11 @@
 Подробные инструкции, Telegram Desktop, DoH, HOSTS и восстановление: **[Быстрый старт](docs/QUICK_START.md)**.
 
 ## Интерфейс
+
+![Обзор интерфейса VORQELI Connect](docs/screenshots/overview.png)
+
+> Скриншот взят из репозитория; соответствие последнему RC необходимо проверить при ручной Windows-приёмке.
+
 
 | Раздел | Что доступно |
 | --- | --- |
