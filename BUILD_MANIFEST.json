@@ -1,5 +1,5 @@
 {
-  "file_count": 218,
+  "file_count": 220,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -14,8 +14,8 @@
       "sha256": "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
     },
     "CHANGELOG.md": {
-      "bytes": 32807,
-      "sha256": "b1d553e3ed1ac2cabfafc960891b7223764fc5fea114e981f291b095d3425bc5"
+      "bytes": 33282,
+      "sha256": "49e93e72f6741ca23d589c32f03dc7e5b68b6dc1f9ad705f55d0ac879c701d28"
     },
     "Compact-preview.png": {
       "bytes": 74045,
@@ -430,8 +430,8 @@
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
     },
     "src/vorqeli_connect/native_ui.py": {
-      "bytes": 35118,
-      "sha256": "66344579d284ef2593968f6973241acbe4e703a908bd0f44dba029b4a5f6990b"
+      "bytes": 35260,
+      "sha256": "5e1e607539dc89c669956c16919ffc1684be2cf09e6b80c242efea4b9d636353"
     },
     "src/vorqeli_connect/network_audit.py": {
       "bytes": 15192,
@@ -872,6 +872,14 @@
     "tests/test_windows_ci_encoding_v361.py": {
       "bytes": 1728,
       "sha256": "0f4712049d3a70c2d1faad93274a79529f8b2af55ea2715e2a1c1a2d183d0df9"
+    },
+    "tests/test_native_ui_premium_dark_2026.py": {
+      "bytes": 2317,
+      "sha256": "11c0ef6409f72e4357d1d6671f16f21fa6fe5fb67b0f48cc46abc2cc8cab23ad"
+    },
+    "docs/PREMIUM_DARK_2026.md": {
+      "bytes": 1052,
+      "sha256": "f97a5af72fe5de64e90d4f8f77ef2d881faa19a08cd1ca1f4f8503838296a842"
     }
   },
   "version": "0.34.0"

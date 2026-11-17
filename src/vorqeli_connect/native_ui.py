@@ -30,11 +30,11 @@ SERVICE_NAMES = tuple(SERVICES)
 # Obsidian 2026: functional contrast, restrained violet accent and quiet surfaces.
 # Rendered from native Canvas primitives: no static screenshot under hitboxes.
 C = {
-    'bg':'#0C0A12', 'sidebar':'#121019', 'surface':'#191620',
-    'surface2':'#241E2F', 'edge':'#383043', 'edgehi':'#7958AB',
-    'text':'#F5F1F9','muted':'#B8AEC5','dim':'#8B8097',
-    'cyan':'#BE92F3','blue':'#563388','strong':'#7045B4',
-    'green':'#48CDA2','amber':'#F3BC70','red':'#EC829D',
+    'bg':'#0C0A12', 'sidebar':'#111018', 'surface':'#191721',
+    'surface2':'#24202F', 'edge':'#302B3C', 'edgehi':'#8964D2',
+    'text':'#F7F5FA','muted':'#BFB6CE','dim':'#978CA9',
+    'cyan':'#D2B1FF','blue':'#543281','strong':'#7042BF',
+    'green':'#49D9A7','amber':'#FFCC83','red':'#F48FA6',
 }
 
 
@@ -163,16 +163,16 @@ class Scene:
         if width:opts['width']=round(width*self.sx)
         return self.cv.create_text(*self.xy(x,y),**opts)
     def header(self,index,title,description):
-        # A deliberate type hierarchy: eyebrow, page title, single-line help.
-        self.txt(361,111,f'{index:02d}  /  {self.app.selected_page.upper()}',14,'cyan',True)
-        self.txt(361,147,title,36,'text',True,width=1105)
-        self.txt(361,209,description,16,'muted',width=825 if self.app.selected_page in ('Диагностика','История') else 1105)
+        """Consistent 2026 desktop hierarchy; one-line description never overlaps content."""
+        self.txt(357,109,f'{index:02d} / {self.app.selected_page.upper()}',13,'cyan',True)
+        self.txt(357,147,title,34,'text',True,width=1090)
+        self.txt(358,205,description,15,'muted',width=805 if self.app.selected_page in ('Диагностика','История') else 1085)
 
     def button(self,rect,label,callback:Callable,*,kind='primary',size=18,enabled=True):
         self.count+=1
         name=f'control_{self.count}'
         fill='strong' if kind=='primary' else 'surface2' if kind=='secondary' else 'surface'
-        hover='#845BC6' if kind=='primary' else '#30273D'
+        hover='#8D5AE0' if kind=='primary' else '#342C41'
         if not enabled:fill='#1E1B24'
         shape=self.rr(rect,fill, 'edgehi' if kind=='primary' and enabled else 'edge',radius=11,tags=(name,))
         x1,y1,x2,y2=rect
@@ -244,17 +244,18 @@ class Scene:
     def chrome(self):
         """Calm Windows desktop shell: one prominent accent, not a neon frame."""
         self.cv.create_rectangle(0,0,*self.xy(W,H),fill=C['bg'],outline='')
-        self.rr((18,19,1518,1005),'bg','edge',15)
-        self.rr((21,21,312,1002),'sidebar','edge',13)
-        self.line(320,88,320,954,'edge')
-        self.txt(357,47,'VORQELI CONNECT',17,'text',True)
-        self.txt(357,72,'Управление сетью · Windows',14,'dim')
-        self.txt(358,969,'VORQELI Connect · Локальное приложение',14,'dim')
-        self.txt(1490,969,'WINDOWS 10 / 11',13,'dim',anchor='ne')
+        self.rr((18,19,1518,1005),'bg','edge',16)
+        self.rr((21,21,312,1002),'sidebar','',13)
+        self.line(320,31,320,993,'edge')
+        self.txt(356,43,'VORQELI  /  CONNECT',16,'text',True)
+        self.txt(357,71,'Центр управления сетью',13,'dim')
+        self.line(346,953,1490,953,'edge')
+        self.txt(357,972,'VORQELI Connect · Только локальные данные',13,'dim')
+        self.txt(1490,972,'Windows 10 / 11',13,'dim',anchor='ne')
         status=getattr(self.report,'overall','off')
         clr='green' if status=='connected' else 'amber' if status=='partial' else 'red' if status=='error' else 'dim'
         text='АКТИВНО' if status=='connected' else 'ЧАСТИЧНО' if status=='partial' else 'ОШИБКА' if status=='error' else 'ОЖИДАНИЕ'
-        self.pill((1113,37,1318,75),text,clr)
+        self.pill((1130,36,1328,76),text,clr)
         self.button((1351,30,1409,76),'—',lambda:self._minimize(),kind='secondary')
         self.button((1449,30,1505,76),'✕',self.app._window_close,kind='secondary')
         if not self.logo(52,42,68):
@@ -263,24 +264,26 @@ class Scene:
         self.txt(135,51,'VORQELI',25,'text',True)
         self.txt(136,83,'C O N N E C T',12,'cyan',True)
         self.line(48,145,285,145,'edge')
-        self.txt(48,171,'РАЗДЕЛЫ',13,'dim',True)
+        self.txt(48,171,'НАВИГАЦИЯ',12,'dim',True)
         nav=[('Главная','⌂'),('Диагностика','◇'),('История','◷'),('О проекте','ⓘ'),('Настройки','⚙')]
         for i,(page,symbol) in enumerate(nav):
             y=208+i*69
             selected=self.app.selected_page==page or (page=='Настройки' and self.app.selected_page=='Сеть и стратегии')
             name=f'nav_{i}'
             fill='surface2' if selected else 'sidebar'
-            shape=self.rr((34,y,298,y+56),fill,'edgehi' if selected else '',11,tags=(name,))
+            shape=self.rr((34,y,298,y+56),fill,'edge' if selected else '',10,tags=(name,))
+            if selected:
+                self.rr((35,y+11,39,y+45),'cyan','',2)
             self.txt(62,y+28,symbol,24,'cyan' if selected else 'dim',anchor='center',tags=(name,))
             self.txt(108,y+28,page,18,'text' if selected else 'muted',selected,anchor='w',tags=(name,))
             idx=self.app._register_control(self._rect_coords((34,y,298,y+56)),lambda p=page:self.app._page(p),'Раздел: '+page)
             self.cv.tag_bind(name,'<Button-1>',lambda e,n=idx:self.activate_mouse(n))
-            self.cv.tag_bind(name,'<Enter>',lambda e,s=shape,a=selected:self._hover(s,C['surface2'] if a else '#201B29'))
+            self.cv.tag_bind(name,'<Enter>',lambda e,s=shape,a=selected:self._hover(s,C['surface2'] if a else '#211D2A'))
             self.cv.tag_bind(name,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,C.get(c,c)))
-        self.rr((35,832,298,976),'surface','edge',13)
-        self.circle(62,868,8,clr)
-        self.txt(84,853,'Соединение активно' if status=='connected' else 'Частичное соединение' if status=='partial' else 'Ошибка соединения' if status=='error' else 'Ожидание',16,'text',True,width=200)
-        self.txt(52,905,'WinWS · Telegram · DNS',14,'muted')
+        self.rr((35,842,298,976),'surface','edge',12)
+        self.circle(61,869,6,clr)
+        self.txt(80,854,'Модули запущены' if status=='connected' else 'Частично запущены' if status=='partial' else 'Ошибка соединения' if status=='error' else 'Готово к работе',15,'text',True,width=202)
+        self.txt(52,905,'WinWS  /  Telegram  /  DNS',13,'muted')
         self.line(52,938,277,938,'edge')
         self.txt(54,950,'v'+VERSION+' · Windows 10/11',12,'dim')
         from .frameless import begin_move,move,end_move
@@ -297,24 +300,24 @@ class Scene:
         minimize(self.app)
 
     def home(self):
-        self.header(1,'Управление подключением','Состояние модулей и быстрые действия в одном месте')
-        self.rr((344,244,1490,505),'surface','edge',17)
+        self.header(1,'Подключение','Управляйте модулями, смотрите состояние и запускайте диагностику')
+        self.rr((344,244,1490,505),'surface','edge',15)
         status=getattr(self.report,'overall','off')
         clr='green' if status=='connected' else 'amber' if status=='partial' else 'red' if status=='error' else 'cyan'
-        self.rr((375,291,520,443),'surface2','edge',16)
-        if not self.logo(387,302,120):
-            self.txt(448,371,'V',80,'cyan',True,anchor='center')
-        self.pill((551,269,910,308),'МОДУЛИ ЗАПУЩЕНЫ' if status=='connected' else 'ЧАСТЬ МОДУЛЕЙ ЗАПУЩЕНА' if status=='partial' else 'ОШИБКА МОДУЛЕЙ' if status=='error' else 'ГОТОВО К ПОДКЛЮЧЕНИЮ',clr)
+        self.rr((375,304,495,425),'surface2','edge',14)
+        if not self.logo(386,315,98):
+            self.txt(435,365,'V',64,'cyan',True,anchor='center')
+        self.pill((528,274,876,315),'МОДУЛИ ЗАПУЩЕНЫ' if status=='connected' else 'ЧАСТЬ МОДУЛЕЙ ЗАПУЩЕНА' if status=='partial' else 'ОШИБКА МОДУЛЕЙ' if status=='error' else 'ГОТОВО К ПОДКЛЮЧЕНИЮ',clr)
         active=status=='connected'
         label='Модули запущены' if active else 'Часть модулей запущена' if status=='partial' else 'Ошибка подключения' if status=='error' else 'Обход отключён'
-        self.txt(550,328,label,34,'text',True,width=590)
+        self.txt(527,337,label,34,'text',True,width=600)
         strategy=getattr(self.app.controller,'active_dpi_mode',None) or self.settings.dpi_mode
-        self.txt(551,395,'WinWS · '+('AUTO 1–13' if strategy=='alt_auto' else strategy.upper()),18,'muted')
+        self.txt(528,398,'DPI / WinWS  ·  '+('AUTO 1–13' if strategy=='alt_auto' else strategy.upper()),17,'muted')
         selected=[name for name in ('dpi','telegram','dns') if getattr(self.settings,'connect_'+name,False)]
         on=sum(getattr(self.report,n,'off')=='on' for n in selected)
-        self.txt(551,433,f'Модули: {on}/{len(selected)} · не проверка доступа к сайтам',15,'dim',width=600)
+        self.txt(528,439,f'Модули: {on}/{len(selected)} · не проверка доступа к сайтам',14,'dim',width=630)
         desired=bool(getattr(self.settings,'desired_enabled',False))
-        self.button((1195,387,1465,464),'ПОДКЛЮЧЕНИЕ...' if getattr(self.app,'running_job',False) else 'ОТКЛЮЧИТЬ' if desired else 'ПОДКЛЮЧИТЬ',self.app._start_disconnect if desired else self.app._start_connect,enabled=not getattr(self.app,'_disconnecting',False) and not getattr(self.app,'running_job',False),size=19)
+        self.button((1179,385,1457,463),'ПОДКЛЮЧЕНИЕ...' if getattr(self.app,'running_job',False) else 'ОТКЛЮЧИТЬ' if desired else 'ПОДКЛЮЧИТЬ',self.app._start_disconnect if desired else self.app._start_connect,enabled=not getattr(self.app,'_disconnecting',False) and not getattr(self.app,'running_job',False),size=19)
         cards=[('DPI / WinWS','dpi','Сеть и стратегии'),('Telegram','telegram','Настройки'),('GeoHide DNS','dns','Сеть и стратегии')]
         for i,(title,key,target) in enumerate(cards):
             left=344+i*382
@@ -335,7 +338,7 @@ class Scene:
             self.button((left,835,left+351,916),name+'   ›',lambda p=page:self.app._page(p),kind='secondary',size=19)
 
     def diagnostics(self):
-        self.header(2,'Диагностика сервисов','HTTPS-проверки не гарантируют вход в аккаунт или обход блокировок')
+        self.header(2,'Диагностика сервисов','HTTPS-ответы не подтверждают авторизацию или обход ограничений')
         busy=bool(getattr(self.app,'running_job',False))
         scope=diagnostic_scope(self.app)
         all_pending=scope=='all'
@@ -373,7 +376,7 @@ class Scene:
             self.button((x,836,x+364,914),name,cb,kind='secondary',size=18)
 
     def history(self):
-        self.header(3,'История событий','Локальные действия и события приложения')
+        self.header(3,'История событий','Журнал действий, ошибок и проверок · хранится локально')
         from .history import load_history as _load_history
         from tkinter import filedialog
         import json
@@ -459,7 +462,7 @@ class Scene:
         self.button((1095,808,1483,899),'Диагностика сети',lambda:self.app._page('Диагностика'),kind='secondary',size=19)
 
     def settings_page(self):
-        self.header(5,'Настройки приложения','Поведение при запуске и включение сетевых компонентов')
+        self.header(5,'Настройки','Запуск, поведение приложения и используемые компоненты')
         rows=[
             (('Автозапуск с Windows','Запускать при входе в систему','launch_at_startup'),
              ('DPI / WinWS','Сетевой модуль обхода','connect_dpi')),
@@ -498,7 +501,7 @@ class Scene:
         self.cv.tag_bind(tag,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,C[c]))
 
     def network(self):
-        self.header(6,'Сеть и стратегии DPI','Настройка WinWS, GeoHide DNS, HOSTS и инструментов восстановления')
+        self.header(6,'Сеть и стратегии','Профили WinWS, GeoHide DNS и безопасное восстановление')
         self.card((344,242,995,717),'Стратегии DPI','Переключение требует переподключения')
         mode=str(self.settings.dpi_mode)
         self.button((780,314,966,368),'АВТО 1–13',lambda:self.app._set_dpi_mode('alt_auto'),kind='primary' if mode=='alt_auto' else 'secondary',size=16)
