@@ -36,7 +36,7 @@ from .tray_assets import tray_icon
 from .frameless import minimize
 from .support_report import build_report
 from .ui_copy import main_status, module_caption, connection_disclaimer
-from .ui_navigation import cycle_focus, reveal_target
+from .ui_navigation import cycle_focus, reveal_target, reconcile_action_focus
 from .windows_chrome import apply_windows_chrome
 from .update_checker import check_for_update, download_verified, UpdateError, Release
 
@@ -372,7 +372,12 @@ class ConnectApp(tk.Tk):
     def _keyboard_activate(self, event):
         index = self._focused_control_index
         if index is not None and 0 <= index < len(self._controls):
-            self._controls[index][1]()
+            _, callback, label = self._controls[index]
+            callback()
+            # A callback can redraw the complete Canvas or disable its button.
+            # Never move the visible keyboard ring onto an unrelated action.
+            if self._focused_control_index == index:
+                self._focused_control_index = reconcile_action_focus(label, self._controls)
             self._render_focus()
             return 'break'
 

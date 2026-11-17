@@ -1,5 +1,5 @@
 {
-  "file_count": 220,
+  "file_count": 222,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -14,8 +14,8 @@
       "sha256": "1b2b52439525297a82c24a6e2ca9dfcf0af1ed4dfbb7efacd0998d7d622cc747"
     },
     "CHANGELOG.md": {
-      "bytes": 33282,
-      "sha256": "49e93e72f6741ca23d589c32f03dc7e5b68b6dc1f9ad705f55d0ac879c701d28"
+      "bytes": 33582,
+      "sha256": "c3e3f3c8bf07e12dca325f8f4faaf02e4dbdcb3e9b00cd0959940c4c91840458"
     },
     "Compact-preview.png": {
       "bytes": 74045,
@@ -350,8 +350,8 @@
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 92748,
-      "sha256": "2a1fe92cd176baa2621b8064674afe11ce4d8e97a7dbfec8d62bb15901163cc2"
+      "bytes": 93112,
+      "sha256": "d17ef5544b756747213cfc3da67e4f68de0e8bd0266310ba8a822a3bc68c52e3"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11063,
@@ -430,8 +430,8 @@
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
     },
     "src/vorqeli_connect/native_ui.py": {
-      "bytes": 35260,
-      "sha256": "5e1e607539dc89c669956c16919ffc1684be2cf09e6b80c242efea4b9d636353"
+      "bytes": 36973,
+      "sha256": "d84360be1ca067919ca8b6db587e3e151618dfc8b6c05af005509a174b2a0312"
     },
     "src/vorqeli_connect/network_audit.py": {
       "bytes": 15192,
@@ -566,8 +566,8 @@
       "sha256": "35f1c65b53e7dd7813d2fb54c710d7f0fb526d29b73eabe1d216305e61aed984"
     },
     "src/vorqeli_connect/ui_navigation.py": {
-      "bytes": 1210,
-      "sha256": "6969bec8598d2b6b72323e27b6de6c3765b88662102d04658eb1f6a6d2e82f20"
+      "bytes": 1506,
+      "sha256": "a0cb34a8d3c499665bddfd4aed5323a06f4fe41480bccf8e7cd8da107cea1eef"
     },
     "src/vorqeli_connect/unified.py": {
       "bytes": 14488,
@@ -880,6 +880,14 @@
     "docs/PREMIUM_DARK_2026.md": {
       "bytes": 1052,
       "sha256": "f97a5af72fe5de64e90d4f8f77ef2d881faa19a08cd1ca1f4f8503838296a842"
+    },
+    "tests/test_native_navigation_focus_v411.py": {
+      "bytes": 2939,
+      "sha256": "20972cb0eb6e1c79ad02691831a475eb9584f10514349423cd84283092f27537"
+    },
+    "docs/NATIVE_NAVIGATION_FOCUS_2026.md": {
+      "bytes": 1189,
+      "sha256": "c300b5ce2e219f8d0ea60748419fab13ccd527647ebec46990914c20984f1a79"
     }
   },
   "version": "0.34.0"

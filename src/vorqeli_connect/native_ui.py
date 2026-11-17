@@ -241,23 +241,69 @@ class Scene:
         self.txt(365,248,title,24,'text',True)
         if subtitle:self.txt(365,285,subtitle,17,'muted')
 
-    def chrome(self):
-        """Calm Windows desktop shell: one prominent accent, not a neon frame."""
-        self.cv.create_rectangle(0,0,*self.xy(W,H),fill=C['bg'],outline='')
-        self.rr((18,19,1518,1005),'bg','edge',16)
-        self.rr((21,21,312,1002),'sidebar','',13)
-        self.line(320,31,320,993,'edge')
-        self.txt(356,43,'VORQELI  /  CONNECT',16,'text',True)
-        self.txt(357,71,'Центр управления сетью',13,'dim')
-        self.line(346,953,1490,953,'edge')
-        self.txt(357,972,'VORQELI Connect · Только локальные данные',13,'dim')
-        self.txt(1490,972,'Windows 10 / 11',13,'dim',anchor='ne')
-        status=getattr(self.report,'overall','off')
-        clr='green' if status=='connected' else 'amber' if status=='partial' else 'red' if status=='error' else 'dim'
-        text='АКТИВНО' if status=='connected' else 'ЧАСТИЧНО' if status=='partial' else 'ОШИБКА' if status=='error' else 'ОЖИДАНИЕ'
-        self.pill((1130,36,1328,76),text,clr)
-        self.button((1351,30,1409,76),'—',lambda:self._minimize(),kind='secondary')
-        self.button((1449,30,1505,76),'✕',self.app._window_close,kind='secondary')
+
+    def nav_icon(self, kind, x, y, tag, active=False):
+        """Resolution-independent Canvas pictograms. All strokes share the row's click tag."""
+        color=C['cyan'] if active else C['muted']
+        weight=max(2,round(self.sf*2.2))
+        def path(*coords):
+            transformed=[]
+            for j in range(0,len(coords),2):
+                transformed.extend(self.xy(coords[j],coords[j+1]))
+            return self.cv.create_line(*transformed,fill=color,width=weight,
+                capstyle='round',joinstyle='round',tags=(tag,))
+        def ring(cx,cy,r):
+            return self.cv.create_oval(*self.xy(cx-r,cy-r),*self.xy(cx+r,cy+r),
+                fill='',outline=color,width=weight,tags=(tag,))
+        if kind=='home':
+            path(x-12,y-1,x,y-11,x+12,y-1)
+            path(x-9,y-3,x-9,y+11,x+9,y+11,x+9,y-3)
+        elif kind=='activity':
+            path(x-13,y,x-8,y,x-4,y-8,x+2,y+9,x+6,y-2,x+13,y-2)
+        elif kind=='history':
+            ring(x,y,12)
+            path(x,y-8,x,y,x+7,y+4)
+        elif kind=='about':
+            ring(x,y,12)
+            path(x,y-1,x,y+7)
+            ring(x,y-7,1)
+        elif kind=='settings':
+            ring(x,y,9)
+            ring(x,y,3)
+            for k in range(8):
+                angle=math.pi*k/4
+                a,b=math.cos(angle),math.sin(angle)
+                path(x+11*a,y+11*b,x+14*a,y+14*b)
+        elif kind=='network':
+            path(x,y-9,x-10,y+9)
+            path(x,y-9,x+10,y+9)
+            path(x-10,y        nav=[
+            ('Главная','home'),
+            ('Диагностика','activity'),
+            ('История','history'),
+            ('О проекте','about'),
+            ('Настройки','settings'),
+            ('Сеть и стратегии','network'),
+        ]
+        for i,(page,icon) in enumerate(nav):
+            y=205+i*65
+            selected=self.app.selected_page==page
+            name=f'nav_{i}'
+            fill='surface2' if selected else 'sidebar'
+            shape=self.rr((34,y,298,y+54),fill,'edge' if selected else '',10,tags=(name,))
+            if selected:
+                self.rr((35,y+10,39,y+44),'cyan','',2,tags=(name,))
+            self.nav_icon(icon,62,y+27,name,active=selected)
+            self.txt(104,y+27,page,17,'text' if selected else 'muted',
+                     selected,anchor='w',tags=(name,))
+            idx=self.app._register_control(self._rect_coords((34,y,298,y+54)),
+                lambda p=page:self.app._page(p),'Раздел: '+page)
+            self.cv.tag_bind(name,'<Button-1>',lambda e,n=idx:self.activate_mouse(n))
+            self.cv.tag_bind(name,'<Enter>',lambda e,s=shape,a=selected:
+                self._hover(s,C['surface2'] if a else '#211D2A'))
+            self.cv.tag_bind(name,'<Leave>',lambda e,s=shape,c=fill:
+                self._hover(s,C.get(c,c)))
+tton((1449,30,1505,76),'✕',self.app._window_close,kind='secondary')
         if not self.logo(52,42,68):
             self.rr((52,42,120,110),'strong','edgehi',12)
             self.txt(86,77,'V',38,'text',True,anchor='center')

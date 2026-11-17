@@ -31,3 +31,9 @@ def reveal_target(bounds: tuple[int, int, int, int],
         oy = y2 - vh + margin
     return (max(0, min(ox, max(0, cw-vw))),
             max(0, min(oy, max(0, ch-vh))))
+
+
+def reconcile_action_focus(label: str, controls: list) -> int | None:
+    """Restore focus only when the original action still has one unambiguous target."""
+    matches=[index for index, control in enumerate(controls) if control[2] == label]
+    return matches[0] if len(matches)==1 else None
