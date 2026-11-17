@@ -1,0 +1,52 @@
+name: "Сообщить об ошибке"
+description: "Ошибка интерфейса, подключения или установки VORQELI Connect"
+title: "[Ошибка]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо за сообщение! **Не публикуйте секреты Telegram, токены, пароли и личные данные.**
+        Прежде чем прикладывать журнал или HOSTS, очистите его от конфиденциальной информации.
+        Для уязвимостей используйте инструкции из SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: "Версия VORQELI"
+      placeholder: "Например: 0.41.0 RC"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: "Версия Windows"
+      placeholder: "Windows 11, x64, масштабирование 125%"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "Что произошло?"
+      description: "Краткое описание проблемы"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: "Как воспроизвести?"
+      placeholder: "1. Открыть ...\n2. Нажать ...\n3. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Что должно было произойти?"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Скриншоты и очищенные журналы"
+      description: "Прикладывайте только данные без секретов, паролей, IP и личной информации"
+    validations:
+      required: false

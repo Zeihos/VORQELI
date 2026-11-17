@@ -1,137 +1,130 @@
 <div align="center">
-  <img src="assets/VORQELI-logo.png" alt="VORQELI" width="132">
-  <h1>VORQELI Connect</h1>
-  <p><strong>Сетевой центр управления для Windows 10/11</strong></p>
-  <p>Одна кнопка для запуска DPI, локального Telegram-прокси и GeoHide DNS.<br>Тёмное стекло и глянец · системный трей · автозапуск · сохранение состояния.</p>
+
+<img src="assets/VORQELI-logo.png" alt="VORQELI Connect" width="108">
+
+# VORQELI Connect
+
+**Центр управления подключением для Windows 10/11**
+
+Управление DPI / WinWS, локальным Telegram MTProto и GeoHide DNS в одном приложении.
+
+[![Windows CI](https://github.com/Zeihos/VORQELI/actions/workflows/windows-build.yml/badge.svg)](https://github.com/Zeihos/VORQELI/actions/workflows/windows-build.yml)
+![Версия](https://img.shields.io/badge/версия-0.41.0_RC-8f69ca)
+![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-30313f)
+[![Лицензия MIT](https://img.shields.io/badge/лицензия-MIT-6a5acd)](LICENSE)
+
+[**Скачать тестовую Windows-сборку**](https://github.com/Zeihos/VORQELI/actions/workflows/windows-build.yml) ·
+[**Быстрый старт**](docs/QUICK_START.md) ·
+[**Сообщить об ошибке**](https://github.com/Zeihos/VORQELI/issues)
+
 </div>
 
-![Главная страница VORQELI](UI-preview.png)
+![Фирменное оформление VORQELI Connect](assets/brand-banner.jpg)
 
-> **Версия 0.34.0 — релиз-кандидат для тестирования (не стабильный релиз).** Автоматические тесты и графические проверки не подтверждают, что обход DPI и DNS работают на реальном устройстве. До публичного релиза требуются испытания Windows 10/11 с WinDivert, GeoHide и Telegram.
+> [!IMPORTANT]
+> **v0.41.0 — Release Candidate, не стабильная v1.0.0.** Автоматические тесты Windows, создание EXE и установщика не доказывают доступность отдельных сайтов и корректность обхода на любой сети. Требуются ручные испытания на Windows 10/11. Сборки из GitHub Actions могут не иметь цифровой подписи издателя.
 
-**v0.33.0:** explicit OFF has a separate fsynced safety marker (`settings.json.off-intent`) and survives an interrupted JSON write. ON is re-enabled only after successful settings persistence and marker removal. The Windows CI suite includes a no-network reboot-intent simulation. See [`docs/OFF_INTENT_RECOVERY_V33.md`](docs/OFF_INTENT_RECOVERY_V33.md).
+## Возможности
 
-**v0.34.0:** GeoHide DNS snapshots now save the Windows adapter GUID, not just
-its reassignable interface index. Before changing DNS, the app checks that the
-index still resolves to the same GUID inside the same PowerShell invocation.
-Recovery retains the backup instead of touching a different network adapter.
-Older backups without GUID are supported conservatively using the saved alias.
-DHCP restoration now verifies that the manual DNS field is cleared. See
-[`docs/GEOHIDE_ADAPTER_IDENTITY_V34.md`](docs/GEOHIDE_ADAPTER_IDENTITY_V34.md).
+| Компонент | Назначение |
+| --- | --- |
+| **DPI / WinWS** | Управление стратегиями Flowseal, включая AUTO и ALT1–ALT13 |
+| **Telegram MTProto** | Управление локальным прокси для Telegram Desktop |
+| **GeoHide DNS** | Настройка системного IPv4 DNS или DoH при явном выборе |
+| **GeoHide HOSTS** | Просмотр и применение дополнительных правил по отдельному подтверждению |
+| **Диагностика** | Проверка HTTPS-ответов сервисов, DNS и состояния модулей |
+| **Восстановление** | Резервные копии DNS/HOSTS, контролируемый откат при ошибках |
+| **Windows** | Трей, автозапуск, восстановление выбранного состояния, установщик |
 
-## Как это должно работать
+Интерфейс выполнен в **Premium Dark**: чёрно-фиолетовые поверхности, шесть разделов, настоящие элементы Tkinter Canvas и управление с клавиатуры. Статус «Модули запущены» **не является** подтверждением обхода ограничений.
 
-1. Установить приложение через `VORQELI-Connect-Setup.exe` из **успешного** [GitHub Actions](https://github.com/Zeihos/VORQELI/actions).
-2. Запустить VORQELI и подтвердить запрос Windows UAC, если он нужен для DPI/DNS.
-3. Нажать **«Подключиться»**. Программа последовательно активирует включённые модули.
-4. Закрыть окно крестиком: соединение продолжит работать в **системном трее**.
-5. При следующем входе в Windows приложение попытается восстановить последнее явно выбранное состояние. Нажатие **«Отключиться»** сохраняет OFF.
+Проект **не является VPN**, не обещает анонимность или шифрование всего интернет-трафика и не связан официально с Flowseal или GeoHide. DPI, DNS и HOSTS — разные механизмы, поэтому результаты их работы могут различаться.
 
-**Ограничения:** успех процесса не гарантирует доступность сервиса; подключение может быть частичным. Для запуска DPI с повышенными правами без UAC при последующих входах требуется корректно зарегистрированная задача Планировщика и установленный EXE под защитой ACL Program Files. Установка и эти сценарии ещё требуют проверки на Windows.
+## Установка на Windows
 
-## Компоненты
+1. Откройте [**Windows build — GitHub Actions**](https://github.com/Zeihos/VORQELI/actions/workflows/windows-build.yml) и выберите **успешный** запуск ветки `main`.
+2. В разделе **Artifacts** скачайте `VORQELI-Connect-v0.41.0-Windows` и распакуйте ZIP.
+3. Сверьте SHA-256 файлов с `SHA256SUMS.txt` внутри артефакта, проверьте источник загрузки и при необходимости запустите `VORQELI-Connect-Setup.exe`.
+4. При первом запуске выберите компоненты и нажмите **«Подключить»**. Для WinWS и системных DNS/HOSTS могут потребоваться права администратора.
+5. После использования нажмите **«Отключить»**; перед удалением приложения проверьте, что DNS и HOSTS восстановлены.
 
-| Модуль | Назначение | Статус реализации |
-|---|---|---|
-| Flowseal WinWS | Экспериментальная обработка DPI | Запуск и контроль процесса; стратегии FAKE / MULTISPLIT / АВТО; требует Windows-проверки |
-| Flowseal tg-ws-proxy | Локальный MTProto-прокси Telegram | Интегрирован в CI-сборку; запуск и проверка локального порта; требует Windows-проверки |
-| GeoHide DNS | IPv4 DNS или добровольно выбранный системный DoH | Резервирование, проверка и восстановление; **DoH требует проверки на Windows 11** |
+**Важно:** не устанавливайте неподписанные исполняемые файлы из посторонних источников. SHA-256 служит проверкой целостности относительно опубликованного артефакта, но не заменяет Authenticode-подпись.
 
-Проект **не является официальным клиентом Flowseal, GeoHide или Cloudflare**. Использование DPI и DNS может требовать прав администратора и менять сетевое поведение других приложений. DNS-профиль не является полноценным VPN.
-
-
-### Обновления — v0.29.0–v0.30.0 (opt-in preview)
-
-На вкладке **«О проекте»** доступна кнопка **«ПРОВЕРИТЬ ОБНОВЛЕНИЯ»**. Только по нажатию она проверяет официальный GitHub Release. Скачивание требует явного согласия, правильного URL и размера файла, SHA-256 из метаданных GitHub. При несовпадении файл удаляется. Приложение **не запускает скачанный установщик** и не меняет сеть при проверке. SHA-256 защищает от повреждения или расхождения с метаданными GitHub, **но не заменяет подпись издателя**. Нет опубликованного релиза — нечего загружать. Подробнее: [docs/UPDATES_V29.md](docs/UPDATES_V29.md).
-
-### Новый контроль обновлений (v0.30.0 — RC hardening)
-
-Клиент **запрещает перенаправления API** и допускает загрузочные перенаправления только на известные HTTPS-CDN GitHub (до трёх переходов). Проверенный установщик публикуется атомарно без перезаписи уже существующих файлов; файлы-символические ссылки не принимаются. Добавлена отдельная **ручная Windows-проверка подписей**: `scripts/windows_release_gate.ps1` должна проходить перед публичным релизом с доверенным сертификатом издателя. Она **ещё не пройдена**: сборка и подпись реальных релизных бинарников требуют Windows и сертификата. Подробнее: [RC gate v0.30.0](docs/RELEASE_CANDIDATE_GATE_V30.md).
-
-### GeoHide DoH — с v0.27.0 (экспериментально)
-
-На странице **Настройки** появилась настройка транспорта **IPv4 DNS / DoH · HTTPS**. По умолчанию остаётся прежний **IPv4 DNS**; DoH включается только по явному выбору. В DoH-режиме VORQELI пытается зарегистрировать фиксированный шаблон GeoHide в Windows (`AutoUpgrade=True`, `AllowFallbackToUdp=False`), проверяет системные записи и затем включает DNS на адаптерах. Конфликтующие глобальные записи Windows не перезаписываются, свои изменения записываются в отдельный восстановительный журнал. При отключении восстанавливаются сначала DNS-адреса, затем глобальные DoH-сопоставления.
-
-**Нет незаметного отката на нешифрованный DNS.** На неподдерживаемых версиях Windows или при конфликте настроек DoH выдаёт ошибку. Наличие DoH-записи ещё не доказывает, что DNS-трафик зашифрован; нужны реальные испытания. [Техническая документация и сценарии восстановления](docs/GEOHIDE_DOH_V27.md).
-
-### Smart DPI (v0.26.0, экспериментальный режим)
-
-В **Настройки → Стратегия DPI** можно выбрать **АВТО**, **FAKE** или **MULTISPLIT**. По умолчанию остался **FAKE** — приложение не начинает дополнительные сетевые проверки без вашего выбора режима **АВТО**.
-
-В режиме **АВТО** приложение пробует не более двух стратегий в указанном порядке, выполняет две прямые HTTPS-проверки доступности (Discord и YouTube) для каждой и оставляет стратегию с наибольшим числом ответов. При равных результатах выбирается FAKE. Если HTTPS не отвечает, приложение прямо сообщает, что работа обхода **не подтверждена**, даже если WinWS запущен. Во время проверки можно нажать «Отключить».
-
-**Это экспериментальная оценка доступности, а не гарантия обхода блокировок.** Ошибки сети, сертификата, DNS или самих сайтов могут повлиять на результат. Две HTTPS-пробы не доказывают работоспособность Telegram, всех приложений или обход DPI. В режиме АВТО есть до четырёх запросов на `discord.com` и `www.youtube.com`; прокси окружения при этом не используются. Никаких измерений на серверы VORQELI не отправляется. Подробности: [docs/SMART_DPI_V26.md](docs/SMART_DPI_V26.md).
+Подробные инструкции, Telegram Desktop, DoH, HOSTS и восстановление: **[Быстрый старт](docs/QUICK_START.md)**.
 
 ## Интерфейс
 
-![Настройки VORQELI](Settings-preview.png)
+| Раздел | Что доступно |
+| --- | --- |
+| Главная | Общий статус и подключение / отключение |
+| Диагностика | Результаты сервисов и дополнительные проверки |
+| История | События, фильтры и экспорт |
+| О проекте | Версия, компоненты, проверка обновлений |
+| Настройки | Трей, автозапуск, выбор модулей |
+| Сеть и стратегии | AUTO / ALT1–ALT13, DNS, DoH, HOSTS и восстановление |
 
-Тёмный дизайн с глянцевыми многослойными панелями и мягкими акцентами. В Windows 11 приложение **запрашивает Mica для системной рамки и тёмный заголовок через DWM**; сам контент по-прежнему рисуется Pillow и не является нативной прозрачной Acrylic-панелью. При неподдерживаемой версии Windows оформление остаётся прежним. Доступны пять страниц: «Главная», «Диагностика», «История», «Настройки», «О проекте». В трее — открытие окна, подключение, отключение и выход.
+**Принципы:** реальные данные вместо нарисованных статусов, кнопки реагируют на повторное нажатие, отдельный фокус для клавиатуры, прокрутка при компактном окне. HTTP 403/429 не считается подтверждённой доступностью сервиса.
 
-**Новое в v0.28.0:** Canvas-кнопки получили **Tab / Shift+Tab**, видимую светлую рамку фокуса, **Enter / Пробел** для активации, **стрелки влево/вправо** для перемещения фокуса. На небольшом рабочем столе доступны вертикальная и горизонтальная прокрутка; при переключении Tab нужная кнопка прокручивается в поле зрения. Исправлено пересечение подписи и переключателей GeoHide при минимальной высоте. Прокрутка колёсиком — вертикальная; Shift+колёсико — горизонтальная. Полноценная интеграция экранных дикторов через UI Automation ещё не выполнена. См. [документацию интерфейса](docs/UI_ACCESSIBILITY_V28.md).
+## Запуск из исходников
 
-## Разработка
-
-```powershell
-py -3 -m venv .venv
-.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-python -m pytest -q
-python scripts/check_repo_layout.py
-python -m vorqeli_connect --doctor
-python -m vorqeli_connect
-```
-
-Для тестирования Telegram-модуля из исходников дополнительно установите закреплённый upstream-коммит (CI делает это автоматически):
+Требуются Windows 10/11, Python 3.12, Git. В PowerShell:
 
 ```powershell
-python -m pip install "git+https://github.com/Flowseal/tg-ws-proxy.git@307a384ab7f522e34bb1a045884d0bd90f40bee5"
+git clone https://github.com/Zeihos/VORQELI.git
+cd VORQELI
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.\.venv\Scripts\python.exe -m vorqeli_connect --version
+.\.venv\Scripts\python.exe -m vorqeli_connect
 ```
 
-Код рассчитан на Python 3.10+. Полноценный EXE и установщик собираются **на Windows** в `.github/workflows/windows-build.yml`. Наличие архивов исходников **не означает**, что Windows-сборка прошла.
+Для использования встроенного Telegram-модуля из Python-исходников дополнительно требуется закреплённая версия зависимого проекта:
 
-## Безопасность и состояние v0.30.0
+```powershell
+.\.venv\Scripts\python.exe -m pip install "git+https://github.com/Flowseal/tg-ws-proxy.git@307a384ab7f522e34bb1a045884d0bd90f40bee5"
+```
 
-- ZIP Flowseal загружается из закреплённого релиза и сверяется с SHA-256; локальный бинарный кеш повторно проверяется перед запуском. Без цифровой подписи это проверка целостности, не универсальная гарантия безопасности.
-- GeoHide сохраняет резервную копию DNS и проверяет итог после применения/отката. Если восстановление не подтверждено, копия не удаляется. При явном включении DoH дополнительно ведётся **независимый журнал глобальных DoH-записей**; восстановление проверяет точное совпадение настроек и не удаляет чужие изменения.
-- Telegram secret в Windows хранится через DPAPI текущего пользователя; `--doctor` не содержит секретов, путей или IP-адресов.
-- **Ранее добавлено:** предотвращение параллельной регистрации автозапуска через задачу и реестр. `--doctor` показывает `startup_registration: "conflict"`, если обнаружены оба механизма.
-- **Новое:** установщик Inno Setup использует `AppMutex` и должен отказываться от обновления, пока VORQELI работает в трее. На GitHub Actions добавлен соответствующий Windows smoke-тест.
-- Удаление блокируется, если DNS не восстановлен, задача автозапуска не удалена или приложение всё ещё запущено.
-- **v0.25:** проверка подлинности записи HKCU Run по команде и типу значения. Подмена не удаляется, `--doctor` сообщает `untrusted`. В CI добавлен реальный Windows-тест регистрации и удаления автозапуска без активации сетевых модулей.
+Проверка исходников без запуска сетевых компонентов:
 
-## Состояние готовности
+```powershell
+.\.venv\Scripts\python.exe -m compileall -q src scripts tests
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe scripts/check_repo_layout.py
+.\.venv\Scripts\python.exe scripts/verify_build_manifest.py
+```
 
-**Автоматизировано локально:** 409 Python-тестов, проверки файлов проекта, CLI, графический запуск пяти страниц и отдельный тест клавиатурного управления в компактном окне. **Требует проверки GitHub Actions:** Windows EXE и установщик. **Требует ручной проверки на ПК:** работа WinDivert, реальное подключение Telegram и GeoHide, автозапуск после перезагрузки, восстановление после сбоев и обновление установленной версии.
+Полный EXE и Inno Setup-установщик собираются через **[GitHub Actions](https://github.com/Zeihos/VORQELI/actions)** на Windows.
 
-Полный план приёмки: [docs/WINDOWS_STARTUP_AUDIT_V25.md](docs/WINDOWS_STARTUP_AUDIT_V25.md) и [docs/WINDOWS_ACCEPTANCE_V23.md](docs/WINDOWS_ACCEPTANCE_V23.md). Технические приоритеты: [docs/ROADMAP.md](docs/ROADMAP.md). История: [CHANGELOG.md](CHANGELOG.md). Восстановление пустого GitHub: [docs/GITHUB_RECOVERY.md](docs/GITHUB_RECOVERY.md).
+## Структура репозитория
 
-## Лицензии и исходники
+```text
+VORQELI/
+├── .github/       # Windows CI, шаблоны Issues и PR
+├── assets/        # Логотип, значок и ресурсы приложения
+├── docs/          # Руководства, архитектура и история изменений
+├── installer/     # Inno Setup
+├── scripts/       # Проверки, Windows smoke-тесты
+├── src/           # Исходный код VORQELI Connect
+├── tests/         # Регрессионные тесты
+├── BUILD_MANIFEST.json
+├── SHA256SUMS.txt
+└── pyproject.toml
+```
 
-Приложение: [MIT](LICENSE). Сторонние компоненты и ссылки: [NOTICE.md](NOTICE.md) и [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md). Репозиторий: <https://github.com/Zeihos/VORQELI>.
+Манифест сборки проверяет полный перечень значимых файлов и SHA-256 до начала Windows-сборки. Подробности — [документация по релизу](docs/RELEASE_VALIDATION.md).
 
+## Состояние проекта
 
-## Обновление v0.24.0
+- **Реализовано и проверяется автоматически:** Python-тесты, проверка манифеста, сборка EXE, Inno Setup и ряд безопасных Windows smoke-тестов.
+- **До стабильного релиза:** реальные испытания WinWS / Telegram / GeoHide на разных сетях, проверка восстановления DNS/HOSTS, UAC, автозапуска после перезагрузки, различных масштабов интерфейса и подписи издателя.
+- **Поддержка:** Windows 10/11 x64. Поддержка других ОС не заявлена.
 
-- **Проверка подлинности конфигурации задачи автозапуска:** Windows Task Scheduler XML
-  проверяется до изменения или удаления задачи с именем VORQELI Connect.
-- **Безопасное отклонение:** посторонние и недоступные для проверки задачи не
-  изменяются автоматически; диагностика возвращает `untrusted` / `unknown`.
-- **Новые регрессионные тесты:** подмена исполняемого файла, аргументов,
-  триггера, уровня прав и дополнительные действия.
+План работ: [ROADMAP](docs/ROADMAP.md) · Регламент испытаний: [RELEASE_VALIDATION](docs/RELEASE_VALIDATION.md) · Изменения: [CHANGELOG](CHANGELOG.md).
 
-Сценарии проверки Windows: `docs/WINDOWS_STARTUP_AUDIT_V24.md`.
+## Участие и безопасность
 
-Проверка готовности к первому публичному выпуску: [RELEASE_CANDIDATE_CHECKLIST_V29.md](docs/RELEASE_CANDIDATE_CHECKLIST_V29.md).
+Предложения и исправления приветствуются: [**CONTRIBUTING.md**](CONTRIBUTING.md). Сообщать о дефектах можно через [Issues](https://github.com/Zeihos/VORQELI/issues), не публикуя Telegram-secret, содержимое журналов с личными данными или другие конфиденциальные сведения.
 
+Для потенциальных уязвимостей используйте [**SECURITY.md**](SECURITY.md). Сведения о сторонних компонентах и их лицензиях: [NOTICE.md](NOTICE.md) и [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md).
 
-### Flowseal ALT1–ALT13 и HOSTS (v0.35.0)
-Выбор профиля DPI: Настройки → АВТО ALT1–13 или ВЫБРАТЬ ALT. Дополнительные статические hosts: Настройки → HOSTS · ДОПОЛНИТЕЛЬНО. Правила hosts независимы от GeoHide DNS, вносятся только по подтверждению. Подробности — docs/FLOWSEAL_ALT_AND_HOSTS_V35.md.
-
-
-### Telegram Web (v0.36.0)
-
-Встроенная **Диагностика → TELEGRAM WEB** проверяет веб-клиенты K/A, прямой TLS/HTTPS, системные записи HOSTS и DNS без HOSTS на Windows. Прокси MTProto Telegram Desktop не связан с доступностью веб-приложения. Проверка ничего не меняет и не гарантирует загрузку Telegram Web в браузере. Подробнее — `docs/TELEGRAM_WEB_DIAGNOSTICS_V36.md`.
-
-### CI encoding hotfix (v0.36.1)
-Windows build now initializes UTF-8 before the first Python preflight. A regression test checks the workflow and Windows legacy-codepage handling. Live DPI/GeoHide/Telegram Web verification remains separate from build success.
+**Лицензия исходного кода:** [MIT](LICENSE). Сторонние компоненты распространяются на условиях собственных лицензий.
