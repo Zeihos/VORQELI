@@ -36,3 +36,16 @@ def test_healthy_resets_retry_budget():
 def test_bad_policy_rejected():
     with pytest.raises(ValueError): RecoveryPolicy(())
     with pytest.raises(ValueError): RecoveryPolicy((1, 0))
+
+
+@pytest.mark.parametrize("invalid", [float("nan"), float("inf"), -float("inf"), True, "3"])
+def test_recovery_rejects_nonfinite_or_non_numeric_delay(invalid):
+    with pytest.raises(ValueError):
+        RecoveryPolicy((1, invalid))
+
+
+def test_recovery_accepts_finite_fractional_delays():
+    policy = RecoveryPolicy((0.25, 0.5))
+    assert not policy.observe(wanted=True, unhealthy=True, busy=False, now=0)
+    assert policy.status(0).next_in_seconds == 0.25
+    assert policy.observe(wanted=True, unhealthy=True, busy=False, now=0.25)
