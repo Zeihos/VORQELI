@@ -438,8 +438,8 @@
       "sha256": "aecd7308a8d08c210912378a7870f1a104b7d8b2f9d0c9e5447e41713612efb6"
     },
     "src/vorqeli_connect/recovery.py": {
-      "bytes": 2036,
-      "sha256": "79949613e351e81b7d013d9c37f5bf8aa26714dd9ce343c5bb137f39fdc870ef"
+      "bytes": 2219,
+      "sha256": "ac505f75fc8503bcf243c28fd2c6289d253190ba69ff03ec210bb867049b4620"
     },
     "src/vorqeli_connect/redesign_ui.py": {
       "bytes": 36826,
@@ -730,8 +730,8 @@
       "sha256": "9cff524ffd84947197606c50ef230cac1732520f69aaa09e727d838facddc385"
     },
     "tests/test_recovery.py": {
-      "bytes": 1731,
-      "sha256": "d6d8afe81715893617b273d32b7d81b6416eed3790ec3222cfeea15e3b413c45"
+      "bytes": 2269,
+      "sha256": "6bea23f804ed6ad4964b16007895f92e2a840d52698b730744cb09be072da835"
     },
     "tests/test_redesign_ui_v37.py": {
       "bytes": 4081,
