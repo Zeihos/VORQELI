@@ -24,10 +24,12 @@ def redact_secrets(text: str, *secrets: str) -> str:
     for secret in secrets:
         if isinstance(secret, str) and len(secret) >= 8:
             text = re.sub(re.escape(secret), "[СКРЫТО]", text, flags=re.IGNORECASE)
-    # Handle common CLI and diagnostic output even when the known secret is unavailable.
-    # Some programs log --secret=HEX or "Generated secret: HEX".
+    # Redact named credential values, not only 32-character hexadecimal tokens.
+    # Keep the surrounding diagnostic text and stop at line boundaries.
     text = re.sub(
-        r"(?i)((?:--secret|(?:generated\s+)?secret)\s*(?:=|:)\s*|--secret\s+)[0-9a-f]{32}\b",
+        r"(?i)((?<![\w-])(?:--secret|(?:generated\s+)?secret|"
+        r"(?:--)?(?:access[_-]?token|api[_-]?key|password|token))"
+        r'\s*(?:=|:|\s)\s*)(?:"[^"\r\n]*"|[^\s,;]+)',
         r"\1[СКРЫТО]", text,
     )
     return text

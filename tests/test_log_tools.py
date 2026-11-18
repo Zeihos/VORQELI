@@ -42,3 +42,19 @@ def test_secret_redaction_without_known_secret():
         result = redact_secrets(line)
         assert secret.lower() not in result.lower()
         assert "[СКРЫТО]" in result
+
+
+def test_redact_credentials_without_known_secret():
+    samples = (
+        "token=tok_TEST_abc-123",
+        "api_key: API_abc123-xyz",
+        "access_token=oauth.abcd.efgh",
+        'password = "a complex passphrase"',
+        "--secret short-but-sensitive",
+        "Generated secret: A1B2C3D4",
+    )
+    for sample in samples:
+        result = redact_secrets(sample + "\nstatus=healthy")
+        assert "[СКРЫТО]" in result
+        assert "status=healthy" in result
+        assert sample.split()[-1] not in result

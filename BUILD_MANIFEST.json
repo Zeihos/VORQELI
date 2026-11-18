@@ -398,8 +398,8 @@
       "sha256": "b19db88423d343bfb949a1ffcf68282a94e7d379c165e24b1f72209d5f3d157c"
     },
     "src/vorqeli_connect/log_tools.py": {
-      "bytes": 2656,
-      "sha256": "1097826acb9cdfca2ad81fd6258496e8529f8f15dc8380e2635334d2dcdd3ba4"
+      "bytes": 2744,
+      "sha256": "b9aea21c79a944652fd909d882c35ae70caa8bdfbd467118994bccdda96e08aa"
     },
     "src/vorqeli_connect/module_registry.py": {
       "bytes": 848,
@@ -662,8 +662,8 @@
       "sha256": "a01bccb8f8b6f936bd6ca820c2ca507feed3e14a635d06654cc3ca868b10c8a2"
     },
     "tests/test_log_tools.py": {
-      "bytes": 1400,
-      "sha256": "09d0c92346a7925f0ec1112b51e83de8bf52898f1263c99b23c6bfe42850f020"
+      "bytes": 1928,
+      "sha256": "1312c09ef0d4a1f276dfcadf3357893854fd2c4c6c0ba1e1b6b765bc0885cacc"
     },
     "tests/test_module_registry.py": {
       "bytes": 480,
