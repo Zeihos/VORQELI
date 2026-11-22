@@ -1,5 +1,5 @@
 {
-  "file_count": 227,
+  "file_count": 228,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -326,8 +326,8 @@
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 101705,
-      "sha256": "977f7865d357cafa43fde10b65f8353364ca934d7ac412031d9d516c87f095ae"
+      "bytes": 102181,
+      "sha256": "76c4f628aa0ecac61f98732a4b0493440143ee5f0bfc0fff1cb743236670e3fb"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11617,
@@ -406,8 +406,8 @@
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
     },
     "src/vorqeli_connect/native_ui.py": {
-      "bytes": 37076,
-      "sha256": "d91757e70f359b15cb166ac4cf94d5860ddb451b51a82869b6df05f3f1ce8897"
+      "bytes": 37394,
+      "sha256": "761643a0105274a1ff664e121a7d9e65c1a44e80ab3c56200dc019aa051d2efb"
     },
     "src/vorqeli_connect/network_audit.py": {
       "bytes": 15192,
@@ -908,6 +908,10 @@
     "tests/test_flowseal_manual_profiles.py": {
       "bytes": 2909,
       "sha256": "2e709343c3840de7ca3b4bdd1500018c24a8e28eae066f7dd18f1d60a8ca8914"
+    },
+    "tests/test_settings_component_lock.py": {
+      "bytes": 2269,
+      "sha256": "307d08bd69d30334784699ecba760c6bbaec2279f45a8d1772acc710d8f148c6"
     }
   },
   "version": "0.41.0"
