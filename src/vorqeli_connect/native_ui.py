@@ -560,7 +560,8 @@ class Scene:
                         lambda mm=m:self.app._set_dpi_mode(mm),
                         kind='primary' if m==mode else 'secondary',size=15)
         self.txt(370,648,'Текущая стратегия: '+('АВТО 1–13' if mode=='alt_auto' else mode.upper()),17,'cyan',True)
-        self.txt(369,689,'АВТО проверяет только ALT1–ALT13. Смена — после переподключения.',14,'muted',width=610)
+        self.button((705,643,968,700),'GAME FILTER',self.app._show_game_filter_settings,kind='secondary',size=15)
+        self.txt(369,689,'AUTO использует только ALT1–ALT13.',14,'muted',width=330)
         self.card((1010,242,1490,717),'GeoHide DNS','Выбор транспорта без скрытых переключений')
         self.txt(1035,384,'ТРАНСПОРТ DNS',17,'muted',True)
         idle=not bool(getattr(self.settings,'desired_enabled',False))
