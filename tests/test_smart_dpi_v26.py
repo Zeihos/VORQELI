@@ -168,7 +168,7 @@ def test_unified_auto_mode_uses_real_selector_with_injected_https(monkeypatch,tm
     monkeypatch.setattr(unified.time,'sleep',lambda _:None)
     monkeypatch.setattr(unified,'build_dpi_spec',lambda folder,mode:LaunchSpec((mode,),tmp_path,mode))
     monkeypatch.setattr(unified,'select_strategy',lambda **kwargs:real_selector(
-        **kwargs, probe=lambda cancelled: (True,False) if engine.mode=='fake' else (True,True)))
+        **kwargs, probe=lambda cancelled: (True,False) if engine.mode=='alt2' else (True,True)))
     events=[]
     class SimEngine:
         def __init__(self): self.mode=None;self.history=[]
@@ -185,8 +185,8 @@ def test_unified_auto_mode_uses_real_selector_with_injected_https(monkeypatch,tm
     controller.dpi=engine
     report=controller.connect()
     assert report.overall=='connected'
-    assert controller.active_dpi_mode == 'multisplit'
-    assert engine.history == ['fake','multisplit']
+    assert controller.active_dpi_mode == 'alt6'
+    assert engine.history == ['alt2','alt6']
     assert controller.disconnect().overall=='off'
     assert controller.active_dpi_mode is None
 
@@ -214,4 +214,4 @@ def test_unified_auto_mode_zero_https_warns(monkeypatch,tmp_path):
     result=controller.connect()
     assert result.overall == 'connected'  # Process alive, NOT proof of bypass.
     assert 'Работа обхода не подтверждена' in result.detail
-    assert controller.active_dpi_mode == 'fake'
+    assert controller.active_dpi_mode == 'alt2'

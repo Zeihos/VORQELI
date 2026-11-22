@@ -89,3 +89,65 @@ def test_old_adapter_backup_blocks_new_host_activation(tmp_path, monkeypatch):
     result = controller.connect()
     assert result.dns == 'error'
     assert 'восстановите DNS' in result.detail
+
+
+def test_offline_reconnect_keeps_verified_overlay(tmp_path):
+    file = tmp_path / 'hosts'
+    journal = tmp_path / 'journal.json'
+    file.write_text('127.0.0.1 localhost\n', encoding='utf-8')
+    hosts.enable_hosts_only(path=file, journal_path=journal,
+                            geo_fetch=geo_sample, flowseal_fetch=flow_sample)
+    before = file.read_bytes()
+    before_journal = journal.read_bytes()
+
+    def unavailable():
+        raise OSError('upstream unreachable')
+
+    result = hosts.enable_hosts_only(path=file, journal_path=journal,
+                                     geo_fetch=unavailable, flowseal_fetch=flow_sample)
+    assert result['reused_verified'] and not result['fresh']
+    assert file.read_bytes() == before and journal.read_bytes() == before_journal
+    assert hosts.restore_hosts_only(path=file, journal_path=journal)
+
+
+def test_offline_without_verified_overlay_fails_closed(tmp_path):
+    file = tmp_path / 'hosts'
+    file.write_text('127.0.0.1 localhost\n', encoding='utf-8')
+    original = file.read_bytes()
+
+    def unavailable():
+        raise OSError('no connection')
+
+    with pytest.raises(OSError, match='no connection'):
+        hosts.enable_hosts_only(path=file, journal_path=tmp_path/'journal',
+                                geo_fetch=unavailable, flowseal_fetch=flow_sample)
+    assert file.read_bytes() == original
+
+
+def test_offline_with_tampered_overlay_does_not_claim_success(tmp_path):
+    file = tmp_path / 'hosts'
+    journal = tmp_path / 'journal'
+    file.write_text('127.0.0.1 localhost\n', encoding='utf-8')
+    hosts.enable_hosts_only(path=file, journal_path=journal,
+                            geo_fetch=geo_sample, flowseal_fetch=flow_sample)
+    file.write_text(file.read_text(encoding='utf-8').replace(
+        '1.1.1.1 discord.com', '8.8.4.4 discord.com'), encoding='utf-8')
+
+    def unavailable():
+        raise OSError('offline')
+
+    with pytest.raises(OSError):
+        hosts.enable_hosts_only(path=file, journal_path=journal,
+                                geo_fetch=unavailable, flowseal_fetch=flow_sample)
+
+
+def test_invalid_online_flowseal_never_uses_cached_data(tmp_path):
+    file = tmp_path / 'hosts'
+    journal = tmp_path / 'journal'
+    file.write_text('127.0.0.1 localhost\n', encoding='utf-8')
+    hosts.enable_hosts_only(path=file, journal_path=journal,
+                            geo_fetch=geo_sample, flowseal_fetch=flow_sample)
+    with pytest.raises(ValueError):
+        hosts.enable_hosts_only(path=file, journal_path=journal,
+                                geo_fetch=geo_sample,
+                                flowseal_fetch=lambda: 'corrupted feed')
