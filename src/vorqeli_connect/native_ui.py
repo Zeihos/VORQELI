@@ -327,7 +327,7 @@ class Scene:
         self.rr((35,842,298,976),'surface','edge',12)
         self.circle(61,869,6,clr)
         self.txt(80,854,'Модули запущены' if status=='connected' else 'Частично запущены' if status=='partial' else 'Ошибка соединения' if status=='error' else 'Готово к работе',15,'text',True,width=202)
-        self.txt(52,905,'WinWS  /  Telegram  /  DNS',13,'muted')
+        self.txt(52,905,'WinWS  /  Telegram  /  HOSTS',13,'muted')
         self.line(52,938,277,938,'edge')
         self.txt(54,950,'v'+VERSION+' · Windows 10/11',12,'dim')
         from .frameless import begin_move,move,end_move
