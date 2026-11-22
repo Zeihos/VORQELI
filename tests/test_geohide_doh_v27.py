@@ -216,15 +216,17 @@ def test_doctor_has_no_ips_or_server_url():
     assert geohide.GEOHIDE_IPV4[0] not in s and geohide.DOH_TEMPLATE not in s
 
 
-def test_controller_selects_doh_only_when_explicit(monkeypatch):
+def test_default_controller_never_selects_adapter_dns(monkeypatch):
     from vorqeli_connect import unified
-    modes=[]
-    monkeypatch.setattr(unified,'enable_geo_dns',lambda *,mode:modes.append(mode))
-    ctrl=UnifiedController(Settings(dns_mode='plain',launch_at_startup=False))
-    ctrl.dns_on()
-    ctrl.settings.dns_mode='doh'
-    ctrl.dns_on()
-    assert modes==['plain','doh']
+    applied = []
+    monkeypatch.setattr(unified, 'enable_geo_dns',
+                        lambda *, mode: (_ for _ in ()).throw(
+                            AssertionError('System DNS must not be modified')))
+    monkeypatch.setattr(unified, 'enable_hosts_only', lambda: applied.append('hosts'))
+    ctrl = UnifiedController(Settings(dns_mode='doh', launch_at_startup=False))
+    assert ctrl._hosts_mode
+    ctrl.dns_on()  # mocked: never write the real system HOSTS
+    assert applied == ['hosts']
 
 
 def test_unknown_mode_rejected_without_dns_changes(env):
