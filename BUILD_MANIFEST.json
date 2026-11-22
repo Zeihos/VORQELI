@@ -326,8 +326,8 @@
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 95905,
-      "sha256": "7d27545f212f1b833851eb7d1f207476896dd1943d218f60bd0b285d70e97f79"
+      "bytes": 95522,
+      "sha256": "301dc50500c75bfc7e441156216236b2f23f124c8b1930c4cfe478c788573256"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11063,
@@ -602,8 +602,8 @@
       "sha256": "e15003175bbbc4baebbaa8661d925e0d7e615d438c829042e5d4e24cc01a37e6"
     },
     "tests/test_flowseal_alts_v35.py": {
-      "bytes": 7400,
-      "sha256": "660f71f06fb08b31a371a265d2344821cf880c6773973f52ee9e2da62fe80fe5"
+      "bytes": 7981,
+      "sha256": "64f010684432f224c257fa34f52d59999badcf0459dc321d207b721fbe9e3c4d"
     },
     "tests/test_geohide.py": {
       "bytes": 2038,
