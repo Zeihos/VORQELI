@@ -198,6 +198,10 @@ class UnifiedController:
                     except Exception as exc:
                         states['dns'] = 'error'
                         errors.append(f'GeoHide: {exc}')
+                if self._cancel.is_set() or not self.settings.desired_enabled:
+                    # OFF may arrive during the blocking HOSTS download/apply.
+                    # Never report connected when the user has already cancelled.
+                    return self._cancelled()
                 successful = sum(1 for state in states.values() if state == 'on')
                 selected = sum((self.settings.connect_dpi, self.settings.connect_telegram, self.settings.connect_dns))
                 overall = 'connected' if selected and successful == selected and not errors else ('partial' if successful else 'error')
@@ -208,7 +212,36 @@ class UnifiedController:
                 self._connecting = False
 
     def _cancelled(self):
-        self._last = ConnectionReport('off','off','off','off', 'Подключение отменено')
+        """Cancel safely even when some owned components already started.
+
+        Called under the connection lock; a queued disconnect is also safe,
+        but must not be the only thing keeping the OFF state truthful.
+        """
+        errors = []
+        states = {'dpi': 'off', 'telegram': 'off', 'dns': 'off'}
+        self.active_dpi_mode = None
+        for key, name, engine in (('dpi', 'DPI', self.dpi),
+                                  ('telegram', 'Telegram', self.telegram)):
+            try:
+                engine.stop()
+                if engine.running:
+                    raise RuntimeError('процесс продолжает работать')
+            except Exception as exc:
+                states[key] = 'error'
+                errors.append(f'{name}: {exc}')
+        if self._dns_managed:
+            try:
+                restored = self.dns_off()
+                if restored is False and not self._hosts_mode:
+                    raise RuntimeError('настройки DNS не восстановлены')
+                self._dns_managed = False
+            except Exception as exc:
+                states['dns'] = 'error'
+                errors.append(f'HOSTS/DNS: {exc}')
+        self._last = ConnectionReport(
+            'error' if errors else 'off', **states,
+            detail=('Подключение отменено; ' + '; '.join(errors))
+            if errors else 'Подключение отменено')
         self.emit('state', self._last)
         return self._last
 
