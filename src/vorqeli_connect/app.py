@@ -30,7 +30,7 @@ from .startup import is_admin, relaunch_elevated, configure_startup, initial_uac
 from .unified import UnifiedController, ConnectionReport
 from .recovery import RecoveryPolicy
 from .engine_adapters import proxy_link
-from .flowseal_alts import ALT_MODES, ALT_PRIORITY
+from .flowseal_alts import ALT_MODES, EXTRA_PROFILE_FILES, ALT_PRIORITY
 from .hosts_overlay import (hosts_path, analyze_hosts, apply_optional_hosts, remove_optional_hosts)
 from .tray_assets import tray_icon
 from .frameless import minimize
@@ -978,8 +978,48 @@ class ConnectApp(tk.Tk):
              'Источник: '+feed.SOURCE_PAGE)
 
 
+    def _show_extra_profiles(self):
+        """Show all additional official manual Flowseal presets."""
+        if self.running_job:
+            return
+        options = list(EXTRA_PROFILE_FILES)
+        dlg = tk.Toplevel(self)
+        dlg.title('VORQELI · Ручные профили Flowseal')
+        dlg.configure(bg='#111629')
+        dlg.geometry('560x475')
+        dlg.transient(self)
+        dlg.grab_set()
+        frame = tk.Frame(dlg, bg='#111629', padx=20, pady=18)
+        frame.pack(fill='both', expand=True)
+        tk.Label(frame, text='РУЧНОЙ ВЫБОР FLOWSEAL', bg='#111629', fg=FG,
+                 font=('Segoe UI', 16, 'bold')).pack(anchor='w')
+        tk.Label(frame, text='AUTO использует только ALT1–ALT13. Ни один .bat не исполняется.',
+                 bg='#111629', fg=FG).pack(anchor='w', pady=9)
+        names = {mode: EXTRA_PROFILE_FILES[mode].removeprefix('general').removesuffix('.bat').strip(' ()') or 'GENERAL'
+                 for mode in options}
+        listbox = tk.Listbox(frame, bg='#1B2238', fg=FG, selectbackground='#6050A0',
+                            selectforeground='white', exportselection=False,
+                            activestyle='none', height=10, font=('Segoe UI', 11))
+        for mode in options:
+            listbox.insert('end', names[mode])
+        listbox.pack(fill='both', expand=True, pady=8)
+        if self.settings.dpi_mode in options:
+            index = options.index(self.settings.dpi_mode)
+            listbox.selection_set(index)
+            listbox.see(index)
+        else:
+            listbox.selection_set(0)
+        def apply():
+            items = listbox.curselection()
+            if not items:
+                return
+            self._set_dpi_mode(options[items[0]])
+            dlg.destroy()
+        tk.Button(frame, text='ВЫБРАТЬ СТРАТЕГИЮ', command=apply,
+                  bg='#6050A0', fg='white', bd=0, padx=14, pady=10).pack(anchor='e')
+
     def _set_dpi_mode(self, mode: str):
-        if self.running_job or mode not in (*ALT_MODES, 'alt_auto', 'fake', 'multisplit') or self.settings.dpi_mode==mode:
+        if self.running_job or mode not in (*ALT_MODES, *EXTRA_PROFILE_FILES, 'alt_auto', 'fake', 'multisplit') or self.settings.dpi_mode==mode:
             return
         previous=self.settings.dpi_mode
         self.settings.dpi_mode=mode

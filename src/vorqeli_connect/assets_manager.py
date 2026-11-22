@@ -12,7 +12,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 from .config import APP_DIR
-from .flowseal_alts import ALT_MODES, alt_filename
+from .flowseal_alts import ALT_MODES, EXTRA_PROFILE_FILES, alt_filename
 
 ZAPRET_TAG = '1.10.3'
 ZAPRET_URL = ('https://github.com/Flowseal/zapret-discord-youtube/releases/download/'
@@ -96,6 +96,16 @@ def _engine_profiles(root: Path) -> dict[str, str]:
             result[mode] = sha256_file(path)
     if result and len(result) != len(ALT_MODES):
         raise ValueError('Неполный комплект Flowseal ALT')
+    additional = {}
+    for mode, filename in EXTRA_PROFILE_FILES.items():
+        file = root / filename
+        if file.is_symlink():
+            raise ValueError('Ссылка вместо официального профиля Flowseal')
+        if file.is_file():
+            additional[mode] = sha256_file(file)
+    if additional and len(additional) != len(EXTRA_PROFILE_FILES):
+        raise ValueError('Неполный комплект дополнительных профилей Flowseal')
+    result.update(additional)
     return result
 
 

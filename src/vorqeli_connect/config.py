@@ -121,8 +121,9 @@ def _validate_settings_fields(data: dict) -> dict:
             raise ValueError('Некорректный порт Telegram')
         result['telegram_port'] = port
     if 'dpi_mode' in data:
+        from .flowseal_alts import EXTRA_PROFILE_FILES
         if data['dpi_mode'] not in ('fake', 'multisplit', 'auto', 'alt_auto',
-                                    *(f'alt{i}' for i in range(1,14))):
+                                    *(f'alt{i}' for i in range(1,14)), *EXTRA_PROFILE_FILES):
             raise ValueError('Неизвестная DPI-стратегия')
         result['dpi_mode'] = data['dpi_mode']
     if 'game_filter_mode' in data:

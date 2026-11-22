@@ -559,9 +559,9 @@ class Scene:
             self.button((x,570,x+202,624),m.upper(),
                         lambda mm=m:self.app._set_dpi_mode(mm),
                         kind='primary' if m==mode else 'secondary',size=15)
-        self.txt(370,648,'Текущая стратегия: '+('АВТО 1–13' if mode=='alt_auto' else mode.upper()),17,'cyan',True)
+        self.txt(566,379,'Выбрано: '+('АВТО 1–13' if mode=='alt_auto' else mode.upper()),13,'cyan',True,width=420)
+        self.button((370,643,690,700),'ДРУГИЕ ПРОФИЛИ',lambda:self.app._show_extra_profiles(),kind='secondary',size=15)
         self.button((705,643,968,700),'GAME FILTER',lambda:self.app._show_game_filter_settings(),kind='secondary',size=15)
-        self.txt(369,689,'AUTO использует только ALT1–ALT13.',14,'muted',width=330)
         self.card((1010,242,1490,717),'GeoHide + Flowseal','HOSTS-only · DNS адаптеров не изменяется')
         self.txt(1035,384,'HOSTS / RU',17,'muted',True)
         self.txt(1035,443,'GeoHide + Flowseal',21,'cyan',True)

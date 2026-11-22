@@ -12,11 +12,12 @@ import re
 import shutil
 import socket
 from urllib.parse import urlencode
-from .flowseal_alts import ALT_MODES, build_alt_arguments
+from .flowseal_alts import ALT_MODES, EXTRA_PROFILE_FILES, build_alt_arguments
 
 
 VALID_DPI_MODES = {"fake": "fake", "multisplit": "multisplit",
-                   **{mode: mode for mode in ALT_MODES}}
+                   **{mode: mode for mode in ALT_MODES},
+                   **{mode: mode for mode in EXTRA_PROFILE_FILES}}
 
 
 @dataclass(frozen=True)
@@ -50,7 +51,7 @@ def build_dpi_spec(folder: str | Path, mode: str = "fake", *,
         raise ValueError("Не найдены bin/winws.exe и lists/list-general.txt")
     if not (root / "LICENSE.txt").is_file():
         raise ValueError("Нет LICENSE.txt: выберите оригинальный пакет Flowseal")
-    if mode in ALT_MODES:
+    if mode in ALT_MODES or mode in EXTRA_PROFILE_FILES:
         return LaunchSpec((str(executable), *build_alt_arguments(
             root, mode, game_mode=game_mode, game_tcp_ports=game_tcp_ports,
             game_udp_ports=game_udp_ports, ipset_override=ipset_override)),

@@ -12,6 +12,28 @@ from pathlib import Path
 from .flowseal_service import game_ports
 
 ALT_MODES = tuple(f'alt{i}' for i in range(1, 14))
+# Exact filenames from the pinned Flowseal 1.10.3 release: no user-defined
+# paths, no .bat execution. AUTO deliberately excludes these profiles.
+EXTRA_PROFILE_FILES = {
+    'general': 'general.bat',
+    'exp': 'general (EXP).bat',
+    'fake_tls_auto': 'general (FAKE TLS AUTO).bat',
+    'fake_tls_auto_alt': 'general (FAKE TLS AUTO ALT).bat',
+    'fake_tls_auto_alt2': 'general (FAKE TLS AUTO ALT2).bat',
+    'fake_tls_auto_alt3': 'general (FAKE TLS AUTO ALT3).bat',
+    'simple_fake': 'general (SIMPLE FAKE).bat',
+    'simple_fake_alt': 'general (SIMPLE FAKE ALT).bat',
+    'simple_fake_alt2': 'general (SIMPLE FAKE ALT2).bat',
+}
+
+def profile_filename(mode: str) -> str:
+    if mode in ALT_MODES:
+        return alt_filename(mode)
+    try:
+        return EXTRA_PROFILE_FILES[mode]
+    except (KeyError, TypeError) as exc:
+        raise ValueError('Неизвестный официальный профиль Flowseal') from exc
+
 # An empirical trial order, NOT an assertion of universal effectiveness.
 ALT_PRIORITY = ('alt2', 'alt6', 'alt11', 'alt12', 'alt13',
                 'alt4', 'alt3', 'alt8', 'alt9', 'alt7', 'alt10', 'alt1', 'alt5')
@@ -66,7 +88,7 @@ def build_alt_arguments(root: Path, mode: str, *, game_mode: str = 'disabled',
     filters are omitted as whole --new groups. No unverified script is run.
     """
     tcp_filter, udp_filter = game_ports(game_mode, game_tcp_ports, game_udp_ports)
-    script_path = root / alt_filename(mode)
+    script_path = root / profile_filename(mode)
     if script_path.is_symlink() or not script_path.is_file() or script_path.stat().st_size > 40_000:
         raise ValueError('ALT-файл Flowseal отсутствует либо недопустим')
     try:
