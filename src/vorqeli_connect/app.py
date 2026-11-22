@@ -913,6 +913,11 @@ class ConnectApp(tk.Tk):
                 show('Ошибка файла: '+str(exc))
 
         def commit():
+            if self.settings.desired_enabled or self.running_job:
+                messagebox.showwarning('GeoHide',
+                    'Сначала отключите VORQELI, чтобы изменить управляемый HOSTS.',
+                    parent=window)
+                return
             snapshot=prepared['snapshot']
             if snapshot is None:
                 messagebox.showwarning('GeoHide','Сначала проверьте официальный HOSTS.',parent=window)
@@ -938,6 +943,11 @@ class ConnectApp(tk.Tk):
             self._draw()
 
         def undo():
+            if self.settings.desired_enabled or self.running_job:
+                messagebox.showwarning('GeoHide',
+                    'Сначала отключите VORQELI, чтобы восстановить HOSTS.',
+                    parent=window)
+                return
             if not is_admin():
                 messagebox.showwarning('GeoHide','Нужны права администратора.',parent=window)
                 return
@@ -962,8 +972,8 @@ class ConnectApp(tk.Tk):
              'Нажмите «ОФИЦИАЛЬНЫЙ RU», чтобы получить последнюю версию из GitHub.\n'
              'В отсутствие интернета скачайте GeoHide → Другие форматы → RU → hosts → Классический, '
              'затем выберите «ИЗ ФАЙЛА».\n\n'
-             'Установка не выполняется автоматически при запуске VORQELI.\n'
-             'После просмотра состава нажмите «ПРИМЕНИТЬ».\n\n'
+             'По кнопке «Подключить» применяется объединённый GeoHide + Flowseal HOSTS.\n'
+             'Ручное применение доступно только при отключённом VORQELI.\n\n'
              'Источник: '+feed.SOURCE_PAGE)
 
 
