@@ -546,8 +546,8 @@
       "sha256": "a0cb34a8d3c499665bddfd4aed5323a06f4fe41480bccf8e7cd8da107cea1eef"
     },
     "src/vorqeli_connect/unified.py": {
-      "bytes": 17885,
-      "sha256": "c3255311e9a8c19112159872f386f5772679ea2feb48fd4dbda2716daa2dc22d"
+      "bytes": 18730,
+      "sha256": "a83f52af53d28a8ac67ff7a787803c2b68a3daf4cdf9bf2ece301250c6889e4e"
     },
     "src/vorqeli_connect/uninstall_safety.py": {
       "bytes": 5730,
@@ -818,8 +818,8 @@
       "sha256": "4bedfbfa7fd30c188cfcfad3772bd25e349b0573628010ea9b8295e7bd3e1092"
     },
     "tests/test_unified.py": {
-      "bytes": 11406,
-      "sha256": "fa50be02c107560d4c43289744cea2047d5c5674e5d3d67bb78bfac514e27eff"
+      "bytes": 15448,
+      "sha256": "d8a4dd8e644578838f8dafc60b80844f2eed4a01b163ced6bf58b2163d5f5a9b"
     },
     "tests/test_uninstall_safety_v22.py": {
       "bytes": 4166,
