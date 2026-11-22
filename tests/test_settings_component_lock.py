@@ -35,9 +35,10 @@ def test_offline_component_change_saves(monkeypatch):
     assert saved == [True]
 
 
-def test_native_ui_omits_live_toggle_actions():
+def test_native_ui_omits_live_toggle_actions(monkeypatch):
     from vorqeli_connect import native_ui as ui
     from test_native_ui_v401 import FakeApp
+    monkeypatch.setattr(ui.Scene, 'logo', lambda *args: True)
     app = FakeApp()
     app.selected_page = 'Настройки'
     app.settings.desired_enabled = True
