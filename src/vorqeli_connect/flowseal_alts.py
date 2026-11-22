@@ -1,4 +1,4 @@
-"""Safely derive winws argv from the pinned Flowseal 1.10.3 ALT batch profiles.
+"""Safely derive winws argv from the pinned Flowseal 1.10.4 ALT batch profiles.
 
 Never execute CMD, .bat, service.bat or shell commands. The only executable is
 bin/winws.exe inside the archive SHA-256 verified by assets_manager. Unsupported
@@ -12,7 +12,7 @@ from pathlib import Path
 from .flowseal_service import game_ports
 
 ALT_MODES = tuple(f'alt{i}' for i in range(1, 14))
-# Exact filenames from the pinned Flowseal 1.10.3 release: no user-defined
+# Exact filenames from the pinned Flowseal 1.10.4 release: no user-defined
 # paths, no .bat execution. AUTO deliberately excludes these profiles.
 EXTRA_PROFILE_FILES = {
     'general': 'general.bat',
