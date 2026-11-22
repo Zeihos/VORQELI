@@ -513,7 +513,7 @@ class Scene:
             (('Восстановление режима','Включать ранее выбранный режим','restore_last_mode'),
              ('Telegram MTProto','Локальный прокси','connect_telegram')),
             (('Сворачивать в трей','Продолжать работу при закрытии окна','minimize_to_tray'),
-             ('GeoHide DNS','Системный DNS-резолвер','connect_dns')),
+             ('GeoHide + Flowseal HOSTS','Управляемый HOSTS-блок','connect_dns')),
             (('Запуск от администратора','Запрашивать UAC при запуске','admin_on_launch'),None)
         ]
         self.card((344,238,939,751),'ОБЩИЕ','Параметры поведения Windows')
@@ -545,7 +545,7 @@ class Scene:
         self.cv.tag_bind(tag,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,C[c]))
 
     def network(self):
-        self.header(6,'Сеть и стратегии','Профили WinWS, GeoHide DNS и безопасное восстановление')
+        self.header(6,'Сеть и стратегии','Профили WinWS, объединённый HOSTS и восстановление')
         self.card((344,242,995,717),'Стратегии DPI','Переключение требует переподключения')
         mode=str(self.settings.dpi_mode)
         self.button((780,314,966,368),'АВТО 1–13',lambda:self.app._set_dpi_mode('alt_auto'),kind='primary' if mode=='alt_auto' else 'secondary',size=16)
@@ -562,14 +562,13 @@ class Scene:
         self.txt(370,648,'Текущая стратегия: '+('АВТО 1–13' if mode=='alt_auto' else mode.upper()),17,'cyan',True)
         self.button((705,643,968,700),'GAME FILTER',lambda:self.app._show_game_filter_settings(),kind='secondary',size=15)
         self.txt(369,689,'AUTO использует только ALT1–ALT13.',14,'muted',width=330)
-        self.card((1010,242,1490,717),'GeoHide DNS','Выбор транспорта без скрытых переключений')
-        self.txt(1035,384,'ТРАНСПОРТ DNS',17,'muted',True)
-        idle=not bool(getattr(self.settings,'desired_enabled',False))
-        self.button((1035,431,1242,502),'IPv4 DNS',lambda:self.app._set_dns_mode('plain'),kind='primary' if self.settings.dns_mode=='plain' else 'secondary',enabled=idle,size=18)
-        self.button((1253,431,1464,502),'DoH / HTTPS',lambda:self.app._set_dns_mode('doh'),kind='primary' if self.settings.dns_mode=='doh' else 'secondary',enabled=idle,size=18)
-        self.txt(1035,546,'Смена транспорта доступна при отключении.',16,'muted',width=423)
+        self.card((1010,242,1490,717),'GeoHide + Flowseal','HOSTS-only · DNS адаптеров не изменяется')
+        self.txt(1035,384,'HOSTS / RU',17,'muted',True)
+        self.txt(1035,443,'GeoHide + Flowseal',21,'cyan',True)
+        self.txt(1035,496,'Записи применяются вместе по кнопке «Подключить».',16,'muted',width=423)
+        self.txt(1035,546,'DNS и DoH Windows не переключаются.',16,'muted',width=423)
         dns=getattr(self.report,'dns','off')
-        self.txt(1035,617,'Модуль: '+('запущен' if dns=='on' else 'ошибка' if dns=='error' else 'не запущен'),18,'green' if dns=='on' else 'red' if dns=='error' else 'muted',True)
+        self.txt(1035,617,'HOSTS: '+('применён' if dns=='on' else 'ошибка' if dns=='error' else 'не запущен'),18,'green' if dns=='on' else 'red' if dns=='error' else 'muted',True)
         self.txt(365,743,'Сетевые инструменты',24,'text',True)
         for i,(label,cb) in enumerate((('Проверка',lambda:self.app._page('Диагностика')),('DNS / HOSTS',self.app._show_dns_audit),('Правила HOSTS',self.app._show_hosts_manager),('Настройки',lambda:self.app._page('Настройки')))):
             x=345+i*287
