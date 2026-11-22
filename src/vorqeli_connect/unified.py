@@ -71,6 +71,14 @@ class UnifiedController:
                 raise
             self._cancel.clear()
 
+    def _dpi_spec(self, bundle: Path, mode: str):
+        if self.settings.game_filter_mode == 'disabled':
+            return build_dpi_spec(bundle, mode)
+        return build_dpi_spec(bundle, mode,
+                              game_mode=self.settings.game_filter_mode,
+                              game_tcp_ports=self.settings.game_tcp_ports,
+                              game_udp_ports=self.settings.game_udp_ports)
+
     def connect(self, *, requested: bool = True) -> ConnectionReport:
         """Start components. Queued UI jobs use requested=False to honor later OFF."""
         if requested:
@@ -101,7 +109,7 @@ class UnifiedController:
                         if self.settings.dpi_mode in ('auto', 'alt_auto'):
                             # Sequential, bounded probes; manual OFF takes priority.
                             def launch(mode: str) -> None:
-                                spec = build_dpi_spec(bundle, mode)
+                                spec = self._dpi_spec(bundle, mode)
                                 self.dpi.start(spec, APP_DIR / 'dpi-engine.log')
                                 time.sleep(.45)
                             result = select_strategy(
@@ -116,7 +124,7 @@ class UnifiedController:
                                 warnings.append('HTTPS отвечает, но это ещё не доказательство обхода DPI.')
                         else:
                             self.active_dpi_mode = self.settings.dpi_mode
-                            spec = build_dpi_spec(bundle, self.settings.dpi_mode)
+                            spec = self._dpi_spec(bundle, self.settings.dpi_mode)
                             if not self.dpi.running:
                                 self.dpi.start(spec, APP_DIR / 'dpi-engine.log')
                             time.sleep(.45)
