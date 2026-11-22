@@ -64,6 +64,9 @@ class Settings:
     telegram_secret_error: str = field(default='',repr=False,compare=False)
     dpi_bundle_dir: str = ""
     dpi_mode: str = "alt_auto"
+    game_filter_mode: str = "disabled"
+    game_tcp_ports: str = "1024-65535"
+    game_udp_ports: str = "1024-65535"
     dns_mode: str = "plain"
     launch_at_startup: bool = True
     minimize_to_tray: bool = True
@@ -119,6 +122,15 @@ def _validate_settings_fields(data: dict) -> dict:
                                     *(f'alt{i}' for i in range(1,14))):
             raise ValueError('Неизвестная DPI-стратегия')
         result['dpi_mode'] = data['dpi_mode']
+    if 'game_filter_mode' in data:
+        from .flowseal_service import GAME_MODES
+        if type(data['game_filter_mode']) is not str or data['game_filter_mode'] not in GAME_MODES:
+            raise ValueError('Неизвестный режим Game Filter')
+        result['game_filter_mode'] = data['game_filter_mode']
+    for key in ('game_tcp_ports', 'game_udp_ports'):
+        if key in data:
+            from .flowseal_service import validate_port_ranges
+            result[key] = validate_port_ranges(data[key])
     if 'dns_mode' in data:
         if type(data['dns_mode']) is not str or data['dns_mode'] not in ('plain', 'doh'):
             raise ValueError('Неизвестный режим GeoHide DNS')
