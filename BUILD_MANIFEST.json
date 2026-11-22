@@ -1,5 +1,5 @@
 {
-  "file_count": 223,
+  "file_count": 225,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -26,8 +26,8 @@
       "sha256": "f93ea6f00a0bfb5deb9ada33d7efbe5c683fa585dcbbcf4bc5d8e92e3a2f7a77"
     },
     "README.md": {
-      "bytes": 10930,
-      "sha256": "97abfc95030090760e30c3002cdbb7989f057edf54f48978c04a86bc8d413e7c"
+      "bytes": 10993,
+      "sha256": "991243e6d969a1ac8c7be70efe5f1de0f17e18fc5fb80580a16eb512b41b8551"
     },
     "assets/Flowseal-zapret-1.10.3-LICENSE.txt": {
       "bytes": 2105,
@@ -134,8 +134,8 @@
       "sha256": "a602382826546e8062d73309bd9a9035afdcb6cc70c279bde87773303b246bb1"
     },
     "docs/QUICK_START.md": {
-      "bytes": 6078,
-      "sha256": "87ed63f9197b02ffcd22af2f1115e8b63c9b9a0c7c6b097e49cf62aa15922253"
+      "bytes": 6407,
+      "sha256": "e5cf8d39dcf7fe9b5f75b255fbeed6713ec531aef0a716b88dd7ce477d2b9c38"
     },
     "docs/RC40_SAFETY_GATE.md": {
       "bytes": 4161,
@@ -326,8 +326,8 @@
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 95522,
-      "sha256": "301dc50500c75bfc7e441156216236b2f23f124c8b1930c4cfe478c788573256"
+      "bytes": 94947,
+      "sha256": "f5852468aa06b71ea6b55b3bb1f7cee7fe065dd384247d8570bc8ecfc5f4f9a3"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11063,
@@ -406,8 +406,8 @@
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
     },
     "src/vorqeli_connect/native_ui.py": {
-      "bytes": 37173,
-      "sha256": "27be3ca0e4951be8cc2674243ca1ca1c3633eac55d3809d8fb22c8212a9d66d5"
+      "bytes": 36909,
+      "sha256": "82b0aa3c7e9920b8ab7a47cac53eb617ae2b73de970182043d8e77ba2c41bb4a"
     },
     "src/vorqeli_connect/network_audit.py": {
       "bytes": 15192,
@@ -546,8 +546,8 @@
       "sha256": "a0cb34a8d3c499665bddfd4aed5323a06f4fe41480bccf8e7cd8da107cea1eef"
     },
     "src/vorqeli_connect/unified.py": {
-      "bytes": 14910,
-      "sha256": "8331a0af7122b4ecc8db4a68974edfb0415747967602af45ab3ef8a5366c3b55"
+      "bytes": 15666,
+      "sha256": "b63e52e755eb45de71da2a61560897a1f0a116d40f5c9e3ac876e92af2ba7324"
     },
     "src/vorqeli_connect/uninstall_safety.py": {
       "bytes": 5730,
@@ -892,6 +892,14 @@
     "src/vorqeli_connect/flowseal_service.py": {
       "bytes": 1320,
       "sha256": "a837cc3b37b4b9b405b4a9eb4afb50217b2a08af35f893e1b48be6be5441a1c2"
+    },
+    "src/vorqeli_connect/hosts_connection.py": {
+      "bytes": 4658,
+      "sha256": "19a9646d93268015c04434d60f177ae47d157d4ba2c44e973e2857a745c988cd"
+    },
+    "tests/test_hosts_connection.py": {
+      "bytes": 4064,
+      "sha256": "e02e335de6c76323d8cc5de78fa2c8fe0a98447f0cc7b64ad60d597546c16528"
     }
   },
   "version": "0.41.0"
