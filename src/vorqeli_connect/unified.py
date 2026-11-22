@@ -124,11 +124,11 @@ class UnifiedController:
                                 start=launch, stop=self.dpi.stop,
                                 running=lambda: self.dpi.running,
                                 cancelled=self._cancel.is_set, progress=self._send,
-                                **({"profiles": ALT_PRIORITY} if self.settings.dpi_mode == "alt_auto" else {}))
+                                profiles=ALT_PRIORITY)
                             self.active_dpi_mode = result.active_mode
                             if result.warning:
                                 warnings.append(result.warning)
-                            elif self.settings.dpi_mode == 'alt_auto':
+                            elif self.settings.dpi_mode in ('auto', 'alt_auto'):
                                 warnings.append('HTTPS отвечает, но это ещё не доказательство обхода DPI.')
                         else:
                             self.active_dpi_mode = self.settings.dpi_mode
@@ -189,7 +189,10 @@ class UnifiedController:
                         self._send('Подключаем GeoHide + Flowseal HOSTS…')
                         if self._hosts_mode and (STATE_FILE.exists() or DOH_STATE_FILE.exists()):
                             raise RuntimeError('Найдена старая настройка системного DNS. Сначала восстановите DNS через настройки.')
-                        self.dns_on()
+                        applied = self.dns_on()
+                        if isinstance(applied, dict) and applied.get('reused_verified') is True:
+                            warnings.append('HOSTS восстановлен из проверенного локального блока: '
+                                            'обновить списки из сети сейчас не удалось.')
                         self._dns_managed = True
                         states['dns'] = 'on'
                     except Exception as exc:
