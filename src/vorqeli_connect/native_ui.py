@@ -554,8 +554,13 @@ class Scene:
             row,col=divmod(i,7)
             x=370+col*87; y=416+row*75
             self.button((x,y,x+79,y+58),m.upper(),lambda mm=m:self.app._set_dpi_mode(mm),kind='primary' if m==mode else 'secondary',size=15)
-        self.txt(370,593,'Текущая стратегия: '+('АВТО 1–13' if mode=='alt_auto' else mode.upper()),17,'cyan',True)
-        self.txt(369,641,'При смене режима во время работы переподключись.',16,'muted',width=584)
+        for i,m in enumerate(('fake','multisplit')):
+            x=370+i*212
+            self.button((x,570,x+202,624),m.upper(),
+                        lambda mm=m:self.app._set_dpi_mode(mm),
+                        kind='primary' if m==mode else 'secondary',size=15)
+        self.txt(370,648,'Текущая стратегия: '+('АВТО 1–13' if mode=='alt_auto' else mode.upper()),17,'cyan',True)
+        self.txt(369,689,'АВТО проверяет только ALT1–ALT13. Смена — после переподключения.',14,'muted',width=610)
         self.card((1010,242,1490,717),'GeoHide DNS','Выбор транспорта без скрытых переключений')
         self.txt(1035,384,'ТРАНСПОРТ DNS',17,'muted',True)
         idle=not bool(getattr(self.settings,'desired_enabled',False))
