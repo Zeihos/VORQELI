@@ -406,8 +406,8 @@
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
     },
     "src/vorqeli_connect/native_ui.py": {
-      "bytes": 37164,
-      "sha256": "47263fe92c81c1b7b09dd18c51c533232a31abe37a4037535b9847d7401e3392"
+      "bytes": 37173,
+      "sha256": "27be3ca0e4951be8cc2674243ca1ca1c3633eac55d3809d8fb22c8212a9d66d5"
     },
     "src/vorqeli_connect/network_audit.py": {
       "bytes": 15192,
