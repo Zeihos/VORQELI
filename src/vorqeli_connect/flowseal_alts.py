@@ -57,7 +57,8 @@ def _source_options(script: str) -> tuple[str, ...]:
 
 def build_alt_arguments(root: Path, mode: str, *, game_mode: str = 'disabled',
                         game_tcp_ports: str = '1024-65535',
-                        game_udp_ports: str = '1024-65535') -> tuple[str, ...]:
+                        game_udp_ports: str = '1024-65535',
+                        ipset_override: Path | None = None) -> tuple[str, ...]:
     """Parse a trusted extracted profile to argv; never pass text through a shell.
 
     The official service.bat creates optional *-user.txt lists and game filter
@@ -119,6 +120,10 @@ def build_alt_arguments(root: Path, mode: str, *, game_mode: str = 'disabled',
                         # Original service.bat creates these; omitted safely.
                         continue
                     raise ValueError('В официальном профиле не найден ресурс: ' + name)
+                if prefix == '%LISTS%' and name == 'ipset-all.txt' and ipset_override is not None:
+                    if not ipset_override.is_file() or ipset_override.is_symlink():
+                        raise ValueError('Не найден безопасный IPSet фильтр VORQELI')
+                    path = ipset_override
                 token = key + '=' + str(path)
             if '%' in token or not _OPTION.fullmatch(token):
                 raise ValueError('Неизвестная переменная или аргумент ALT-профиля')
