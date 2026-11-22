@@ -30,7 +30,7 @@ from .startup import is_admin, relaunch_elevated, configure_startup, initial_uac
 from .unified import UnifiedController, ConnectionReport
 from .recovery import RecoveryPolicy
 from .engine_adapters import proxy_link
-from .flowseal_alts import ALT_MODES, ALT_PRIORITY
+from .flowseal_alts import ALT_MODES, EXTRA_PROFILE_FILES, ALT_PRIORITY
 from .hosts_overlay import (hosts_path, analyze_hosts, apply_optional_hosts, remove_optional_hosts)
 from .tray_assets import tray_icon
 from .frameless import minimize
@@ -979,7 +979,7 @@ class ConnectApp(tk.Tk):
 
 
     def _set_dpi_mode(self, mode: str):
-        if self.running_job or mode not in (*ALT_MODES, 'alt_auto', 'fake', 'multisplit') or self.settings.dpi_mode==mode:
+        if self.running_job or mode not in (*ALT_MODES, *EXTRA_PROFILE_FILES, 'alt_auto', 'fake', 'multisplit') or self.settings.dpi_mode==mode:
             return
         previous=self.settings.dpi_mode
         self.settings.dpi_mode=mode
