@@ -115,21 +115,32 @@ class UnifiedController:
                         if self._cancel.is_set():
                             return self._cancelled()
                         if self.settings.dpi_mode in ('auto', 'alt_auto'):
-                            # Sequential, bounded probes; manual OFF takes priority.
-                            def launch(mode: str) -> None:
-                                spec = self._dpi_spec(bundle, mode)
-                                self.dpi.start(spec, APP_DIR / 'dpi-engine.log')
-                                time.sleep(.45)
-                            result = select_strategy(
-                                start=launch, stop=self.dpi.stop,
-                                running=lambda: self.dpi.running,
-                                cancelled=self._cancel.is_set, progress=self._send,
-                                profiles=ALT_PRIORITY)
-                            self.active_dpi_mode = result.active_mode
-                            if result.warning:
-                                warnings.append(result.warning)
-                            elif self.settings.dpi_mode in ('auto', 'alt_auto'):
-                                warnings.append('HTTPS отвечает, но это ещё не доказательство обхода DPI.')
+                            if self.dpi.running and self.active_dpi_mode in ALT_PRIORITY:
+                                # A partial Telegram/HOSTS outage must not restart
+                                # an already healthy, owned WinWS child process.
+                                # Preserve the actual strategy selected earlier.
+                                self._send('WinWS уже работает: сохраняем активный ALT-профиль.')
+                            else:
+                                # Unknown running process has no trusted profile
+                                # identity: stop only our own child before probing.
+                                if self.dpi.running:
+                                    self.dpi.stop()
+                                self.active_dpi_mode = None
+                                # Sequential, bounded probes; manual OFF takes priority.
+                                def launch(mode: str) -> None:
+                                    spec = self._dpi_spec(bundle, mode)
+                                    self.dpi.start(spec, APP_DIR / 'dpi-engine.log')
+                                    time.sleep(.45)
+                                result = select_strategy(
+                                    start=launch, stop=self.dpi.stop,
+                                    running=lambda: self.dpi.running,
+                                    cancelled=self._cancel.is_set, progress=self._send,
+                                    profiles=ALT_PRIORITY)
+                                self.active_dpi_mode = result.active_mode
+                                if result.warning:
+                                    warnings.append(result.warning)
+                                else:
+                                    warnings.append('HTTPS отвечает, но это ещё не доказательство обхода DPI.')
                         else:
                             self.active_dpi_mode = self.settings.dpi_mode
                             spec = self._dpi_spec(bundle, self.settings.dpi_mode)

@@ -237,3 +237,86 @@ def test_failed_cancel_cleanup_never_reports_false_off(monkeypatch, tmp_path):
     assert result.dpi == 'error'
     assert 'driver still busy' in result.detail
     assert controller.dpi.running
+
+
+def test_partial_reconnect_preserves_running_auto_dpi(monkeypatch, tmp_path):
+    """Recover missing HOSTS without restarting a healthy, selected WinWS ALT."""
+    monkeypatch.setattr(unified, 'save_settings', lambda _: None)
+    monkeypatch.setattr(unified, 'select_strategy',
+                        lambda **kwargs: pytest.fail('already running ALT must not be reprobed'))
+    settings = Settings(desired_enabled=True, dpi_mode='alt_auto', connect_dpi=True,
+                        connect_telegram=False, connect_dns=True, launch_at_startup=False)
+    actions = []
+    controller = unified.UnifiedController(
+        settings, assets=lambda **kwargs: tmp_path,
+        dns_on=lambda: actions.append('hosts'))
+    class KeepRunning(FakeEngine):
+        def __init__(self):
+            super().__init__()
+            self.running = True
+            self.stops = 0
+        def stop(self, *args, **kwargs):
+            self.stops += 1
+            super().stop(*args, **kwargs)
+    engine = KeepRunning()
+    controller.dpi = engine
+    controller.active_dpi_mode = 'alt6'
+    result = controller.connect(requested=False)
+    assert result.overall == 'connected'
+    assert result.dpi == 'on' and result.dns == 'on'
+    assert controller.active_dpi_mode == 'alt6'
+    assert engine.running and not engine.started and engine.stops == 0
+    assert actions == ['hosts']
+
+
+def test_partial_reconnect_restarts_unknown_auto_dpi_before_selecting(monkeypatch, tmp_path):
+    """Never pass an unidentified already-running child into the auto-selector."""
+    monkeypatch.setattr(unified, 'save_settings', lambda _: None)
+    monkeypatch.setattr(unified, 'build_dpi_spec',
+                        lambda bundle, mode: SimpleNamespace(argv=('winws',), label=mode))
+    monkeypatch.setattr(unified.time, 'sleep', lambda seconds: None)
+    settings = Settings(desired_enabled=True, dpi_mode='alt_auto', connect_dpi=True,
+                        connect_telegram=False, connect_dns=False, launch_at_startup=False)
+    controller = unified.UnifiedController(settings, assets=lambda **kwargs: tmp_path)
+    class Tracked(FakeEngine):
+        def __init__(self):
+            super().__init__()
+            self.running = True
+            self.stops = 0
+        def stop(self, *args, **kwargs):
+            self.stops += 1
+            super().stop(*args, **kwargs)
+    controller.dpi = Tracked()
+    def select(**kwargs):
+        assert not controller.dpi.running
+        assert kwargs['profiles'] == unified.ALT_PRIORITY
+        kwargs['start']('alt2')
+        return SimpleNamespace(active_mode='alt2', warning='', all_targets_reachable=True)
+    monkeypatch.setattr(unified, 'select_strategy', select)
+    result = controller.connect(requested=False)
+    assert result.overall == 'connected'
+    assert controller.active_dpi_mode == 'alt2'
+    assert controller.dpi.stops == 1
+    assert controller.dpi.started and controller.dpi.running
+
+
+def test_auto_dpi_reprobes_when_its_owned_process_has_exited(monkeypatch, tmp_path):
+    monkeypatch.setattr(unified, 'save_settings', lambda _: None)
+    monkeypatch.setattr(unified, 'build_dpi_spec',
+                        lambda bundle, mode: SimpleNamespace(argv=('winws',), label=mode))
+    monkeypatch.setattr(unified.time, 'sleep', lambda seconds: None)
+    settings = Settings(desired_enabled=True, dpi_mode='alt_auto', connect_dpi=True,
+                        connect_telegram=False, connect_dns=False, launch_at_startup=False)
+    controller = unified.UnifiedController(settings, assets=lambda **kwargs: tmp_path)
+    controller.dpi = FakeEngine()
+    controller.active_dpi_mode = 'alt6'
+    called = []
+    def select(**kwargs):
+        called.append('select')
+        kwargs['start']('alt3')
+        return SimpleNamespace(active_mode='alt3', warning='', all_targets_reachable=True)
+    monkeypatch.setattr(unified, 'select_strategy', select)
+    result = controller.connect(requested=False)
+    assert result.dpi == 'on'
+    assert controller.active_dpi_mode == 'alt3'
+    assert called == ['select']
