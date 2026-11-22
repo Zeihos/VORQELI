@@ -66,3 +66,12 @@ def test_pointer_repeated_activation_remains_keyboard_focus_independent():
     scene.activate_mouse(0)
     assert called == [1, 1]
     assert app._focused_control_index is None
+
+def test_manual_modes_reachable_in_network_page():
+    app = FakeApp()
+    app.selected_page = 'Сеть и стратегии'
+    ui.draw(app)
+    descriptions = [label for _, _, label in app._controls]
+    assert 'FAKE' in descriptions
+    assert 'MULTISPLIT' in descriptions
+    assert 'ALT13' in descriptions
