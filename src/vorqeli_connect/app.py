@@ -180,6 +180,7 @@ class ConnectApp(tk.Tk):
         self.after(220, self._poll)
         self.after(800, self._health_check)
         self.after(1000, self._register_autostart)
+        self.after(2200, self._check_flowseal_upstream)
         self.after(150, self._draw)
         self.after(350, lambda: apply_windows_chrome(self))
         if minimized:
@@ -992,6 +993,74 @@ class ConnectApp(tk.Tk):
                          if self.settings.desired_enabled else 'DPI-стратегия: '+mode.upper())
         self._draw()
 
+
+    def _check_flowseal_upstream(self, *, forced: bool = False):
+        """Read-only background check; never install third-party executables."""
+        if not forced and not self.settings.flowseal_update_check:
+            return
+        def worker():
+            try:
+                from .flowseal_service import check_flowseal_version, is_newer_flowseal
+                from .assets_manager import ZAPRET_TAG
+                latest = check_flowseal_version()
+                if is_newer_flowseal(latest, ZAPRET_TAG):
+                    message = ('Flowseal ' + latest +
+                               ' доступен; встроен ' + ZAPRET_TAG +
+                               '. Установка только после проверки нового релиза.')
+                else:
+                    message = 'Версия Flowseal проверена: ' + ZAPRET_TAG
+                if forced or is_newer_flowseal(latest, ZAPRET_TAG):
+                    self.events.put(('progress', message))
+            except (OSError, ValueError, UnicodeError) as exc:
+                if forced:
+                    self.events.put(('progress', 'Не удалось проверить Flowseal: ' + str(exc)))
+        threading.Thread(target=worker, daemon=True, name='FlowsealVersionCheck').start()
+
+    def _show_flowseal_extra_settings(self):
+        """IPSet selection and safe upstream check without executing service.bat."""
+        if self.running_job:
+            return
+        from .flowseal_service import IPSET_MODES
+        dlg = tk.Toplevel(self)
+        dlg.title('VORQELI · IPSet и обновления Flowseal')
+        dlg.configure(bg='#111629')
+        dlg.geometry('520x295')
+        dlg.transient(self)
+        dlg.grab_set()
+        frame = tk.Frame(dlg, bg='#111629', padx=22, pady=20)
+        frame.pack(fill='both', expand=True)
+        tk.Label(frame, text='FLOWSEAL · IPSET FILTER', bg='#111629', fg=FG,
+                 font=('Segoe UI', 15, 'bold')).pack(anchor='w')
+        tk.Label(frame, text='loaded — исходный список, any — все IP, none — отключённый IPSet',
+                 bg='#111629', fg=FG, wraplength=460).pack(anchor='w', pady=8)
+        mode = tk.StringVar(value=self.settings.ipset_mode)
+        tk.OptionMenu(frame, mode, *IPSET_MODES).pack(fill='x', pady=3)
+        check = tk.BooleanVar(value=self.settings.flowseal_update_check)
+        tk.Checkbutton(frame, text='Auto-Update Check — проверять версию при запуске',
+                       variable=check, bg='#111629', fg=FG, selectcolor='#343252',
+                       activebackground='#111629', activeforeground=FG).pack(anchor='w', pady=15)
+        actions = tk.Frame(frame, bg='#111629')
+        actions.pack(fill='x')
+        def save():
+            new_mode = mode.get()
+            if new_mode not in IPSET_MODES:
+                messagebox.showerror('IPSet', 'Неизвестный режим IPSet', parent=dlg)
+                return
+            before = (self.settings.ipset_mode, self.settings.flowseal_update_check)
+            self.settings.ipset_mode, self.settings.flowseal_update_check = new_mode, bool(check.get())
+            try:
+                save_settings(self.settings)
+            except (OSError, ValueError) as exc:
+                self.settings.ipset_mode, self.settings.flowseal_update_check = before
+                messagebox.showerror('IPSet', str(exc), parent=dlg)
+                return
+            self.detail = 'Настройки Flowseal сохранены. Переподключитесь для применения IPSet.'
+            dlg.destroy()
+            self._draw()
+        tk.Button(actions, text='ПРОВЕРИТЬ ВЕРСИЮ', command=lambda: self._check_flowseal_upstream(forced=True),
+                  bg='#343252', fg=FG, bd=0, padx=10, pady=9).pack(side='left')
+        tk.Button(actions, text='СОХРАНИТЬ', command=save,
+                  bg='#6050A0', fg='white', bd=0, padx=14, pady=9).pack(side='right')
 
     def _show_game_filter_settings(self):
         """Configure Game Filter without executing upstream service.bat."""
