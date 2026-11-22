@@ -124,3 +124,40 @@ def test_connect_keeps_partial_status_if_dns_fails(monkeypatch, tmp_path):
     assert result.overall == 'partial'
     assert (result.dpi, result.telegram, result.dns) == ('on', 'on', 'error')
     assert 'DNS adapter unavailable' in result.detail
+
+
+def test_legacy_auto_is_always_alt_only(monkeypatch, tmp_path):
+    from vorqeli_connect import unified
+    monkeypatch.setattr(unified, 'save_settings', lambda _: None)
+    monkeypatch.setattr(unified, 'build_dpi_spec',
+                        lambda bundle, mode: SimpleNamespace(argv=('winws',), label=mode))
+    profiles_seen = []
+    def selector(**kwargs):
+        profiles_seen.extend(kwargs['profiles'])
+        kwargs['start']('alt1')
+        return SimpleNamespace(active_mode='alt1', warning='', all_targets_reachable=True)
+    monkeypatch.setattr(unified, 'select_strategy', selector)
+    monkeypatch.setattr(unified.time, 'sleep', lambda x: None)
+    ctrl = unified.UnifiedController(
+        Settings(dpi_mode='auto', connect_dpi=True,
+                 connect_telegram=False, connect_dns=False, launch_at_startup=False),
+        assets=lambda **kw: tmp_path)
+    ctrl.dpi = FakeEngine()
+    assert ctrl.connect().dpi == 'on'
+    assert set(profiles_seen) == set(unified.ALT_PRIORITY)
+    assert len(profiles_seen) == 13
+
+
+def test_cached_hosts_reconnect_reports_explicit_warning(monkeypatch, tmp_path):
+    from vorqeli_connect import unified
+    monkeypatch.setattr(unified, 'save_settings', lambda _: None)
+    monkeypatch.setattr(unified, 'STATE_FILE', tmp_path / 'dns.json')
+    monkeypatch.setattr(unified, 'DOH_STATE_FILE', tmp_path / 'doh.json')
+    monkeypatch.setattr(unified, 'enable_hosts_only',
+                        lambda: {'reused_verified': True, 'fresh': False})
+    settings = Settings(connect_dpi=False, connect_telegram=False,
+                        connect_dns=True, launch_at_startup=False)
+    controller = unified.UnifiedController(settings)
+    result = controller.connect()
+    assert result.dns == 'on'
+    assert 'проверенного локального блока' in result.detail
