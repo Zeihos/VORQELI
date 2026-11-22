@@ -88,14 +88,6 @@ class ConnectApp(tk.Tk):
                 save_settings(self.settings)
             except OSError:
                 pass
-        # v0.34 used FAKE as default. Prefer real Flowseal ALT profiles after
-        # upgrade, while keeping explicitly chosen newer profiles untouched.
-        if self.settings.dpi_mode in ('fake', 'auto', 'multisplit'):
-            self.settings.dpi_mode = 'alt_auto'
-            try:
-                save_settings(self.settings)
-            except OSError:
-                pass
         self.title('VORQELI Connect')
         self.configure(bg='#0A1223')
         # Set the actual taskbar/window icon, not merely an image in the UI.
