@@ -910,8 +910,8 @@
       "sha256": "2e709343c3840de7ca3b4bdd1500018c24a8e28eae066f7dd18f1d60a8ca8914"
     },
     "tests/test_settings_component_lock.py": {
-      "bytes": 2269,
-      "sha256": "307d08bd69d30334784699ecba760c6bbaec2279f45a8d1772acc710d8f148c6"
+      "bytes": 2342,
+      "sha256": "e3bc5c5c1a480fbd1418c85583c7c421c6950f649f623e352fc8c06bbb661537"
     }
   },
   "version": "0.41.0"
