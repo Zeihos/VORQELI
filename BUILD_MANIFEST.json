@@ -326,8 +326,8 @@
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 94947,
-      "sha256": "f5852468aa06b71ea6b55b3bb1f7cee7fe065dd384247d8570bc8ecfc5f4f9a3"
+      "bytes": 95559,
+      "sha256": "00a799967aa98a8b4a4ab6025c657eb1f5c95971e4f0cacf7bd9fec3b52ee2dd"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11063,
@@ -614,8 +614,8 @@
       "sha256": "7025a431e32c93e19f711fc8d870fff3e617d4bc2c7db6118637473a5aef85f5"
     },
     "tests/test_geohide_doh_v27.py": {
-      "bytes": 13823,
-      "sha256": "0c85d5a025a25f8e0bdbf650d3b670f5471dce07a45aa512d1a05e7c18eb6941"
+      "bytes": 14049,
+      "sha256": "886671b46faf73787743638998bae44419ef66675b53f699945cb14c2821db08"
     },
     "tests/test_geohide_official_hosts_v391.py": {
       "bytes": 4638,
@@ -682,8 +682,8 @@
       "sha256": "01e4b8ab185d42ab6c44dd2406297c465e408ff7466dcb3d2a98edf4d6e9bda9"
     },
     "tests/test_native_ui_v404.py": {
-      "bytes": 5376,
-      "sha256": "12d34f68807dcdf4cf4c00d987b1e1f6db1bf24d38386d5ed6af7ababd3c004a"
+      "bytes": 5369,
+      "sha256": "d819b58accceba32cbc9e4854c5a36238e4c9ac2632c4e8c324c93a67032b655"
     },
     "tests/test_native_ui_v405.py": {
       "bytes": 3563,
@@ -806,8 +806,8 @@
       "sha256": "def61baa397e77511504a9d51b8ac62e91ca86582ae926d5ebcadd7be6f02848"
     },
     "tests/test_ui_navigation_v28.py": {
-      "bytes": 3026,
-      "sha256": "dca0302d56fced98e2f75d422b6eb227aa1cb9ee1134cf0f671b0049cbeeadc6"
+      "bytes": 3106,
+      "sha256": "1819590ad4f242c89be4f94f646ea556c538ffd16e3a1492383db42200a78306"
     },
     "tests/test_ui_polish_v391.py": {
       "bytes": 5059,
