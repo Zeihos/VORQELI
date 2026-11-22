@@ -35,7 +35,10 @@ def _bundle_dir(folder: str | Path) -> Path:
     return root
 
 
-def build_dpi_spec(folder: str | Path, mode: str = "fake") -> LaunchSpec:
+def build_dpi_spec(folder: str | Path, mode: str = "fake", *,
+                   game_mode: str = 'disabled',
+                   game_tcp_ports: str = '1024-65535',
+                   game_udp_ports: str = '1024-65535') -> LaunchSpec:
     """Build an experimental TCP host-list strategy, not a Flowseal .bat preset."""
     root = _bundle_dir(folder)
     if mode not in VALID_DPI_MODES:
@@ -47,7 +50,9 @@ def build_dpi_spec(folder: str | Path, mode: str = "fake") -> LaunchSpec:
     if not (root / "LICENSE.txt").is_file():
         raise ValueError("Нет LICENSE.txt: выберите оригинальный пакет Flowseal")
     if mode in ALT_MODES:
-        return LaunchSpec((str(executable), *build_alt_arguments(root, mode)),
+        return LaunchSpec((str(executable), *build_alt_arguments(
+            root, mode, game_mode=game_mode, game_tcp_ports=game_tcp_ports,
+            game_udp_ports=game_udp_ports)),
                           root / "bin", f"Flowseal {mode.upper()}")
     args = [str(executable), "--wf-tcp=80,443", "--filter-tcp=80,443",
             f"--hostlist={hostlist}", f"--dpi-desync={mode}"]

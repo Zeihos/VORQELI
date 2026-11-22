@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from .flowseal_service import game_ports
 
 ALT_MODES = tuple(f'alt{i}' for i in range(1, 14))
 # An empirical trial order, NOT an assertion of universal effectiveness.
@@ -54,13 +55,16 @@ def _source_options(script: str) -> tuple[str, ...]:
     return tuple(options)
 
 
-def build_alt_arguments(root: Path, mode: str) -> tuple[str, ...]:
+def build_alt_arguments(root: Path, mode: str, *, game_mode: str = 'disabled',
+                        game_tcp_ports: str = '1024-65535',
+                        game_udp_ports: str = '1024-65535') -> tuple[str, ...]:
     """Parse a trusted extracted profile to argv; never pass text through a shell.
 
     The official service.bat creates optional *-user.txt lists and game filter
     variables. Missing optional user lists are omitted, while unexpanded game
     filters are omitted as whole --new groups. No unverified script is run.
     """
+    tcp_filter, udp_filter = game_ports(game_mode, game_tcp_ports, game_udp_ports)
     script_path = root / alt_filename(mode)
     if script_path.is_symlink() or not script_path.is_file() or script_path.stat().st_size > 40_000:
         raise ValueError('ALT-файл Flowseal отсутствует либо недопустим')
@@ -79,13 +83,18 @@ def build_alt_arguments(root: Path, mode: str) -> tuple[str, ...]:
     for group in groups:
         if not group:
             continue
-        if any('--filter-tcp=%GameFilterTCP%' in entry or
-               '--filter-udp=%GameFilterUDP%' in entry for entry in group):
+        if game_mode == 'disabled' and any(
+            '--filter-tcp=%GameFilterTCP%' in entry or
+            '--filter-udp=%GameFilterUDP%' in entry for entry in group
+        ):
             continue
         converted: list[str] = []
         for token in group:
-            if token.startswith('--wf-'):
+            if token.startswith('--wf-') and game_mode == 'disabled':
                 token = token.replace(',%GameFilterTCP%', '').replace(',%GameFilterUDP%', '')
+            else:
+                token = token.replace('%GameFilterTCP%', tcp_filter).replace(
+                    '%GameFilterUDP%', udp_filter)
             if token.startswith('--filter-') and _VARIABLE.search(token) and 'GameFilter' in token:
                 raise ValueError('Неразрешённый игровой фильтр Flowseal')
             # Strip surrounding quotes on a value; the subprocess argv preserves
