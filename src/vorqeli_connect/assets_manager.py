@@ -209,7 +209,8 @@ def ensure_zapret(*, progress=None, base_dir: Path | None = None,
         shutil.copytree(found, staged)
         # Flowseal's release ZIP may omit LICENSE.txt despite the tagged source
         # including it. Never fabricate a license or weaken SHA validation:
-        # bundle the exact, SHA-pinned official 1.10.4 LICENSE.txt (unchanged since 1.10.3) in the app.
+        # bundle the exact, SHA-pinned official LICENSE.txt in the app.
+        # The upstream 1.10.4 license is byte-identical to 1.10.3.
         license_path = staged / 'LICENSE.txt'
         if not license_path.exists():
             # Package resources are installed with pip and collected into the
