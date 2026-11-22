@@ -378,8 +378,8 @@
       "sha256": "37c74694b147e63127c93efd346dc718f0a236fb72276fa222f7af9d1ea9c488"
     },
     "src/vorqeli_connect/geohide_hosts_feed.py": {
-      "bytes": 16493,
-      "sha256": "7490fdcd50f47529ca3d38fd3191c4f73f46f14dfd2f2ffe659e25d9195839b3"
+      "bytes": 17299,
+      "sha256": "36a5e907c256a828b6753273dfecf0905fd51ad7f50bff71bc2326fc951d973a"
     },
     "src/vorqeli_connect/geohide_uninstall_guard.py": {
       "bytes": 1980,
@@ -626,8 +626,8 @@
       "sha256": "38bb3e9bf155dae5534dfb638a75b512a63a3f2d084cf6c7bef7497055deffd9"
     },
     "tests/test_geohide_recovery_v406.py": {
-      "bytes": 4267,
-      "sha256": "3dc858ed6854f0852e81239ed16d053b53ecbd5328617256923aba8d5b1aa083"
+      "bytes": 6924,
+      "sha256": "50cb01ee11a21cf9b00cb734cc868645b1a8e4518e74c1b807d1756501e90014"
     },
     "tests/test_geohide_safety.py": {
       "bytes": 870,

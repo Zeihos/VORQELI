@@ -165,7 +165,16 @@ def _assert_known_geo_block(block: str, journal: dict | None) -> None:
         return
     if not journal or not isinstance(journal.get('active_block_sha256'), str):
         raise ValueError('Existing GeoHide section has no trusted recovery journal')
-    if sha256(_encode(block)).hexdigest() != journal['active_block_sha256']:
+    actual = sha256(_encode(block)).hexdigest()
+    # During a refresh the new journal is committed before the HOSTS file.
+    # A power loss in between can leave the prior *verified* managed block
+    # intact. Accept only that exact prior digest as a recoverable transition.
+    expected = journal['active_block_sha256']
+    previous = journal.get('previous_block_sha256')
+    if actual != expected and not (
+        isinstance(previous, str) and
+        re.fullmatch(r'[0-9a-f]{64}', previous) and actual == previous
+    ):
         raise ValueError('GeoHide section was edited outside VORQELI: refusing overwrite')
 
 
@@ -277,6 +286,12 @@ def apply(path: Path, snapshot: Snapshot, journal_path: Path, legacy_fallback: s
     new_journal={'schema':1,'legacy_block':plan['legacy_block'],
                  'active_block_sha256':sha256(_encode(plan['new_block'])).hexdigest(),
                  'source_sha256':snapshot.sha256,'updated':snapshot.updated}
+    if journal is not None:
+        _, previous_block, _ = _outside(_decode(before))
+        if previous_block:
+            # The old block was already validated by preview(). Record the
+            # exact transitional state before switching journals on disk.
+            new_journal['previous_block_sha256'] = sha256(_encode(previous_block)).hexdigest()
     journal_old=_bytes(journal_path,optional=True)
     _atomic(journal_path,(json.dumps(new_journal,ensure_ascii=False,indent=2)+'\n').encode('utf-8'),expected=journal_old)
     try:

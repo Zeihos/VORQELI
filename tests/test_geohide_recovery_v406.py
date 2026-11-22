@@ -108,3 +108,69 @@ def test_recovery_never_uses_real_windows_hosts(tmp_path):
     hosts,journal=fixtures(tmp_path)
     assert hosts.parent==tmp_path
     assert feed.readonly_status(hosts,journal)['geohide_installed'] is False
+
+
+def test_power_loss_between_refresh_journal_and_hosts_recovers_verified_old_block(tmp_path):
+    hosts = tmp_path / 'hosts'
+    journal = tmp_path / 'journal.json'
+    original = '127.0.0.1 localhost\n8.8.8.8 my.local.example\n'
+    hosts.write_text(original, encoding='utf-8')
+    first = snapshot()
+    feed.apply(hosts, first, journal)
+    old_host = hosts.read_bytes()
+    second = feed.Snapshot(
+        records=first.records + (('193.233.112.67', 'new.example.org'),),
+        updated='2026-11-22 19:00:00',
+        sha256='c' * 64,
+        domain_count=first.domain_count + 1,
+    )
+    feed.apply(hosts, second, journal)
+    transition = json.loads(journal.read_text('utf-8'))
+    assert transition['previous_block_sha256']
+    assert transition['active_block_sha256'] != transition['previous_block_sha256']
+
+    # Simulated hard crash: journal switched, HOSTS never switched.
+    hosts.write_bytes(old_host)
+    assert feed.readonly_status(hosts, journal)['status'] == 'installed_verified'
+    assert feed.remove(hosts, journal)
+    assert hosts.read_text('utf-8') == original
+    assert not journal.exists()
+
+
+def test_power_loss_refresh_allows_retry_without_duplicate_managed_block(tmp_path):
+    hosts = tmp_path / 'hosts'
+    journal = tmp_path / 'journal'
+    hosts.write_text('127.0.0.1 localhost\n', encoding='utf-8')
+    first = snapshot()
+    feed.apply(hosts, first, journal)
+    before = hosts.read_bytes()
+    second = feed.Snapshot(
+        records=first.records + (('193.233.112.67', 'next.example.org'),),
+        updated=first.updated, sha256='f' * 64,
+        domain_count=first.domain_count + 1,
+    )
+    feed.apply(hosts, second, journal)
+    hosts.write_bytes(before)
+    # A later refresh must be able to complete the interrupted update.
+    feed.apply(hosts, second, journal)
+    assert hosts.read_text('utf-8').count(feed.START) == 1
+    assert feed.remove(hosts, journal)
+
+
+def test_refresh_recovery_never_accepts_unrecognized_manual_edits(tmp_path):
+    hosts = tmp_path / 'hosts'
+    journal = tmp_path / 'journal'
+    hosts.write_text('127.0.0.1 localhost\n', encoding='utf-8')
+    first = snapshot()
+    feed.apply(hosts, first, journal)
+    old_host = hosts.read_bytes()
+    second = feed.Snapshot(
+        records=first.records + (('193.233.112.67', 'different.example.org'),),
+        updated=first.updated, sha256='e' * 64,
+        domain_count=first.domain_count + 1,
+    )
+    feed.apply(hosts, second, journal)
+    hosts.write_bytes(old_host.replace(b'chatgpt.com', b'unsafe.example'))
+    with pytest.raises(ValueError, match='edited outside'):
+        feed.remove(hosts, journal)
+    assert journal.exists()
