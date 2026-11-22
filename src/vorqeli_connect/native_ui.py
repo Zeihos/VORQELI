@@ -491,11 +491,11 @@ class Scene:
         self.header(4,'О проекте VORQELI','Локальное приложение для управления сетевыми компонентами Windows')
         self.rr((344,242,1490,489),'surface2','edge',16)
         self.txt(405,288,'VORQELI CONNECT',42,'text',True)
-        self.txt(405,357,'Обход DPI · Telegram MTProto · GeoHide DNS',21,'muted')
+        self.txt(405,357,'WinWS · Telegram MTProto · GeoHide + Flowseal HOSTS',21,'muted')
         self.pill((1210,266,1450,313),'v'+VERSION,'cyan')
         self.txt(406,427,'Исходный код и информация о лицензиях доступны в GitHub',16,'muted')
         self.txt(364,510,'Сетевые компоненты',25,'text',True)
-        for i,(title,key,details) in enumerate((('WinWS / DPI','dpi','Стратегии ALT1–ALT13'),('Telegram','telegram','MTProto локально'),('GeoHide DNS','dns','Системный DNS / HOSTS'))):
+        for i,(title,key,details) in enumerate((('WinWS / DPI','dpi','Стратегии ALT1–ALT13'),('Telegram','telegram','MTProto локально'),('GeoHide + Flowseal','dns','Управляемый HOSTS'))):
             left=344+i*382
             self.card((left,559,left+364,777),title,details)
             active=getattr(self.report,key,'off')=='on'
@@ -524,25 +524,29 @@ class Scene:
             if right:self._setting(974,y,1470,right)
         self.rr((344,772,1490,924),'surface2','edge',16)
         self.txt(378,799,'Сеть и стратегии DPI',28,'text',True)
-        self.txt(379,847,'ALT1–ALT13 · GeoHide DNS · HOSTS · восстановление',18,'muted')
+        self.txt(379,847,'AUTO ALT1–ALT13 · Game Filter · IPSet · HOSTS',18,'muted')
         self.button((1200,801,1464,890),'ОТКРЫТЬ  →',lambda:self.app._page('Сеть и стратегии'),size=20)
 
     def _setting(self,x,y,right,setting):
         name,desc,key=setting
         state=bool(getattr(self.settings,key,False))
+        locked=(key in ('connect_dpi','connect_telegram','connect_dns')
+                and (bool(getattr(self.settings,'desired_enabled',False))
+                     or bool(getattr(self.app,'running_job',False))))
         tag=f'opt_{key}'
         rect=(x,y,right,y+88)
         fill='surface2'
         shape=self.rr(rect,fill,'edge',14,tags=(tag,))
         self.txt(x+22,y+17,name,19,'text',True,width=right-x-153,tags=(tag,))
-        self.txt(x+22,y+49,desc,15,'muted',width=right-x-153,tags=(tag,))
+        self.txt(x+22,y+49,('Отключите VORQELI для изменения' if locked else desc),15,'muted',width=right-x-153,tags=(tag,))
         cx=right-67;cy=y+44
         self.rr((cx-42,cy-20,cx+43,cy+20),'blue' if state else '#332C3D','edgehi' if state else 'edge',18,tags=(tag,))
         self.circle(cx+19 if state else cx-20,cy,15,'text',tags=(tag,))
-        idx=self.app._register_control(self._rect_coords(rect),lambda k=key:self.app._toggle_setting(k),'Переключить '+name)
-        self.cv.tag_bind(tag,'<Button-1>',lambda e,n=idx:self.activate_mouse(n))
-        self.cv.tag_bind(tag,'<Enter>',lambda e,s=shape:self._hover(s,'#2E253A'))
-        self.cv.tag_bind(tag,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,C[c]))
+        if not locked:
+            idx=self.app._register_control(self._rect_coords(rect),lambda k=key:self.app._toggle_setting(k),'Переключить '+name)
+            self.cv.tag_bind(tag,'<Button-1>',lambda e,n=idx:self.activate_mouse(n))
+            self.cv.tag_bind(tag,'<Enter>',lambda e,s=shape:self._hover(s,'#2E253A'))
+            self.cv.tag_bind(tag,'<Leave>',lambda e,s=shape,c=fill:self._hover(s,C[c]))
 
     def network(self):
         self.header(6,'Сеть и стратегии','Профили WinWS, объединённый HOSTS и восстановление')
