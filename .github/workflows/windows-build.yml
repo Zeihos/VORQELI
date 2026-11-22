@@ -43,7 +43,7 @@ jobs:
 
       # Pinned upstream commit, not moving main/HEAD. Its MIT license is in NOTICE.
       - name: Install Flowseal Telegram core
-        run: python -m pip install "git+https://github.com/Flowseal/tg-ws-proxy.git@307a384ab7f522e34bb1a045884d0bd90f40bee5"
+        run: python -m pip install "git+https://github.com/Flowseal/tg-ws-proxy.git@9f71904e1a4a282fd9e5044bbb71d59f4d30576b"
 
       - name: Run tests (including offline Smart DPI selectors)
         run: python -m pytest -q

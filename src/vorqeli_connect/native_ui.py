@@ -567,6 +567,7 @@ class Scene:
         self.txt(1035,443,'GeoHide + Flowseal',21,'cyan',True)
         self.txt(1035,496,'Записи применяются вместе по кнопке «Подключить».',16,'muted',width=423)
         self.txt(1035,546,'DNS и DoH Windows не переключаются.',16,'muted',width=423)
+        self.button((1035,657,1464,706),'IPSET / ОБНОВЛЕНИЯ',lambda:self.app._show_flowseal_extra_settings(),kind='secondary',size=15)
         dns=getattr(self.report,'dns','off')
         self.txt(1035,617,'HOSTS: '+('применён' if dns=='on' else 'ошибка' if dns=='error' else 'не запущен'),18,'green' if dns=='on' else 'red' if dns=='error' else 'muted',True)
         self.txt(365,743,'Сетевые инструменты',24,'text',True)

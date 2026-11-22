@@ -18,6 +18,7 @@ from .engine_adapters import build_dpi_spec, port_is_free, port_is_listening
 from .engine_processes import EngineProcess
 from .smart_dpi import select_strategy, SelectionCancelled
 from .flowseal_alts import ALT_PRIORITY
+from .flowseal_service import prepare_ipset_override
 from .geohide import enable_dns, restore_dns, STATE_FILE
 from .geohide_doh import enable_geo_dns, restore_geo_dns, DOH_STATE_FILE
 from .startup import configure_startup
@@ -76,12 +77,15 @@ class UnifiedController:
             self._cancel.clear()
 
     def _dpi_spec(self, bundle: Path, mode: str):
-        if self.settings.game_filter_mode == 'disabled':
+        if self.settings.game_filter_mode == 'disabled' and self.settings.ipset_mode == 'loaded':
             return build_dpi_spec(bundle, mode)
+        override = prepare_ipset_override(
+            self.settings.ipset_mode, APP_DIR / 'flowseal-ipset')
         return build_dpi_spec(bundle, mode,
                               game_mode=self.settings.game_filter_mode,
                               game_tcp_ports=self.settings.game_tcp_ports,
-                              game_udp_ports=self.settings.game_udp_ports)
+                              game_udp_ports=self.settings.game_udp_ports,
+                              ipset_override=override)
 
     def connect(self, *, requested: bool = True) -> ConnectionReport:
         """Start components. Queued UI jobs use requested=False to honor later OFF."""

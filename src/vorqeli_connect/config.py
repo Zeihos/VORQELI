@@ -67,6 +67,8 @@ class Settings:
     game_filter_mode: str = "disabled"
     game_tcp_ports: str = "1024-65535"
     game_udp_ports: str = "1024-65535"
+    ipset_mode: str = "loaded"
+    flowseal_update_check: bool = True
     dns_mode: str = "plain"
     launch_at_startup: bool = True
     minimize_to_tray: bool = True
@@ -85,6 +87,7 @@ _FLAGS = frozenset({
     'launch_at_startup', 'desired_enabled', 'connect_dpi', 'connect_telegram',
     'connect_dns', 'first_launch_notice', 'telegram_link_opened',
     'minimize_to_tray', 'admin_on_launch', 'restore_last_mode',
+    'flowseal_update_check',
 })
 _STRINGS = frozenset({
     'dpi_profile', 'telegram_source_dir', 'telegram_python', 'dpi_bundle_dir',
@@ -131,6 +134,11 @@ def _validate_settings_fields(data: dict) -> dict:
         if key in data:
             from .flowseal_service import validate_port_ranges
             result[key] = validate_port_ranges(data[key])
+    if 'ipset_mode' in data:
+        from .flowseal_service import IPSET_MODES
+        if type(data['ipset_mode']) is not str or data['ipset_mode'] not in IPSET_MODES:
+            raise ValueError('Неизвестный режим IPSet')
+        result['ipset_mode'] = data['ipset_mode']
     if 'dns_mode' in data:
         if type(data['dns_mode']) is not str or data['dns_mode'] not in ('plain', 'doh'):
             raise ValueError('Неизвестный режим GeoHide DNS')

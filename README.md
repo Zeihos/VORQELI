@@ -39,7 +39,7 @@
 
 | Компонент | Назначение |
 | --- | --- |
-| **DPI / WinWS** | Управление стратегиями Flowseal, включая AUTO и ALT1–ALT13 |
+| **DPI / WinWS** | AUTO (ALT1–ALT13), ручной выбор, Game Filter, IPSet Filter, проверка обновлений Flowseal |
 | **Telegram MTProto** | Управление локальным прокси для Telegram Desktop |
 | **GeoHide + Flowseal HOSTS** | Одно подключение: объединённый HOSTS с защитой ручных записей и журналом отката |
 | **HOSTS-менеджер** | Просмотр, обновление и ручное восстановление управляемого блока |
@@ -97,7 +97,7 @@ py -3.12 -m venv .venv
 Для использования встроенного Telegram-модуля из Python-исходников дополнительно требуется закреплённая версия зависимого проекта:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install "git+https://github.com/Flowseal/tg-ws-proxy.git@307a384ab7f522e34bb1a045884d0bd90f40bee5"
+.\.venv\Scripts\python.exe -m pip install "git+https://github.com/Flowseal/tg-ws-proxy.git@9f71904e1a4a282fd9e5044bbb71d59f4d30576b"
 ```
 
 Проверка исходников без запуска сетевых компонентов:
