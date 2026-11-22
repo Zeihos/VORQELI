@@ -165,3 +165,17 @@ def test_game_filter_tcp_only(tmp_path):
     assert '--wf-tcp=80,443,5000-6000' in args
     assert '--filter-tcp=5000-6000' in args
     assert '--wf-udp=443,12' in args
+
+def test_manual_non_alt_modes_survive_settings_round_trip(tmp_path):
+    from vorqeli_connect.config import Settings, load_settings, save_settings
+    for mode in ('fake', 'multisplit'):
+        path = tmp_path / (mode + '.json')
+        save_settings(Settings(dpi_mode=mode), path)
+        assert load_settings(path).dpi_mode == mode
+
+
+def test_app_does_not_override_saved_manual_mode_on_launch():
+    import inspect
+    from vorqeli_connect.app import ConnectApp
+    source = inspect.getsource(ConnectApp.__init__)
+    assert "self.settings.dpi_mode = 'alt_auto'" not in source
