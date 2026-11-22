@@ -1405,14 +1405,41 @@ class ConnectApp(tk.Tk):
                 return
             previous = self.settings.desired_enabled
             self.settings.desired_enabled = True
-            save_settings(self.settings)
-            if relaunch_elevated():
+            try:
+                save_settings(self.settings)
+            except Exception as exc:
+                # Do not launch an elevated instance with an unsaved ON intent.
+                self.settings.desired_enabled = previous
+                self.detail = 'Не удалось сохранить состояние перед UAC: ' + str(exc)
+                self._draw()
+                return
+            try:
+                elevated = relaunch_elevated()
+            except Exception as exc:
+                elevated = False
+                elevation_error = str(exc)
+            else:
+                elevation_error = ''
+            if elevated:
                 self._quit_now(skip_disconnect=True)
             else:
                 self.settings.desired_enabled = previous
-                save_settings(self.settings)
-                messagebox.showwarning('Права администратора',
-                     'Windows не разрешила повышение прав. Отключите DPI/GeoHide или запустите приложение от администратора.', parent=self)
+                try:
+                    save_settings(self.settings)
+                except Exception as exc:
+                    self.detail = ('Повышение прав отменено. Не удалось сохранить прежнее '
+                                   'состояние: ' + str(exc) +
+                                   '. Проверьте автозапуск после перезагрузки.')
+                    self._draw()
+                    messagebox.showwarning('Права администратора', self.detail, parent=self)
+                    return
+                self.detail = ('Не удалось повысить права: ' + elevation_error
+                               if elevation_error else 'Повышение прав отменено.')
+                messagebox.showwarning(
+                    'Права администратора',
+                    self.detail + ' Запустите приложение от администратора или '
+                    'отключите WinWS и HOSTS.', parent=self)
+                self._draw()
             return
         if not automatic:
             self.recovery.reset()
