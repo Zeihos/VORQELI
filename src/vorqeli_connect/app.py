@@ -998,6 +998,55 @@ class ConnectApp(tk.Tk):
                          if self.settings.desired_enabled else 'DPI-стратегия: '+mode.upper())
         self._draw()
 
+
+    def _show_game_filter_settings(self):
+        """Configure Game Filter without executing upstream service.bat."""
+        if self.running_job:
+            return
+        from .flowseal_service import GAME_MODES, validate_port_ranges
+        dlg = tk.Toplevel(self)
+        dlg.title('VORQELI · Flowseal Game Filter')
+        dlg.configure(bg='#111629')
+        dlg.geometry('520x360')
+        dlg.transient(self)
+        dlg.grab_set()
+        panel = tk.Frame(dlg, bg='#111629', padx=24, pady=18)
+        panel.pack(fill='both', expand=True)
+        tk.Label(panel, text='GAME FILTER / WINWS', bg='#111629', fg=FG,
+                 font=('Segoe UI', 16, 'bold')).pack(anchor='w', pady=(0, 12))
+        mode = tk.StringVar(value=self.settings.game_filter_mode)
+        tcp = tk.StringVar(value=self.settings.game_tcp_ports)
+        udp = tk.StringVar(value=self.settings.game_udp_ports)
+        tk.Label(panel, text='Режим: disabled / all / tcp / udp',
+                 bg='#111629', fg=FG).pack(anchor='w')
+        tk.OptionMenu(panel, mode, *GAME_MODES).pack(fill='x', pady=(2, 10))
+        for name, var in (('Диапазон TCP', tcp), ('Диапазон UDP', udp)):
+            tk.Label(panel, text=name, bg='#111629', fg=FG).pack(anchor='w')
+            tk.Entry(panel, textvariable=var).pack(fill='x', pady=(2, 8))
+        tk.Label(panel, text='Например: 1024-65535 или 80,443,1000-1200\n'
+                 'Применяется к ALT-профилям после переподключения.',
+                 bg='#111629', fg=FG, justify='left').pack(anchor='w', pady=4)
+        def save():
+            try:
+                values = (mode.get(), validate_port_ranges(tcp.get()),
+                          validate_port_ranges(udp.get()))
+                previous = (self.settings.game_filter_mode,
+                            self.settings.game_tcp_ports, self.settings.game_udp_ports)
+                self.settings.game_filter_mode, self.settings.game_tcp_ports, self.settings.game_udp_ports = values
+                try:
+                    save_settings(self.settings)
+                except Exception:
+                    self.settings.game_filter_mode, self.settings.game_tcp_ports, self.settings.game_udp_ports = previous
+                    raise
+            except (OSError, ValueError) as exc:
+                messagebox.showerror('Game Filter', str(exc), parent=dlg)
+                return
+            self.detail = 'Game Filter сохранён. Переподключитесь для применения.'
+            dlg.destroy()
+            self._draw()
+        tk.Button(panel, text='СОХРАНИТЬ', command=save, bg='#6050A0',
+                  fg='white', bd=0, padx=12, pady=10).pack(anchor='e', pady=5)
+
     def _set_dns_mode(self, mode: str):
         if self.settings.desired_enabled:
             self.detail = 'Для смены транспорта DNS сначала нажмите «Отключиться». '
