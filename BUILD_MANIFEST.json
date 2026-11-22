@@ -1,5 +1,5 @@
 {
-  "file_count": 222,
+  "file_count": 223,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -326,8 +326,8 @@
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 93134,
-      "sha256": "82d8cb15058b53fc1876243832ef4f85b7d1c1bab945dd47fd3852291438eaa4"
+      "bytes": 95905,
+      "sha256": "7d27545f212f1b833851eb7d1f207476896dd1943d218f60bd0b285d70e97f79"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11063,
@@ -338,8 +338,8 @@
       "sha256": "9c5e89747f003cad0b5b6478f7cc0033806f0457a6b006c4e8e11d50a80aa209"
     },
     "src/vorqeli_connect/config.py": {
-      "bytes": 10193,
-      "sha256": "a785b023f9ee79c2f44a9037b2979a4817abd0aaf41bb546e6328daf2bf3d8f0"
+      "bytes": 10832,
+      "sha256": "bd9ed63789d98daab1ecd9016e9b4deaf38e4004bedc9b6a29d4b1fdee1c59bd"
     },
     "src/vorqeli_connect/diagnostics.py": {
       "bytes": 2315,
@@ -350,8 +350,8 @@
       "sha256": "785bd1df7211834f9a3a50467b047052a6c3fdd95c165d1d8ce61d858cf68c27"
     },
     "src/vorqeli_connect/engine_adapters.py": {
-      "bytes": 5558,
-      "sha256": "57f297ee2aedbb48440a01d97697510c47dfe9ac4dcc7793f7bb42fe882a58f5"
+      "bytes": 5827,
+      "sha256": "8c8e220f40d2af49b83a1354e73a956f5947352dc2b6af90de7fb19c85968449"
     },
     "src/vorqeli_connect/engine_processes.py": {
       "bytes": 3097,
@@ -362,8 +362,8 @@
       "sha256": "f63c3aa11783a392d4c9bf222b0ed2bb5d2e72e4e6bd8bb1f939515639b633aa"
     },
     "src/vorqeli_connect/flowseal_alts.py": {
-      "bytes": 6581,
-      "sha256": "9c18940c03981946ea8accbd8342d5c48cc604f30fdf474bb23e2ff7c658ab66"
+      "bytes": 7079,
+      "sha256": "bbdbdc2a4d6f43aa07537d7ec09106ba4d26db06d20096b5c3289dd6925f57b3"
     },
     "src/vorqeli_connect/frameless.py": {
       "bytes": 3931,
@@ -406,8 +406,8 @@
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
     },
     "src/vorqeli_connect/native_ui.py": {
-      "bytes": 37110,
-      "sha256": "96e209762bee8a144024d2198ad8d71fdc73e2a63465f5e94e578420b5decb27"
+      "bytes": 37164,
+      "sha256": "47263fe92c81c1b7b09dd18c51c533232a31abe37a4037535b9847d7401e3392"
     },
     "src/vorqeli_connect/network_audit.py": {
       "bytes": 15192,
@@ -546,8 +546,8 @@
       "sha256": "a0cb34a8d3c499665bddfd4aed5323a06f4fe41480bccf8e7cd8da107cea1eef"
     },
     "src/vorqeli_connect/unified.py": {
-      "bytes": 14488,
-      "sha256": "08ca52402523b2ee19ffc988521e2959cfd966b3ffe7c6e5e060e3121990375b"
+      "bytes": 14910,
+      "sha256": "8331a0af7122b4ecc8db4a68974edfb0415747967602af45ab3ef8a5366c3b55"
     },
     "src/vorqeli_connect/uninstall_safety.py": {
       "bytes": 5730,
@@ -602,8 +602,8 @@
       "sha256": "e15003175bbbc4baebbaa8661d925e0d7e615d438c829042e5d4e24cc01a37e6"
     },
     "tests/test_flowseal_alts_v35.py": {
-      "bytes": 5863,
-      "sha256": "f1f69346034ff094ee2a2b20024c082ff226436614aa61dde7aaf941e133261c"
+      "bytes": 7400,
+      "sha256": "660f71f06fb08b31a371a265d2344821cf880c6773973f52ee9e2da62fe80fe5"
     },
     "tests/test_geohide.py": {
       "bytes": 2038,
@@ -888,6 +888,10 @@
     "tests/test_public_repo_hygiene.py": {
       "bytes": 1432,
       "sha256": "5b2bb2f41d40d242a511d3f53d4c040f9d19229dcab751fe99c15dc996b5c867"
+    },
+    "src/vorqeli_connect/flowseal_service.py": {
+      "bytes": 1320,
+      "sha256": "a837cc3b37b4b9b405b4a9eb4afb50217b2a08af35f893e1b48be6be5441a1c2"
     }
   },
   "version": "0.41.0"
