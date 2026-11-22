@@ -61,7 +61,7 @@ def test_doctor_only_reports_enum(tmp_path):
 
 
 def test_failed_reinstall_preserves_legacy_cache(tmp_path,monkeypatch):
-    root=tmp_path/'engines'/'zapret-1.10.3'
+    root=tmp_path/'engines'/'zapret-1.10.4'
     (root/'bin').mkdir(parents=True)
     (root/'bin/winws.exe').write_bytes(b'keep old')
     (root/'lists').mkdir()
@@ -78,7 +78,7 @@ def test_failed_reinstall_preserves_legacy_cache(tmp_path,monkeypatch):
 
 
 def test_verified_cache_is_offline(tmp_path,monkeypatch):
-    root=tmp_path/'engines'/'zapret-1.10.3'
+    root=tmp_path/'engines'/'zapret-1.10.4'
     (root/'bin').mkdir(parents=True)
     (root/'lists').mkdir()
     (root/'bin/winws.exe').write_bytes(b'original')

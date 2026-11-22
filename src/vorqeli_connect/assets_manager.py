@@ -14,10 +14,10 @@ from pathlib import Path
 from .config import APP_DIR
 from .flowseal_alts import ALT_MODES, EXTRA_PROFILE_FILES, alt_filename
 
-ZAPRET_TAG = '1.10.3'
+ZAPRET_TAG = '1.10.4'
 ZAPRET_URL = ('https://github.com/Flowseal/zapret-discord-youtube/releases/download/'
-              '1.10.3/zapret-discord-youtube-1.10.3.zip')
-ZAPRET_SHA256 = '244314ae1c24538a0d751601da8e0c925c843371eec4456eb15f14c4fd6b7058'
+              '1.10.4/zapret-discord-youtube-1.10.4.zip')
+ZAPRET_SHA256 = '291af673bd0238506f9548e0e94ca0abf244000f4c9a06960544fb01c5f97b34'
 MAX_DOWNLOAD_BYTES = 30 * 1024 * 1024
 MAX_EXTRACT_BYTES = 140 * 1024 * 1024
 ENGINE_MANIFEST = '.vorqeli-engine-manifest.json'
@@ -174,7 +174,7 @@ def engine_cache_root() -> Path:
 
 def ensure_zapret(*, progress=None, base_dir: Path | None = None,
                   url: str = ZAPRET_URL, expected_sha: str = ZAPRET_SHA256) -> Path:
-    dest = (base_dir if base_dir is not None else engine_cache_root()) / 'zapret-1.10.3'
+    dest = (base_dir if base_dir is not None else engine_cache_root()) / 'zapret-1.10.4'
     cache_status = engine_integrity(dest, release_sha=expected_sha)
     if (cache_status == 'verified' and
             (dest / 'lists/list-general.txt').is_file() and
@@ -209,7 +209,8 @@ def ensure_zapret(*, progress=None, base_dir: Path | None = None,
         shutil.copytree(found, staged)
         # Flowseal's release ZIP may omit LICENSE.txt despite the tagged source
         # including it. Never fabricate a license or weaken SHA validation:
-        # bundle the exact, SHA-pinned official 1.10.3 LICENSE.txt in the app.
+        # bundle the exact, SHA-pinned official LICENSE.txt in the app.
+        # The upstream 1.10.4 license is byte-identical to 1.10.3.
         license_path = staged / 'LICENSE.txt'
         if not license_path.exists():
             # Package resources are installed with pip and collected into the
