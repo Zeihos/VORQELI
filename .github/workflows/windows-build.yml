@@ -48,6 +48,10 @@ jobs:
       - name: Run tests (including offline Smart DPI selectors)
         run: python -m pytest -q
 
+      # Parse the actual SHA-256 verified upstream ZIP; never execute WinWS.
+      - name: Verify all official Flowseal 1.10.4 profiles without launching drivers
+        run: python scripts/verify_official_flowseal_profiles.py
+
       - name: Verify GeoHide HOSTS release guard (read-only temp files)
         run: python scripts/windows_geohide_rc_readonly_smoke.py
 
