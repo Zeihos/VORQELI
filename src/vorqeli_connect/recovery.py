@@ -6,6 +6,7 @@ process or settings side effects; UI tests can exercise it deterministically.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 
 
 @dataclass(frozen=True)
@@ -24,8 +25,11 @@ class RecoveryPolicy:
     """
 
     def __init__(self, delays: tuple[float, ...] = (10, 30, 90)):
-        if not delays or any(delay <= 0 for delay in delays):
-            raise ValueError('Интервалы восстановления должны быть положительными')
+        if not delays or any(
+            isinstance(delay, bool) or not isinstance(delay, (int, float))
+            or not isfinite(delay) or delay <= 0 for delay in delays
+        ):
+            raise ValueError('Интервалы восстановления должны быть конечными положительными числами')
         self.delays = delays
         self.attempts = 0
         self._due: float | None = None
