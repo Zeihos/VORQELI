@@ -326,8 +326,8 @@
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 93112,
-      "sha256": "d17ef5544b756747213cfc3da67e4f68de0e8bd0266310ba8a822a3bc68c52e3"
+      "bytes": 93134,
+      "sha256": "82d8cb15058b53fc1876243832ef4f85b7d1c1bab945dd47fd3852291438eaa4"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11063,
@@ -406,8 +406,8 @@
       "sha256": "eeb93e199db16518575cda5ab159857c252b82a40e2e332720e9d651a286add9"
     },
     "src/vorqeli_connect/native_ui.py": {
-      "bytes": 36817,
-      "sha256": "104ed9964b36ef28f165fe32f5e920c76e355e3fef452dab16dc2e7b78ea1611"
+      "bytes": 37110,
+      "sha256": "96e209762bee8a144024d2198ad8d71fdc73e2a63465f5e94e578420b5decb27"
     },
     "src/vorqeli_connect/network_audit.py": {
       "bytes": 15192,
@@ -818,8 +818,8 @@
       "sha256": "4bedfbfa7fd30c188cfcfad3772bd25e349b0573628010ea9b8295e7bd3e1092"
     },
     "tests/test_unified.py": {
-      "bytes": 3299,
-      "sha256": "ae8af725410dfbc7d2dacdd8cea17aaccc069476e5c4a807d156b061f287bcb9"
+      "bytes": 5749,
+      "sha256": "d52d49bb1087207a1bba585f66f1847dd70ea321e3b0c066a713ad32e80e6aee"
     },
     "tests/test_uninstall_safety_v22.py": {
       "bytes": 4166,
@@ -850,8 +850,8 @@
       "sha256": "0f4712049d3a70c2d1faad93274a79529f8b2af55ea2715e2a1c1a2d183d0df9"
     },
     "tests/test_native_ui_premium_dark_2026.py": {
-      "bytes": 2317,
-      "sha256": "11c0ef6409f72e4357d1d6671f16f21fa6fe5fb67b0f48cc46abc2cc8cab23ad"
+      "bytes": 2632,
+      "sha256": "440b7a0d709a8895f565a570af418de3a0d8a91135740c6490b31c75079ee47d"
     },
     "docs/PREMIUM_DARK_2026.md": {
       "bytes": 1052,

@@ -79,3 +79,48 @@ def test_runtime_health_reports_module_failure(monkeypatch,tmp_path):
     health=c.runtime_health()
     assert health.overall=='partial'
     assert health.dpi=='on' and health.dns=='error'
+
+def test_single_connect_starts_all_three_selected_components(monkeypatch, tmp_path):
+    """One request must activate all selected modules without real networking."""
+    monkeypatch.setattr(unified, 'save_settings', lambda settings: None)
+    monkeypatch.setattr(unified, 'build_dpi_spec',
+                        lambda bundle, mode: SimpleNamespace(argv=('winws',), label=mode))
+    monkeypatch.setattr(unified, 'build_worker_spec',
+                        lambda port: SimpleNamespace(argv=('telegram',), label='Telegram'))
+    monkeypatch.setattr(unified, 'port_is_free', lambda port: True)
+    monkeypatch.setattr(unified, 'port_is_listening', lambda port: True)
+    monkeypatch.setattr(unified.time, 'sleep', lambda seconds: None)
+    settings = Settings(dpi_mode='alt1', launch_at_startup=False)
+    applied = []
+    controller = unified.UnifiedController(
+        settings, assets=lambda **kwargs: tmp_path,
+        dns_on=lambda: applied.append('dns'))
+    controller.dpi = FakeEngine()
+    controller.telegram = FakeEngine()
+    result = controller.connect()
+    assert result.overall == 'connected'
+    assert (result.dpi, result.telegram, result.dns) == ('on', 'on', 'on')
+    assert controller.dpi.started and controller.telegram.started
+    assert applied == ['dns']
+
+
+def test_connect_keeps_partial_status_if_dns_fails(monkeypatch, tmp_path):
+    monkeypatch.setattr(unified, 'save_settings', lambda settings: None)
+    monkeypatch.setattr(unified, 'build_dpi_spec',
+                        lambda bundle, mode: SimpleNamespace(argv=('winws',), label=mode))
+    monkeypatch.setattr(unified, 'build_worker_spec',
+                        lambda port: SimpleNamespace(argv=('telegram',), label='Telegram'))
+    monkeypatch.setattr(unified, 'port_is_free', lambda port: True)
+    monkeypatch.setattr(unified, 'port_is_listening', lambda port: True)
+    monkeypatch.setattr(unified.time, 'sleep', lambda seconds: None)
+    def failed_dns():
+        raise RuntimeError('DNS adapter unavailable')
+    controller = unified.UnifiedController(
+        Settings(dpi_mode='alt1', launch_at_startup=False),
+        assets=lambda **kwargs: tmp_path, dns_on=failed_dns)
+    controller.dpi = FakeEngine()
+    controller.telegram = FakeEngine()
+    result = controller.connect()
+    assert result.overall == 'partial'
+    assert (result.dpi, result.telegram, result.dns) == ('on', 'on', 'error')
+    assert 'DNS adapter unavailable' in result.detail
