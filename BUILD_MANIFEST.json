@@ -1,5 +1,5 @@
 {
-  "file_count": 228,
+  "file_count": 229,
   "files": {
     ".gitattributes": {
       "bytes": 99,
@@ -326,8 +326,8 @@
       "sha256": "0ba4c6fe1dc77ad5e595e96efde4d7e256b1dabbfba543be7258dfa4fb2c62c8"
     },
     "src/vorqeli_connect/app.py": {
-      "bytes": 102181,
-      "sha256": "76c4f628aa0ecac61f98732a4b0493440143ee5f0bfc0fff1cb743236670e3fb"
+      "bytes": 103565,
+      "sha256": "10dd7d4b61528535bedff8c746fd50e43e5c8ead5b0246ce01dabed0dbd811bc"
     },
     "src/vorqeli_connect/assets_manager.py": {
       "bytes": 11617,
@@ -912,6 +912,10 @@
     "tests/test_settings_component_lock.py": {
       "bytes": 2410,
       "sha256": "52965463529c7fca738271987f6c09c14c3722427f86da53d41068a1eb1f9c9b"
+    },
+    "tests/test_uac_elevation_rollback.py": {
+      "bytes": 3454,
+      "sha256": "1b7cb2ecdbfa042ac8a5a2317d3ee6fa8c8a7dfbcf5437a302f8a160f88b90e6"
     }
   },
   "version": "0.41.0"
