@@ -91,8 +91,22 @@ def enable_hosts_only(*, path: Path | None = None,
         geo_fetch = geo.fetch_official
     if flowseal_fetch is None:
         flowseal_fetch = fetch_flowseal_hosts
-    source = merge_sources(geo_fetch(), flowseal_fetch())
-    return geo.apply(path or hosts_path(), source, journal_path or HOSTS_JOURNAL)
+    target = path or hosts_path()
+    journal = journal_path or HOSTS_JOURNAL
+    try:
+        # Always prefer current official mappings when reachable.
+        geohide_text = geo_fetch()
+        flowseal_text = flowseal_fetch()
+    except OSError:
+        # A reconnect after an outage must not rewrite or discard a previously
+        # verified, managed HOSTS section. Never use a missing/edited journal.
+        if status_hosts_only(path=target, journal_path=journal):
+            return {'reused_verified': True, 'fresh': False}
+        raise
+    # Invalid source data must fail closed: never silently trust a bad feed.
+    source = merge_sources(geohide_text, flowseal_text)
+    applied = geo.apply(target, source, journal)
+    return {**applied, 'reused_verified': False, 'fresh': True}
 
 
 def restore_hosts_only(*, path: Path | None = None,
