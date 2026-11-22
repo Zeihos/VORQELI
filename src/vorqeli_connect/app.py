@@ -1330,6 +1330,13 @@ class ConnectApp(tk.Tk):
             messagebox.showwarning('Telegram','Сначала подключите Telegram-прокси',parent=self)
 
     def _toggle_setting(self,key):
+        # Component selection is a next-connect setting. Never let the UI
+        # report new desired modules while the old processes are still alive.
+        if (key in ('connect_dpi', 'connect_telegram', 'connect_dns') and
+                (self.settings.desired_enabled or self.running_job)):
+            self.detail = 'Сначала отключите VORQELI, чтобы изменить состав компонентов.'
+            self._draw()
+            return
         previous=getattr(self.settings,key)
         target=not previous
         setattr(self.settings,key,target)
