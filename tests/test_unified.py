@@ -161,3 +161,79 @@ def test_cached_hosts_reconnect_reports_explicit_warning(monkeypatch, tmp_path):
     result = controller.connect()
     assert result.dns == 'on'
     assert 'проверенного локального блока' in result.detail
+
+
+def test_cancel_during_telegram_start_stops_previously_started_dpi(monkeypatch, tmp_path):
+    """Never claim OFF with a WinWS process still owned by VORQELI."""
+    monkeypatch.setattr(unified, 'save_settings', lambda _: None)
+    monkeypatch.setattr(unified, 'build_dpi_spec',
+                        lambda bundle, mode: SimpleNamespace(argv=('winws',), label=mode))
+    monkeypatch.setattr(unified, 'build_worker_spec',
+                        lambda port: SimpleNamespace(argv=('telegram',), label='tg'))
+    monkeypatch.setattr(unified, 'port_is_free', lambda port: True)
+    monkeypatch.setattr(unified.time, 'sleep', lambda seconds: None)
+    settings = Settings(dpi_mode='alt1', connect_dpi=True, connect_telegram=True,
+                        connect_dns=False, launch_at_startup=False)
+    controller = unified.UnifiedController(settings, assets=lambda **kwargs: tmp_path)
+    controller.dpi = FakeEngine()
+    class CancelWhenStarted(FakeEngine):
+        def start(self, *args, **kwargs):
+            super().start(*args, **kwargs)
+            controller.request_disconnect()
+    controller.telegram = CancelWhenStarted()
+    monkeypatch.setattr(unified, 'port_is_listening', lambda port: False)
+    result = controller.connect()
+    assert result.overall == 'off'
+    assert result.dpi == 'off' and result.telegram == 'off'
+    assert not controller.dpi.running and not controller.telegram.running
+    assert controller.active_dpi_mode is None
+    assert not settings.desired_enabled
+
+
+def test_cancel_during_hosts_apply_restores_overlay_and_stops_dpi(monkeypatch, tmp_path):
+    """A late OFF during a blocking HOSTS apply must immediately clean up."""
+    monkeypatch.setattr(unified, 'save_settings', lambda _: None)
+    monkeypatch.setattr(unified, 'build_dpi_spec',
+                        lambda bundle, mode: SimpleNamespace(argv=('winws',), label=mode))
+    monkeypatch.setattr(unified.time, 'sleep', lambda seconds: None)
+    settings = Settings(dpi_mode='alt1', connect_dpi=True, connect_telegram=False,
+                        connect_dns=True, launch_at_startup=False)
+    actions = []
+    controller = None
+    def on_hosts():
+        actions.append('apply')
+        controller.request_disconnect()
+    controller = unified.UnifiedController(
+        settings, assets=lambda **kwargs: tmp_path,
+        dns_on=on_hosts, dns_off=lambda: actions.append('restore') or True)
+    controller.dpi = FakeEngine()
+    result = controller.connect()
+    assert result.overall == 'off'
+    assert (result.dpi, result.telegram, result.dns) == ('off','off','off')
+    assert actions == ['apply', 'restore']
+    assert not controller.dpi.running and not controller._dns_managed
+    assert not settings.desired_enabled
+
+
+def test_failed_cancel_cleanup_never_reports_false_off(monkeypatch, tmp_path):
+    monkeypatch.setattr(unified, 'save_settings', lambda _: None)
+    monkeypatch.setattr(unified, 'build_dpi_spec',
+                        lambda bundle, mode: SimpleNamespace(argv=('winws',), label=mode))
+    monkeypatch.setattr(unified.time, 'sleep', lambda seconds: None)
+    settings = Settings(dpi_mode='alt1', connect_dpi=True, connect_telegram=False,
+                        connect_dns=True, launch_at_startup=False)
+    controller = None
+    def on_hosts():
+        controller.request_disconnect()
+    controller = unified.UnifiedController(
+        settings, assets=lambda **kwargs: tmp_path, dns_on=on_hosts,
+        dns_off=lambda: True)
+    class UnstoppableEngine(FakeEngine):
+        def stop(self, *args, **kwargs):
+            raise OSError('driver still busy')
+    controller.dpi = UnstoppableEngine()
+    result = controller.connect()
+    assert result.overall == 'error'
+    assert result.dpi == 'error'
+    assert 'driver still busy' in result.detail
+    assert controller.dpi.running
