@@ -112,7 +112,7 @@ def test_network_view_does_not_hide_dns_error(monkeypatch):
     app=FakeApp();app.selected_page='Сеть и стратегии'
     app.controller.status=lambda:NS(overall='error',dpi='off',telegram='off',dns='error')
     ui.draw(app)
-    assert 'Модуль: ошибка' in captured
+    assert 'HOSTS: ошибка' in captured
 
 
 def test_missing_icon_tcl_failure_is_graceful(monkeypatch):

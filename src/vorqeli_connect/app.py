@@ -217,9 +217,9 @@ class ConnectApp(tk.Tk):
         save_settings(self.settings)
         messagebox.showinfo('VORQELI Connect',
             'Первое подключение может загрузить официальный DPI-пакет Flowseal (проверяется SHA-256).\n\n'
-            'Для WinDivert и системного DNS Windows потребуются права администратора (UAC).\n'
+            'Для WinDivert и изменения Windows HOSTS потребуются права администратора (UAC).\n'
             'При включённом автозапуске программа создаст задачу Windows, чтобы затем работать из трея.\n\n'
-            'GeoHide меняет DNS активных сетевых адаптеров. Отключение возвращает прежние настройки.',parent=self)
+            'GeoHide + Flowseal используют управляемый HOSTS. При отключении удаляется только собственный проверенный блок.',parent=self)
 
     def _launch_tray(self):
         try:
@@ -546,7 +546,7 @@ class ConnectApp(tk.Tk):
                        + (' (HTTPS-проба)' if self.settings.dpi_mode == 'alt_auto' else ' · выбран'))
         cards=[('DPI / WINWS','01','dpi',self.settings.connect_dpi,dpi_caption),
                ('TELEGRAM','02','telegram',self.settings.connect_telegram,'Локальный MTProto-прокси'),
-               ('GEOHIDE DNS','03','dns',self.settings.connect_dns,'Профиль системного DNS')]
+               ('GEOHIDE + FLOWSEAL HOSTS','03','dns',self.settings.connect_dns,'Управляемый HOSTS')]
         cw=(right-x-28)//3
         for i,(title,num,key,enabled,description) in enumerate(cards):
             sx=x+i*(cw+14)
@@ -648,21 +648,13 @@ class ConnectApp(tk.Tk):
         for j,(title,key,subtitle) in enumerate([
             ('DPI / Flowseal','connect_dpi','WinWS · обход DPI'),
             ('Telegram MTProto','connect_telegram','Локальный прокси Telegram Desktop'),
-            ('GeoHide DNS','connect_dns',
-             'Зашифрованный DoH' if self.settings.dns_mode=='doh' else 'Системный IPv4 DNS'),
+            ('GeoHide + Flowseal HOSTS','connect_dns','Управляемый системный HOSTS'),
         ]):
             self._toggle(x+31,421+j*66,title,getattr(self.settings,key),
                          lambda k=key:self._toggle_setting(k),info=subtitle,
                          width=int(span*.55)-145)
-        # GeoHide transport belongs to the left component panel, not to the
-        # header: keep glass-card borders unobstructed at common window sizes.
-        self._text(x+31,602,'GEOHIDE · ТРАНСПОРТ DNS',10,VIOLET,weight='bold')
-        self._text(x+31,622,'DoH требует поддержки Windows, без UDP fallback.',9,SECONDARY)
-        for j,(mode,label) in enumerate((('plain','IPv4 DNS'),('doh','DoH · HTTPS'))):
-            self._place_button(x+31+j*151,640,label,
-                               lambda m=mode:self._set_dns_mode(m),
-                               accent=self.settings.dns_mode==mode,width=139,height=37,size=9,
-                               disabled=self.running_job or self.settings.desired_enabled)
+        self._text(x+31,602,'GEOHIDE + FLOWSEAL · HOSTS',10,VIOLET,weight='bold')
+        self._text(x+31,622,'Одна кнопка; системный DNS не изменяется.',9,SECONDARY)
         self._toggle(split,421,'Автозапуск Windows',self.settings.launch_at_startup,
                      lambda:self._toggle_setting('launch_at_startup'),
                      info='При входе восстановить выбранный режим',width=int(span*.44)-141)
@@ -685,7 +677,7 @@ class ConnectApp(tk.Tk):
             ('Платформа','Windows 10 / 11'),
             ('DPI','Flowseal / zapret-discord-youtube'),
             ('Telegram','Flowseal / tg-ws-proxy'),
-            ('DNS','GeoHide · сторонний DNS-провайдер'),
+            ('HOSTS','GeoHide RU + Flowseal, без смены DNS'),
             ('Релиз','Preview · совместная работа требует проверки'),
         ]):
             y=445+j*38
@@ -921,6 +913,11 @@ class ConnectApp(tk.Tk):
                 show('Ошибка файла: '+str(exc))
 
         def commit():
+            if self.settings.desired_enabled or self.running_job:
+                messagebox.showwarning('GeoHide',
+                    'Сначала отключите VORQELI, чтобы изменить управляемый HOSTS.',
+                    parent=window)
+                return
             snapshot=prepared['snapshot']
             if snapshot is None:
                 messagebox.showwarning('GeoHide','Сначала проверьте официальный HOSTS.',parent=window)
@@ -946,6 +943,11 @@ class ConnectApp(tk.Tk):
             self._draw()
 
         def undo():
+            if self.settings.desired_enabled or self.running_job:
+                messagebox.showwarning('GeoHide',
+                    'Сначала отключите VORQELI, чтобы восстановить HOSTS.',
+                    parent=window)
+                return
             if not is_admin():
                 messagebox.showwarning('GeoHide','Нужны права администратора.',parent=window)
                 return
@@ -970,8 +972,8 @@ class ConnectApp(tk.Tk):
              'Нажмите «ОФИЦИАЛЬНЫЙ RU», чтобы получить последнюю версию из GitHub.\n'
              'В отсутствие интернета скачайте GeoHide → Другие форматы → RU → hosts → Классический, '
              'затем выберите «ИЗ ФАЙЛА».\n\n'
-             'Установка не выполняется автоматически при запуске VORQELI.\n'
-             'После просмотра состава нажмите «ПРИМЕНИТЬ».\n\n'
+             'По кнопке «Подключить» применяется объединённый GeoHide + Flowseal HOSTS.\n'
+             'Ручное применение доступно только при отключённом VORQELI.\n\n'
              'Источник: '+feed.SOURCE_PAGE)
 
 

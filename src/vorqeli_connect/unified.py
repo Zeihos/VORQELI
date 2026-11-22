@@ -21,6 +21,8 @@ from .flowseal_alts import ALT_PRIORITY
 from .geohide import enable_dns, restore_dns, STATE_FILE
 from .geohide_doh import enable_geo_dns, restore_geo_dns, DOH_STATE_FILE
 from .startup import configure_startup
+from .hosts_connection import (enable_hosts_only, restore_hosts_only,
+                               status_hosts_only, HOSTS_JOURNAL)
 
 
 @dataclass(frozen=True)
@@ -41,9 +43,11 @@ class UnifiedController:
         self.dpi = EngineProcess('DPI')
         self.telegram = EngineProcess('Telegram')
         self.assets = assets
-        # Keep dependency injection compatible with offline controller tests.
-        self.dns_on = (lambda: enable_geo_dns(mode=self.settings.dns_mode)) if dns_on is enable_dns else dns_on
-        self.dns_off = restore_geo_dns if dns_off is restore_dns else dns_off
+        # New connections use reversible HOSTS only. Preserve injectable test
+        # callbacks and the legacy DNS restoration feature separately.
+        self._hosts_mode = dns_on is enable_dns and dns_off is restore_dns
+        self.dns_on = enable_hosts_only if self._hosts_mode else dns_on
+        self.dns_off = restore_hosts_only if self._hosts_mode else dns_off
         self.startup = startup
         self._lock = threading.Lock()
         self._intent_lock = threading.RLock()
@@ -178,7 +182,9 @@ class UnifiedController:
                     return self._cancelled()
                 if self.settings.connect_dns:
                     try:
-                        self._send('Подключаем GeoHide DNS…')
+                        self._send('Подключаем GeoHide + Flowseal HOSTS…')
+                        if self._hosts_mode and (STATE_FILE.exists() or DOH_STATE_FILE.exists()):
+                            raise RuntimeError('Найдена старая настройка системного DNS. Сначала восстановите DNS через настройки.')
                         self.dns_on()
                         self._dns_managed = True
                         states['dns'] = 'on'
@@ -232,10 +238,11 @@ class UnifiedController:
                 except Exception as exc:
                     states[key] = 'error'
                     errors.append(f'{name}: {exc}')
-            if self._dns_managed or STATE_FILE.exists() or DOH_STATE_FILE.exists():
+            if self._dns_managed or (self._hosts_mode and HOSTS_JOURNAL.exists()) or (
+                    not self._hosts_mode and (STATE_FILE.exists() or DOH_STATE_FILE.exists())):
                 try:
                     restored = self.dns_off()
-                    if restored is False:
+                    if restored is False and not self._hosts_mode:
                         raise RuntimeError('резервная копия DNS не была восстановлена')
                     self._dns_managed = False
                 except Exception as exc:
@@ -258,9 +265,10 @@ class UnifiedController:
             'dpi': ('on' if self.dpi.running else 'error') if self.settings.connect_dpi else 'off',
             'telegram': ('on' if self.telegram.running and port_is_listening(self.settings.telegram_port)
                          else 'error') if self.settings.connect_telegram else 'off',
-            'dns': ('on' if STATE_FILE.is_file() and
-                    (self.settings.dns_mode == 'plain' or DOH_STATE_FILE.is_file()) else 'error')
-                    if self.settings.connect_dns else 'off',
+            'dns': ('on' if (status_hosts_only() if self._hosts_mode else
+                             STATE_FILE.is_file() and
+                             (self.settings.dns_mode == 'plain' or DOH_STATE_FILE.is_file()))
+                    else 'error') if self.settings.connect_dns else 'off',
         }
         selected = [key for key, enabled in (
             ('dpi', self.settings.connect_dpi), ('telegram', self.settings.connect_telegram),
