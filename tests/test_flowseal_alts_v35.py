@@ -127,3 +127,41 @@ def test_modified_alt_batch_invalidates_engine_cache(tmp_path):
     assert engine_integrity(root,release_sha='0'*64)=='verified'
     (root/alt_filename('alt2')).write_text('tampered')
     assert engine_integrity(root,release_sha='0'*64)=='tampered'
+
+
+def test_game_filter_settings_round_trip(tmp_path):
+    from vorqeli_connect.config import Settings, save_settings, load_settings
+    path = tmp_path / 'game.json'
+    settings = Settings(game_filter_mode='tcp',
+                        game_tcp_ports='80,443,1024-65535', game_udp_ports='1024-65535')
+    save_settings(settings, path)
+    loaded = load_settings(path)
+    assert loaded.game_filter_mode == 'tcp'
+    assert loaded.game_tcp_ports == '80,443,1024-65535'
+
+
+@pytest.mark.parametrize('value', ['0', '65536', '80-70', '80,,443', '-1', 'a,b', '2-', '1-99999', ''])
+def test_game_ports_invalid(value):
+    from vorqeli_connect.flowseal_service import validate_port_ranges
+    with pytest.raises(ValueError):
+        validate_port_ranges(value)
+
+
+def test_game_filter_tcp_udp_argv(tmp_path):
+    fixture(tmp_path)
+    args = build_alt_arguments(tmp_path, 'alt2', game_mode='all',
+                               game_tcp_ports='1024-65535', game_udp_ports='4000-5000')
+    assert '--wf-tcp=80,443,1024-65535' in args
+    assert '--wf-udp=443,4000-5000' in args
+    assert '--filter-tcp=1024-65535' in args
+    assert '--filter-udp=4000-5000' in args
+    assert not any('%GameFilter' in token for token in args)
+
+
+def test_game_filter_tcp_only(tmp_path):
+    fixture(tmp_path)
+    args = build_alt_arguments(tmp_path, 'alt2', game_mode='tcp',
+                               game_tcp_ports='5000-6000')
+    assert '--wf-tcp=80,443,5000-6000' in args
+    assert '--filter-tcp=5000-6000' in args
+    assert '--wf-udp=443,12' in args
