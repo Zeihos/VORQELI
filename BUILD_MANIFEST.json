@@ -770,8 +770,8 @@
       "sha256": "1a745b4c0e9d4074c50f804c0d184486a4ebc06197520545ca0909b223b5b7ab"
     },
     "tests/test_smart_dpi_v26.py": {
-      "bytes": 8576,
-      "sha256": "14afee018f5d0f133c57f2cbfbadab48a24814de9da2b44128b262dbb970c5ac"
+      "bytes": 8564,
+      "sha256": "0d7d7bf927d407a5104fa3c881aff0f5c1750fa60abd7a830240dfe686cdeecc"
     },
     "tests/test_startup.py": {
       "bytes": 666,
