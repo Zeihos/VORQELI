@@ -1,13 +1,13 @@
 {
-  "file_count": 229,
+  "file_count": 230,
   "files": {
     ".gitattributes": {
       "bytes": 99,
       "sha256": "5caab612d19030c1253ea6417303b7d09e62c825024057359befe8cd3ca27796"
     },
     ".github/workflows/windows-build.yml": {
-      "bytes": 6358,
-      "sha256": "68025d37eca527afd45febb8073041b20bead1a95ef9ae15a2d1e07a91df32d1"
+      "bytes": 6586,
+      "sha256": "a120adce265824eb46aa0e2e9fb9bf79a86122e89d47373185ebf5b92c1e82ff"
     },
     ".gitignore": {
       "bytes": 390,
@@ -22,8 +22,8 @@
       "sha256": "d1266ba7e98f1956717feebf5bdb0cdf4af6257f824cfada393e094e5e73e3a3"
     },
     "NOTICE.md": {
-      "bytes": 1673,
-      "sha256": "f93ea6f00a0bfb5deb9ada33d7efbe5c683fa585dcbbcf4bc5d8e92e3a2f7a77"
+      "bytes": 1696,
+      "sha256": "80155b2bc21b6fd85ceb86836bbb73632f12e15f299fa7bc93c55fc1cd34a6f3"
     },
     "README.md": {
       "bytes": 11122,
@@ -186,8 +186,8 @@
       "sha256": "ad18a532e463f291a0aa413aeae445dc990833318c9ec4d9ccf9bbd41371d586"
     },
     "docs/THIRD_PARTY.md": {
-      "bytes": 1552,
-      "sha256": "af9b0a95ab4b4ded90b04783eccf4188e71925c43ebb327ef289f66da98ca058"
+      "bytes": 1668,
+      "sha256": "6348be359c28b9d2ff88cbf55a9b631a4832936a869f4b70be80dd080a6d0c4f"
     },
     "docs/UI_ACCESSIBILITY_V28.md": {
       "bytes": 4506,
@@ -330,8 +330,8 @@
       "sha256": "10dd7d4b61528535bedff8c746fd50e43e5c8ead5b0246ce01dabed0dbd811bc"
     },
     "src/vorqeli_connect/assets_manager.py": {
-      "bytes": 11617,
-      "sha256": "60b86dab1537e4ecf7615afb9c1ddd7b1bb7d3477f65d731811547aeb1612f61"
+      "bytes": 11677,
+      "sha256": "9ec9b568d4b6c995ac345d1daeb5d80e16a975aaab8ad86f295dbe752141ab79"
     },
     "src/vorqeli_connect/bundled_telegram.py": {
       "bytes": 1565,
@@ -363,7 +363,7 @@
     },
     "src/vorqeli_connect/flowseal_alts.py": {
       "bytes": 8410,
-      "sha256": "4a46b51782821a9133bc8cec273a4172d5dfc0f8e815bdee253157986fb2ef83"
+      "sha256": "12503687c88cc6539b692dfed99b885b1065027191df64fbee130c861b4d5be3"
     },
     "src/vorqeli_connect/frameless.py": {
       "bytes": 3931,
@@ -659,7 +659,7 @@
     },
     "tests/test_integrity_v20.py": {
       "bytes": 3687,
-      "sha256": "a01bccb8f8b6f936bd6ca820c2ca507feed3e14a635d06654cc3ca868b10c8a2"
+      "sha256": "73d39e4fc4506dd20deb68fa639d3d3cf6e2be54aa0fa33bddb105ba946f35df"
     },
     "tests/test_log_tools.py": {
       "bytes": 1928,
@@ -916,6 +916,10 @@
     "tests/test_uac_elevation_rollback.py": {
       "bytes": 3454,
       "sha256": "1b7cb2ecdbfa042ac8a5a2317d3ee6fa8c8a7dfbcf5437a302f8a160f88b90e6"
+    },
+    "scripts/verify_official_flowseal_profiles.py": {
+      "bytes": 2036,
+      "sha256": "bcb4b9ced59ebc56846d8a96206fb36d034a9279c4d2b0dad7948880ca0b056f"
     }
   },
   "version": "0.41.0"
